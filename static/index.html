@@ -728,16 +728,24 @@
                 const size = parseFloat(position.position?.size || position.size || 0);
                 const leverage = parseFloat(position.position?.leverage || position.leverage || 1);
                 const level = parseFloat(position.position?.level || position.level || position.openLevel || 0);
-                const currentPrice = parseFloat(position.market?.bid || position.market?.offer || 0);
+                const bidPrice = parseFloat(position.market?.bid || 0);
+                const offerPrice = parseFloat(position.market?.offer || 0);
+                // Capital.com shows Trade size/Margin using the current price (their "Last price").
+                // In most cases this equals the bid. Fallback to offer, then entry level.
+                const currentPrice = (!isNaN(bidPrice) && bidPrice > 0)
+                    ? bidPrice
+                    : ((!isNaN(offerPrice) && offerPrice > 0) ? offerPrice : level);
                 const upl = parseFloat(position.position?.upl || position.position?.profit || position.position?.pnl || position.profit || position.pnl || 0);
                 const pnlClass = upl >= 0 ? 'text-success fw-bold' : 'text-danger fw-bold';
                 const type = position.orderType ? 'ORDER' : 'POSITION';
                 const createdDate = position.position?.createdDate || position.createdDate || '-';
                 const stopLevel = position.position?.stopLevel || '-';
                 
-                // Calculate notional value and margin
-                const notionalValue = size * level;
-                const marginRequired = notionalValue / leverage;
+                // Calculate Trade Size (notional) and Margin using current price to match Capital.com UI
+                const notionalValue = size * currentPrice;
+                // Capital.com appears to truncate margin to 2 decimals (not round)
+                const marginRequiredRaw = notionalValue / leverage;
+                const marginRequired = Math.floor(marginRequiredRaw * 100) / 100;
                 
                 // Format date
                 let dateDisplay = '-';

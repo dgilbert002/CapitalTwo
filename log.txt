@@ -1,71 +1,197 @@
-2025-09-24 02:41:57,525 - bot.settings - INFO - Settings reloaded from file
-2025-09-24 02:41:57,527 - uvicorn.error - INFO - Started server process [8576]
-2025-09-24 02:41:57,527 - uvicorn.error - INFO - Waiting for application startup.
-2025-09-24 02:41:57,527 - main - INFO - Starting app connection layer...
-2025-09-24 02:41:57,529 - bot.api - INFO - CapitalComAPI.authenticate(environment=live)
-2025-09-24 02:41:58,983 - bot.api - INFO - Successfully authenticated with Capital.com
-2025-09-24 02:42:00,795 - bot.api - INFO - Switched to account: 290795266196460740
-2025-09-24 02:42:00,795 - main - INFO - Connected to live account: Account 1
-2025-09-24 02:42:00,797 - main - INFO - Starting continuous data updates
-2025-09-24 02:42:00,797 - main - INFO - Running data update #1
-2025-09-24 02:42:00,797 - uvicorn.error - INFO - Application startup complete.
-2025-09-24 02:42:00,797 - uvicorn.error - INFO - Uvicorn running on http://127.0.0.1:8011 (Press CTRL+C to quit)
-2025-09-24 02:42:00,958 - uvicorn.access - INFO - 127.0.0.1:54855 - "GET / HTTP/1.1" 200
-2025-09-24 02:42:01,364 - main - INFO - Account balance: $0.0
-2025-09-24 02:42:01,489 - uvicorn.error - INFO - ('127.0.0.1', 54861) - "WebSocket /ws" [accepted]
-2025-09-24 02:42:01,490 - main - INFO - WebSocket connected
-2025-09-24 02:42:01,491 - uvicorn.access - INFO - 127.0.0.1:54855 - "GET /config HTTP/1.1" 200
-2025-09-24 02:42:01,492 - uvicorn.error - INFO - connection open
-2025-09-24 02:42:02,183 - main - INFO - Found 0 open positions
-2025-09-24 02:42:02,494 - main - INFO - Account structure: accountName=Account 1, balance_keys=['balance', 'deposit', 'profitLoss', 'available']
-2025-09-24 02:42:02,494 - main - INFO - Balance values: balance=0.0, available=0.0, profitLoss=0.0
-2025-09-24 02:42:02,591 - bot.api - INFO - Market data keys for TECL: ['instrument', 'dealingRules', 'snapshot']
-2025-09-24 02:42:02,593 - bot.api - INFO - Snapshot for TECL: bid=122.14, offer=122.33, high=None, low=None, percentageChange=0.02
-2025-09-24 02:42:02,593 - bot.api - INFO - Instrument for TECL: name=Direxion Daily Technology Bull 3X Shares, type=SHARES, marketId=None, expiry=-, lotSize=1
-2025-09-24 02:42:02,593 - bot.api - INFO - Opening hours for TECL: {'mon': ['13:30 - 20:00'], 'tue': ['13:30 - 20:00'], 'wed': ['13:30 - 20:00'], 'thu': ['13:30 - 20:00'], 'fri': ['13:30 - 20:00'], 'sat': [], 'sun': [], 'zone': 'UTC'}
-2025-09-24 02:42:02,593 - bot.api - INFO - Dealing rules (top level): minDealSize={'unit': 'POINTS', 'value': 0.1}, maxDealSize={'unit': 'POINTS', 'value': 3250}, minSizeIncrement={'unit': 'POINTS', 'value': 0.1}
-2025-09-24 02:42:02,593 - main - INFO - Market data updated for TECL
-2025-09-24 02:42:02,621 - main - INFO - Market is CLOSED, next open in 14.8 hours
-2025-09-24 02:42:03,001 - uvicorn.access - INFO - 127.0.0.1:54855 - "GET /accounts HTTP/1.1" 200
-2025-09-24 02:42:03,006 - main - INFO - Selecting account 290795266196460740
-2025-09-24 02:42:03,823 - bot.api - INFO - Switched to account: 290795266196460740
-2025-09-24 02:42:03,825 - bot.settings - INFO - Settings saved to file
-2025-09-24 02:42:03,825 - bot.settings - INFO - Saved environment account map: live -> 290795266196460740
-2025-09-24 02:42:04,230 - bot.api - INFO - Fetched 0 historical trades
-2025-09-24 02:42:04,230 - main - INFO - Found 0 historic trades
-2025-09-24 02:42:04,853 - uvicorn.access - INFO - 127.0.0.1:54855 - "POST /accounts/select HTTP/1.1" 200
-2025-09-24 02:42:09,596 - main - INFO - Running data update #2
-2025-09-24 02:42:10,027 - main - INFO - Account balance: $0.0
-2025-09-24 02:42:11,010 - main - INFO - Found 0 open positions
-2025-09-24 02:42:11,584 - bot.api - INFO - Market data keys for TECL: ['instrument', 'dealingRules', 'snapshot']
-2025-09-24 02:42:11,585 - bot.api - INFO - Snapshot for TECL: bid=122.14, offer=122.33, high=None, low=None, percentageChange=0.02
-2025-09-24 02:42:11,585 - bot.api - INFO - Instrument for TECL: name=Direxion Daily Technology Bull 3X Shares, type=SHARES, marketId=None, expiry=-, lotSize=1
-2025-09-24 02:42:11,585 - bot.api - INFO - Opening hours for TECL: {'mon': ['13:30 - 20:00'], 'tue': ['13:30 - 20:00'], 'wed': ['13:30 - 20:00'], 'thu': ['13:30 - 20:00'], 'fri': ['13:30 - 20:00'], 'sat': [], 'sun': [], 'zone': 'UTC'}
-2025-09-24 02:42:11,585 - bot.api - INFO - Dealing rules (top level): minDealSize={'unit': 'POINTS', 'value': 0.1}, maxDealSize={'unit': 'POINTS', 'value': 3250}, minSizeIncrement={'unit': 'POINTS', 'value': 0.1}
-2025-09-24 02:42:11,585 - main - INFO - Market data updated for TECL
-2025-09-24 02:42:11,586 - main - INFO - Market is CLOSED, next open in 14.8 hours
-2025-09-24 02:42:11,937 - bot.api - INFO - Fetched 0 historical trades
-2025-09-24 02:42:11,937 - main - INFO - Found 0 historic trades
-2025-09-24 02:42:17,107 - uvicorn.error - INFO - ('127.0.0.1', 54887) - "WebSocket /ws" [accepted]
-2025-09-24 02:42:17,109 - main - INFO - WebSocket connected
-2025-09-24 02:42:17,109 - uvicorn.error - INFO - connection open
-2025-09-24 02:42:17,503 - main - INFO - Running data update #3
-2025-09-24 02:42:18,159 - main - INFO - Account balance: $0.0
-2025-09-24 02:42:18,483 - uvicorn.error - INFO - Shutting down
-2025-09-24 02:42:18,484 - uvicorn.error - INFO - connection closed
-2025-09-24 02:42:18,485 - uvicorn.error - INFO - connection closed
-2025-09-24 02:42:18,587 - main - INFO - WebSocket disconnected
-2025-09-24 02:42:18,587 - uvicorn.error - INFO - Waiting for background tasks to complete. (CTRL+C to force quit)
-2025-09-24 02:42:18,745 - main - INFO - Found 0 open positions
-2025-09-24 02:42:19,081 - bot.api - INFO - Market data keys for TECL: ['instrument', 'dealingRules', 'snapshot']
-2025-09-24 02:42:19,081 - bot.api - INFO - Snapshot for TECL: bid=122.14, offer=122.33, high=None, low=None, percentageChange=0.02
-2025-09-24 02:42:19,081 - bot.api - INFO - Instrument for TECL: name=Direxion Daily Technology Bull 3X Shares, type=SHARES, marketId=None, expiry=-, lotSize=1
-2025-09-24 02:42:19,081 - bot.api - INFO - Opening hours for TECL: {'mon': ['13:30 - 20:00'], 'tue': ['13:30 - 20:00'], 'wed': ['13:30 - 20:00'], 'thu': ['13:30 - 20:00'], 'fri': ['13:30 - 20:00'], 'sat': [], 'sun': [], 'zone': 'UTC'}
-2025-09-24 02:42:19,081 - bot.api - INFO - Dealing rules (top level): minDealSize={'unit': 'POINTS', 'value': 0.1}, maxDealSize={'unit': 'POINTS', 'value': 3250}, minSizeIncrement={'unit': 'POINTS', 'value': 0.1}
-2025-09-24 02:42:19,081 - main - INFO - Market data updated for TECL
-2025-09-24 02:42:19,081 - main - INFO - Market is CLOSED, next open in 14.8 hours
-2025-09-24 02:42:19,139 - main - INFO - WebSocket disconnected
-2025-09-24 02:42:19,253 - uvicorn.error - INFO - Waiting for application shutdown.
-2025-09-24 02:42:19,253 - main - INFO - Stopping app...
-2025-09-24 02:42:19,253 - uvicorn.error - INFO - Application shutdown complete.
-2025-09-24 02:42:19,253 - uvicorn.error - INFO - Finished server process [8576]
+2025-09-24 02:51:32,804 - bot.settings - INFO - Settings reloaded from file
+2025-09-24 02:51:32,806 - uvicorn.error - INFO - Started server process [33796]
+2025-09-24 02:51:32,806 - uvicorn.error - INFO - Waiting for application startup.
+2025-09-24 02:51:32,806 - main - INFO - Starting app connection layer...
+2025-09-24 02:51:32,806 - bot.api - INFO - CapitalComAPI.authenticate(environment=live)
+2025-09-24 02:51:33,386 - bot.api - INFO - Successfully authenticated with Capital.com
+2025-09-24 02:51:35,505 - bot.api - INFO - Switched to account: 211640169982416068
+2025-09-24 02:51:35,505 - main - INFO - Connected to live account: MAIN ACCOUNT
+2025-09-24 02:51:35,505 - main - INFO - Starting continuous data updates
+2025-09-24 02:51:35,505 - main - INFO - Running data update #1
+2025-09-24 02:51:35,505 - uvicorn.error - INFO - Application startup complete.
+2025-09-24 02:51:35,507 - uvicorn.error - INFO - Uvicorn running on http://127.0.0.1:8011 (Press CTRL+C to quit)
+2025-09-24 02:51:35,765 - uvicorn.access - INFO - 127.0.0.1:55597 - "GET / HTTP/1.1" 200
+2025-09-24 02:51:35,883 - main - INFO - Account balance: $252.53
+2025-09-24 02:51:36,354 - uvicorn.access - INFO - 127.0.0.1:55597 - "GET /config HTTP/1.1" 200
+2025-09-24 02:51:36,356 - uvicorn.error - INFO - ('127.0.0.1', 55605) - "WebSocket /ws" [accepted]
+2025-09-24 02:51:36,356 - main - INFO - WebSocket connected
+2025-09-24 02:51:36,357 - uvicorn.error - INFO - connection open
+2025-09-24 02:51:36,640 - main - INFO - Found 1 open positions
+2025-09-24 02:51:36,640 - main - INFO - Position fields: ['position', 'market']
+2025-09-24 02:51:36,640 - main - INFO - First position: {'position': {'contractSize': 1, 'createdDate': '2025-09-11T18:15:17.438', 'createdDateUTC': '2025-09-11T14:15:17.438', 'dealId': '00015481-0001-54c4-0000-000080ad0086', 'dealReference': 'p_00015481-0001-54c4-0000-000080ad0086', 'workingOrderId': '00015481-0001-54c4-0000-000080ad0085', 'size': 21.0, 'leverage': 10, 'upl': 162.33, 'direction': 'BUY', 'level': 42.45, 'currency': 'USD', 'guaranteedStop': False, 'stopLevel': 43.92, 'trailingStop': False}, 'market': {'instrumentName': 'Global X Uranium ETF', 'instrumentId': 374388004312260, 'expiry': '-', 'epic': 'URA', 'symbol': 'URA', 'instrumentType': 'SHARES', 'marketStatus': 'CLOSED', 'lotSize': 1, 'percentageChange': -0.04, 'bid': 50.18, 'offer': 50.39, 'updateTime': '2025-09-23T23:59:58.954', 'updateTimeUTC': '2025-09-23T19:59:58.954', 'delayTime': 0, 'streamingPricesAvailable': True, 'scalingFactor': 1, 'marketModes': ['REGULAR'], 'pipPosition': 2, 'tickSize': 0.01}}
+2025-09-24 02:51:36,970 - bot.api - INFO - Market data keys for TECL: ['instrument', 'dealingRules', 'snapshot']
+2025-09-24 02:51:36,972 - bot.api - INFO - Snapshot for TECL: bid=122.14, offer=122.33, high=None, low=None, percentageChange=0.02
+2025-09-24 02:51:36,972 - bot.api - INFO - Instrument for TECL: name=Direxion Daily Technology Bull 3X Shares, type=SHARES, marketId=None, expiry=-, lotSize=1
+2025-09-24 02:51:36,972 - bot.api - INFO - Opening hours for TECL: {'mon': ['13:30 - 20:00'], 'tue': ['13:30 - 20:00'], 'wed': ['13:30 - 20:00'], 'thu': ['13:30 - 20:00'], 'fri': ['13:30 - 20:00'], 'sat': [], 'sun': [], 'zone': 'UTC'}
+2025-09-24 02:51:36,972 - bot.api - INFO - Dealing rules (top level): minDealSize={'unit': 'POINTS', 'value': 0.1}, maxDealSize={'unit': 'POINTS', 'value': 3250}, minSizeIncrement={'unit': 'POINTS', 'value': 0.1}
+2025-09-24 02:51:36,972 - main - INFO - Market data updated for TECL
+2025-09-24 02:51:37,007 - main - INFO - Market is CLOSED, next open in 14.6 hours
+2025-09-24 02:51:37,008 - uvicorn.access - INFO - 127.0.0.1:55597 - "GET /accounts HTTP/1.1" 200
+2025-09-24 02:51:37,012 - main - INFO - Selecting account 211640169982416068
+2025-09-24 02:51:37,371 - main - INFO - Account structure: accountName=MAIN ACCOUNT, balance_keys=['balance', 'deposit', 'profitLoss', 'available']
+2025-09-24 02:51:37,371 - main - INFO - Balance values: balance=252.53, available=147.15, profitLoss=162.33
+2025-09-24 02:51:37,692 - bot.api - INFO - Switched to account: 211640169982416068
+2025-09-24 02:51:37,692 - bot.settings - INFO - Settings saved to file
+2025-09-24 02:51:37,692 - bot.settings - INFO - Saved environment account map: live -> 211640169982416068
+2025-09-24 02:51:37,701 - bot.api - INFO - Fetched 0 historical trades
+2025-09-24 02:51:37,701 - main - INFO - Found 0 historic trades
+2025-09-24 02:51:38,469 - uvicorn.access - INFO - 127.0.0.1:55597 - "POST /accounts/select HTTP/1.1" 200
+2025-09-24 02:51:43,184 - main - INFO - Running data update #2
+2025-09-24 02:51:44,305 - main - INFO - Account balance: $252.53
+2025-09-24 02:51:44,654 - main - INFO - Found 1 open positions
+2025-09-24 02:51:44,654 - main - INFO - Position fields: ['position', 'market']
+2025-09-24 02:51:44,654 - main - INFO - First position: {'position': {'contractSize': 1, 'createdDate': '2025-09-11T18:15:17.438', 'createdDateUTC': '2025-09-11T14:15:17.438', 'dealId': '00015481-0001-54c4-0000-000080ad0086', 'dealReference': 'p_00015481-0001-54c4-0000-000080ad0086', 'workingOrderId': '00015481-0001-54c4-0000-000080ad0085', 'size': 21.0, 'leverage': 10, 'upl': 162.33, 'direction': 'BUY', 'level': 42.45, 'currency': 'USD', 'guaranteedStop': False, 'stopLevel': 43.92, 'trailingStop': False}, 'market': {'instrumentName': 'Global X Uranium ETF', 'instrumentId': 374388004312260, 'expiry': '-', 'epic': 'URA', 'symbol': 'URA', 'instrumentType': 'SHARES', 'marketStatus': 'CLOSED', 'lotSize': 1, 'percentageChange': -0.04, 'bid': 50.18, 'offer': 50.39, 'updateTime': '2025-09-23T23:59:58.954', 'updateTimeUTC': '2025-09-23T19:59:58.954', 'delayTime': 0, 'streamingPricesAvailable': True, 'scalingFactor': 1, 'marketModes': ['REGULAR'], 'pipPosition': 2, 'tickSize': 0.01}}
+2025-09-24 02:51:44,983 - bot.api - INFO - Market data keys for TECL: ['instrument', 'dealingRules', 'snapshot']
+2025-09-24 02:51:44,983 - bot.api - INFO - Snapshot for TECL: bid=122.14, offer=122.33, high=None, low=None, percentageChange=0.02
+2025-09-24 02:51:44,983 - bot.api - INFO - Instrument for TECL: name=Direxion Daily Technology Bull 3X Shares, type=SHARES, marketId=None, expiry=-, lotSize=1
+2025-09-24 02:51:44,983 - bot.api - INFO - Opening hours for TECL: {'mon': ['13:30 - 20:00'], 'tue': ['13:30 - 20:00'], 'wed': ['13:30 - 20:00'], 'thu': ['13:30 - 20:00'], 'fri': ['13:30 - 20:00'], 'sat': [], 'sun': [], 'zone': 'UTC'}
+2025-09-24 02:51:44,983 - bot.api - INFO - Dealing rules (top level): minDealSize={'unit': 'POINTS', 'value': 0.1}, maxDealSize={'unit': 'POINTS', 'value': 3250}, minSizeIncrement={'unit': 'POINTS', 'value': 0.1}
+2025-09-24 02:51:44,983 - main - INFO - Market data updated for TECL
+2025-09-24 02:51:44,985 - main - INFO - Market is CLOSED, next open in 14.6 hours
+2025-09-24 02:51:45,624 - bot.api - INFO - Fetched 0 historical trades
+2025-09-24 02:51:45,624 - main - INFO - Found 0 historic trades
+2025-09-24 02:51:50,959 - main - INFO - Running data update #3
+2025-09-24 02:51:52,085 - main - INFO - Account balance: $252.53
+2025-09-24 02:51:52,695 - main - INFO - Found 1 open positions
+2025-09-24 02:51:52,695 - main - INFO - Position fields: ['position', 'market']
+2025-09-24 02:51:52,695 - main - INFO - First position: {'position': {'contractSize': 1, 'createdDate': '2025-09-11T18:15:17.438', 'createdDateUTC': '2025-09-11T14:15:17.438', 'dealId': '00015481-0001-54c4-0000-000080ad0086', 'dealReference': 'p_00015481-0001-54c4-0000-000080ad0086', 'workingOrderId': '00015481-0001-54c4-0000-000080ad0085', 'size': 21.0, 'leverage': 10, 'upl': 162.33, 'direction': 'BUY', 'level': 42.45, 'currency': 'USD', 'guaranteedStop': False, 'stopLevel': 43.92, 'trailingStop': False}, 'market': {'instrumentName': 'Global X Uranium ETF', 'instrumentId': 374388004312260, 'expiry': '-', 'epic': 'URA', 'symbol': 'URA', 'instrumentType': 'SHARES', 'marketStatus': 'CLOSED', 'lotSize': 1, 'percentageChange': -0.04, 'bid': 50.18, 'offer': 50.39, 'updateTime': '2025-09-23T23:59:58.954', 'updateTimeUTC': '2025-09-23T19:59:58.954', 'delayTime': 0, 'streamingPricesAvailable': True, 'scalingFactor': 1, 'marketModes': ['REGULAR'], 'pipPosition': 2, 'tickSize': 0.01}}
+2025-09-24 02:51:53,027 - bot.api - INFO - Market data keys for TECL: ['instrument', 'dealingRules', 'snapshot']
+2025-09-24 02:51:53,027 - bot.api - INFO - Snapshot for TECL: bid=122.14, offer=122.33, high=None, low=None, percentageChange=0.02
+2025-09-24 02:51:53,027 - bot.api - INFO - Instrument for TECL: name=Direxion Daily Technology Bull 3X Shares, type=SHARES, marketId=None, expiry=-, lotSize=1
+2025-09-24 02:51:53,029 - bot.api - INFO - Opening hours for TECL: {'mon': ['13:30 - 20:00'], 'tue': ['13:30 - 20:00'], 'wed': ['13:30 - 20:00'], 'thu': ['13:30 - 20:00'], 'fri': ['13:30 - 20:00'], 'sat': [], 'sun': [], 'zone': 'UTC'}
+2025-09-24 02:51:53,029 - bot.api - INFO - Dealing rules (top level): minDealSize={'unit': 'POINTS', 'value': 0.1}, maxDealSize={'unit': 'POINTS', 'value': 3250}, minSizeIncrement={'unit': 'POINTS', 'value': 0.1}
+2025-09-24 02:51:53,029 - main - INFO - Market data updated for TECL
+2025-09-24 02:51:53,029 - main - INFO - Market is CLOSED, next open in 14.6 hours
+2025-09-24 02:51:53,612 - bot.api - INFO - Fetched 0 historical trades
+2025-09-24 02:51:53,612 - main - INFO - Found 0 historic trades
+2025-09-24 02:51:59,563 - main - INFO - Running data update #4
+2025-09-24 02:52:00,336 - main - INFO - Account balance: $252.53
+2025-09-24 02:52:00,682 - main - INFO - Found 1 open positions
+2025-09-24 02:52:00,684 - main - INFO - Position fields: ['position', 'market']
+2025-09-24 02:52:00,684 - main - INFO - First position: {'position': {'contractSize': 1, 'createdDate': '2025-09-11T18:15:17.438', 'createdDateUTC': '2025-09-11T14:15:17.438', 'dealId': '00015481-0001-54c4-0000-000080ad0086', 'dealReference': 'p_00015481-0001-54c4-0000-000080ad0086', 'workingOrderId': '00015481-0001-54c4-0000-000080ad0085', 'size': 21.0, 'leverage': 10, 'upl': 162.33, 'direction': 'BUY', 'level': 42.45, 'currency': 'USD', 'guaranteedStop': False, 'stopLevel': 43.92, 'trailingStop': False}, 'market': {'instrumentName': 'Global X Uranium ETF', 'instrumentId': 374388004312260, 'expiry': '-', 'epic': 'URA', 'symbol': 'URA', 'instrumentType': 'SHARES', 'marketStatus': 'CLOSED', 'lotSize': 1, 'percentageChange': -0.04, 'bid': 50.18, 'offer': 50.39, 'updateTime': '2025-09-23T23:59:58.954', 'updateTimeUTC': '2025-09-23T19:59:58.954', 'delayTime': 0, 'streamingPricesAvailable': True, 'scalingFactor': 1, 'marketModes': ['REGULAR'], 'pipPosition': 2, 'tickSize': 0.01}}
+2025-09-24 02:52:01,013 - bot.api - INFO - Market data keys for TECL: ['instrument', 'dealingRules', 'snapshot']
+2025-09-24 02:52:01,013 - bot.api - INFO - Snapshot for TECL: bid=122.14, offer=122.33, high=None, low=None, percentageChange=0.02
+2025-09-24 02:52:01,013 - bot.api - INFO - Instrument for TECL: name=Direxion Daily Technology Bull 3X Shares, type=SHARES, marketId=None, expiry=-, lotSize=1
+2025-09-24 02:52:01,013 - bot.api - INFO - Opening hours for TECL: {'mon': ['13:30 - 20:00'], 'tue': ['13:30 - 20:00'], 'wed': ['13:30 - 20:00'], 'thu': ['13:30 - 20:00'], 'fri': ['13:30 - 20:00'], 'sat': [], 'sun': [], 'zone': 'UTC'}
+2025-09-24 02:52:01,013 - bot.api - INFO - Dealing rules (top level): minDealSize={'unit': 'POINTS', 'value': 0.1}, maxDealSize={'unit': 'POINTS', 'value': 3250}, minSizeIncrement={'unit': 'POINTS', 'value': 0.1}
+2025-09-24 02:52:01,013 - main - INFO - Market data updated for TECL
+2025-09-24 02:52:01,013 - main - INFO - Market is CLOSED, next open in 14.6 hours
+2025-09-24 02:52:01,388 - bot.api - INFO - Fetched 0 historical trades
+2025-09-24 02:52:01,388 - main - INFO - Found 0 historic trades
+2025-09-24 02:52:06,708 - main - INFO - Running data update #5
+2025-09-24 02:52:07,229 - main - INFO - Account balance: $252.53
+2025-09-24 02:52:07,723 - uvicorn.error - INFO - Shutting down
+2025-09-24 02:52:07,723 - uvicorn.error - INFO - connection closed
+2025-09-24 02:52:07,809 - main - INFO - Found 1 open positions
+2025-09-24 02:52:07,809 - main - INFO - Position fields: ['position', 'market']
+2025-09-24 02:52:07,809 - main - INFO - First position: {'position': {'contractSize': 1, 'createdDate': '2025-09-11T18:15:17.438', 'createdDateUTC': '2025-09-11T14:15:17.438', 'dealId': '00015481-0001-54c4-0000-000080ad0086', 'dealReference': 'p_00015481-0001-54c4-0000-000080ad0086', 'workingOrderId': '00015481-0001-54c4-0000-000080ad0085', 'size': 21.0, 'leverage': 10, 'upl': 162.33, 'direction': 'BUY', 'level': 42.45, 'currency': 'USD', 'guaranteedStop': False, 'stopLevel': 43.92, 'trailingStop': False}, 'market': {'instrumentName': 'Global X Uranium ETF', 'instrumentId': 374388004312260, 'expiry': '-', 'epic': 'URA', 'symbol': 'URA', 'instrumentType': 'SHARES', 'marketStatus': 'CLOSED', 'lotSize': 1, 'percentageChange': -0.04, 'bid': 50.18, 'offer': 50.39, 'updateTime': '2025-09-23T23:59:58.954', 'updateTimeUTC': '2025-09-23T19:59:58.954', 'delayTime': 0, 'streamingPricesAvailable': True, 'scalingFactor': 1, 'marketModes': ['REGULAR'], 'pipPosition': 2, 'tickSize': 0.01}}
+2025-09-24 02:52:07,809 - uvicorn.error - INFO - Waiting for background tasks to complete. (CTRL+C to force quit)
+2025-09-24 02:52:08,012 - uvicorn.error - INFO - Finished server process [33796]
+2025-09-24 02:52:08,013 - uvicorn.error - ERROR - Exception in ASGI application
+Traceback (most recent call last):
+  File "C:\Users\gilbe\AppData\Local\Programs\Python\Python311\Lib\asyncio\runners.py", line 190, in run
+    return runner.run(main)
+           ^^^^^^^^^^^^^^^^
+  File "C:\Users\gilbe\AppData\Local\Programs\Python\Python311\Lib\asyncio\runners.py", line 118, in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\gilbe\AppData\Local\Programs\Python\Python311\Lib\asyncio\base_events.py", line 641, in run_until_complete
+    self.run_forever()
+  File "C:\Users\gilbe\AppData\Local\Programs\Python\Python311\Lib\asyncio\windows_events.py", line 321, in run_forever
+    super().run_forever()
+  File "C:\Users\gilbe\AppData\Local\Programs\Python\Python311\Lib\asyncio\base_events.py", line 608, in run_forever
+    self._run_once()
+  File "C:\Users\gilbe\AppData\Local\Programs\Python\Python311\Lib\asyncio\base_events.py", line 1936, in _run_once
+    handle._run()
+  File "C:\Users\gilbe\AppData\Local\Programs\Python\Python311\Lib\asyncio\events.py", line 84, in _run
+    self._context.run(self._callback, *self._args)
+  File "C:\CapitalTwo\.venv\Lib\site-packages\uvicorn\server.py", line 68, in serve
+    with self.capture_signals():
+  File "C:\Users\gilbe\AppData\Local\Programs\Python\Python311\Lib\contextlib.py", line 144, in __exit__
+    next(self.gen)
+  File "C:\CapitalTwo\.venv\Lib\site-packages\uvicorn\server.py", line 328, in capture_signals
+    signal.raise_signal(captured_signal)
+  File "C:\Users\gilbe\AppData\Local\Programs\Python\Python311\Lib\asyncio\runners.py", line 157, in _on_sigint
+    raise KeyboardInterrupt()
+KeyboardInterrupt
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\CapitalTwo\.venv\Lib\site-packages\uvicorn\protocols\websockets\websockets_impl.py", line 244, in run_asgi
+    result = await self.app(self.scope, self.asgi_receive, self.asgi_send)  # type: ignore[func-returns-value]
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\CapitalTwo\.venv\Lib\site-packages\uvicorn\middleware\proxy_headers.py", line 70, in __call__
+    return await self.app(scope, receive, send)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\CapitalTwo\.venv\Lib\site-packages\fastapi\applications.py", line 1054, in __call__
+    await super().__call__(scope, receive, send)
+  File "C:\CapitalTwo\.venv\Lib\site-packages\starlette\applications.py", line 112, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "C:\CapitalTwo\.venv\Lib\site-packages\starlette\middleware\errors.py", line 152, in __call__
+    await self.app(scope, receive, send)
+  File "C:\CapitalTwo\.venv\Lib\site-packages\starlette\middleware\exceptions.py", line 62, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "C:\CapitalTwo\.venv\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "C:\CapitalTwo\.venv\Lib\site-packages\starlette\routing.py", line 714, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "C:\CapitalTwo\.venv\Lib\site-packages\starlette\routing.py", line 734, in app
+    await route.handle(scope, receive, send)
+  File "C:\CapitalTwo\.venv\Lib\site-packages\starlette\routing.py", line 362, in handle
+    await self.app(scope, receive, send)
+  File "C:\CapitalTwo\.venv\Lib\site-packages\starlette\routing.py", line 95, in app
+    await wrap_app_handling_exceptions(app, session)(scope, receive, send)
+  File "C:\CapitalTwo\.venv\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "C:\CapitalTwo\.venv\Lib\site-packages\starlette\routing.py", line 93, in app
+    await func(session)
+  File "C:\CapitalTwo\.venv\Lib\site-packages\fastapi\routing.py", line 383, in app
+    await dependant.call(**solved_result.values)
+  File "C:\CapitalTwo\main.py", line 98, in websocket_endpoint
+    await asyncio.sleep(1) # Send updates every second
+    ^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\gilbe\AppData\Local\Programs\Python\Python311\Lib\asyncio\tasks.py", line 649, in sleep
+    return await future
+           ^^^^^^^^^^^^
+asyncio.exceptions.CancelledError
+2025-09-24 02:52:08,032 - main - INFO - Stopping app...
+2025-09-24 02:52:08,032 - uvicorn.error - ERROR - Traceback (most recent call last):
+  File "C:\Users\gilbe\AppData\Local\Programs\Python\Python311\Lib\asyncio\runners.py", line 190, in run
+    return runner.run(main)
+           ^^^^^^^^^^^^^^^^
+  File "C:\Users\gilbe\AppData\Local\Programs\Python\Python311\Lib\asyncio\runners.py", line 118, in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\gilbe\AppData\Local\Programs\Python\Python311\Lib\asyncio\base_events.py", line 641, in run_until_complete
+    self.run_forever()
+  File "C:\Users\gilbe\AppData\Local\Programs\Python\Python311\Lib\asyncio\windows_events.py", line 321, in run_forever
+    super().run_forever()
+  File "C:\Users\gilbe\AppData\Local\Programs\Python\Python311\Lib\asyncio\base_events.py", line 608, in run_forever
+    self._run_once()
+  File "C:\Users\gilbe\AppData\Local\Programs\Python\Python311\Lib\asyncio\base_events.py", line 1936, in _run_once
+    handle._run()
+  File "C:\Users\gilbe\AppData\Local\Programs\Python\Python311\Lib\asyncio\events.py", line 84, in _run
+    self._context.run(self._callback, *self._args)
+  File "C:\CapitalTwo\.venv\Lib\site-packages\uvicorn\server.py", line 68, in serve
+    with self.capture_signals():
+  File "C:\Users\gilbe\AppData\Local\Programs\Python\Python311\Lib\contextlib.py", line 144, in __exit__
+    next(self.gen)
+  File "C:\CapitalTwo\.venv\Lib\site-packages\uvicorn\server.py", line 328, in capture_signals
+    signal.raise_signal(captured_signal)
+  File "C:\Users\gilbe\AppData\Local\Programs\Python\Python311\Lib\asyncio\runners.py", line 157, in _on_sigint
+    raise KeyboardInterrupt()
+KeyboardInterrupt
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\CapitalTwo\.venv\Lib\site-packages\starlette\routing.py", line 699, in lifespan
+    await receive()
+  File "C:\CapitalTwo\.venv\Lib\site-packages\uvicorn\lifespan\on.py", line 137, in receive
+    return await self.receive_queue.get()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\gilbe\AppData\Local\Programs\Python\Python311\Lib\asyncio\queues.py", line 158, in get
+    await getter
+asyncio.exceptions.CancelledError
+
