@@ -1,0 +1,33 @@
+# Capital.com Trading Bot Settings
+# This file is read every 5 seconds for live updates
+
+[CREDENTIALS]
+api_key=yktYIOXRX6dFuGbJ
+password=Tickles21!
+email=dean2021q1@gmail.com
+account_id=
+
+[BOT_CONFIG]
+bot_name=AI Hybrid Trader
+epic=TECL
+leverage=4.0
+stop_loss_pct=2.0
+investment_pct=99.0
+ai_confidence_threshold=30.0
+direction=long
+
+[TRADING_HOURS]
+timezone=Asia/Dubai
+market_timezone=US/Eastern
+
+[API_CONFIG]
+base_url=https://demo-api-capital.backend-capital.com/api/v1
+# Use demo for testing, live for production
+# Live URL: https://api-capital.backend-capital.com/api/v1
+
+[DISPLAY_CONFIG]
+refresh_interval=1
+settings_refresh_interval=5
+
+
+port=8011

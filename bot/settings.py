@@ -1,0 +1,44 @@
+import configparser
+import logging
+import os
+
+logger = logging.getLogger(__name__)
+
+class TradingBotSettings:
+    """Manages bot settings from settings.txt file"""
+    
+    def __init__(self, settings_file: str = "settings.txt"):
+        self.settings_file = settings_file
+        self.config = configparser.ConfigParser()
+        self.last_modified = 0
+        self.load_settings()
+    
+    def load_settings(self):
+        """Load settings from file"""
+        try:
+            if os.path.exists(self.settings_file):
+                current_modified = os.path.getmtime(self.settings_file)
+                if current_modified > self.last_modified:
+                    self.config.read(self.settings_file)
+                    self.last_modified = current_modified
+                    logger.info("Settings reloaded from file")
+            else:
+                logger.warning(f"Settings file {self.settings_file} not found")
+        except Exception as e:
+            logger.error(f"Error loading settings: {e}")
+    
+    def get(self, section: str, key: str, fallback: str = "") -> str:
+        """Get setting value"""
+        self.load_settings()  # Check for updates
+        return self.config.get(section, key, fallback=fallback)
+    
+    def getfloat(self, section: str, key: str, fallback: float = 0.0) -> float:
+        """Get float setting value"""
+        self.load_settings()
+        return self.config.getfloat(section, key, fallback=fallback)
+    
+    def getint(self, section: str, key: str, fallback: int = 0) -> int:
+        """Get integer setting value"""
+        self.load_settings()
+        return self.config.getint(section, key, fallback=fallback)
+
