@@ -46,11 +46,9 @@ Thumbs.db
 
 # Logs
 *.log
-log.txt
 server.log
 
-# Database
-*.db
+# Database (allow database.db and log.txt)
 *.sqlite
 *.sqlite3
 
