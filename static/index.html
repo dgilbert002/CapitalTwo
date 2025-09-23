@@ -3,97 +3,157 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Trading Bot - Capital.com</title>
+    <title>AI Hybrid Trader</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        body {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        
+        body { 
+            background: #050506;
+            background-image: 
+                radial-gradient(ellipse at top left, rgba(120, 119, 198, 0.15) 0%, transparent 50%),
+                radial-gradient(ellipse at bottom right, rgba(255, 119, 198, 0.1) 0%, transparent 50%);
+            color: #e8e9ef; 
+            min-height: 100vh; 
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
         }
-        .dashboard-container {
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 20px;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        
+        .dashboard-container { 
+            background: rgba(10, 11, 13, 0.95);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 20px; 
+            box-shadow: 
+                0 20px 40px rgba(0, 0, 0, 0.4),
+                inset 0 1px 0 rgba(255, 255, 255, 0.05);
+            margin: 20px; 
+            padding: 28px;
+            backdrop-filter: blur(20px);
+        }
+        
+        h1 {
+            background: linear-gradient(135deg, #7877c6 0%, #ff77c6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 700;
+        }
+        
+        .status-card { 
+            background: linear-gradient(135deg, rgba(120, 119, 198, 0.1) 0%, rgba(255, 119, 198, 0.05) 100%);
+            color: #e8e9ef; 
+            border-radius: 16px; 
+            padding: 20px; 
+            margin-bottom: 20px; 
+            border: 1px solid rgba(255, 255, 255, 0.08);
             backdrop-filter: blur(10px);
-            margin: 20px;
-            padding: 30px;
         }
-        .status-card {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border-radius: 15px;
-            padding: 25px;
-            margin-bottom: 20px;
-            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+        
+        .metric-card { 
+            background: rgba(15, 16, 20, 0.6);
+            border-radius: 16px; 
+            padding: 20px; 
+            margin-bottom: 20px; 
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
         }
-        .metric-card {
-            background: white;
-            border-radius: 15px;
-            padding: 20px;
-            margin-bottom: 20px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
-            border-left: 4px solid #667eea;
-            transition: transform 0.3s ease;
+        
+        .metric-card:hover { 
+            border-color: rgba(120, 119, 198, 0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(120, 119, 198, 0.1);
         }
-        .metric-card:hover {
-            transform: translateY(-5px);
-        }
-        .metric-value {
-            font-size: 2rem;
-            font-weight: bold;
-            color: #667eea;
-        }
-        .metric-label {
-            color: #6c757d;
-            font-size: 0.9rem;
+        
+        .metric-card h6 {
+            color: #9ca3af;
+            font-weight: 600;
+            font-size: 0.875rem;
             text-transform: uppercase;
             letter-spacing: 1px;
+            margin-bottom: 0.75rem;
+        }
+        
+        .text-muted {
+            color: #9ca3af !important;
+        }
+        
+        .form-text {
+            color: #9ca3af;
+            font-size: 0.875rem;
+        }
+        .metric-value { 
+            font-size: 1.8rem; 
+            font-weight: 700; 
+            background: linear-gradient(135deg, #7877c6 0%, #ff77c6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .metric-label { 
+            color: #6b7280; 
+            font-size: 0.75rem; 
+            letter-spacing: 1px; 
+            text-transform: uppercase; 
+            font-weight: 600;
         }
         .status-indicator {
-            width: 12px;
-            height: 12px;
+            width: 10px;
+            height: 10px;
             border-radius: 50%;
             display: inline-block;
             margin-right: 8px;
+            box-shadow: 0 0 10px currentColor;
         }
-        .status-running {
-            background-color: #28a745;
+        .status-running { 
+            background-color: #10b981; 
             animation: pulse 2s infinite;
+            box-shadow: 0 0 20px #10b981;
         }
-        .status-stopped {
-            background-color: #dc3545;
+        .status-stopped { 
+            background-color: #ef4444;
+            box-shadow: 0 0 20px #ef4444;
         }
         @keyframes pulse {
-            0% { opacity: 1; }
-            50% { opacity: 0.5; }
-            100% { opacity: 1; }
+            0% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.8; transform: scale(1.1); }
+            100% { opacity: 1; transform: scale(1); }
         }
-        .countdown {
-            font-family: 'Courier New', monospace;
-            font-size: 1.2rem;
-            font-weight: bold;
+        .positions-table { 
+            background: rgba(15, 16, 20, 0.6);
+            border-radius: 16px; 
+            overflow: hidden; 
+            border: 1px solid rgba(255, 255, 255, 0.08);
         }
-        .positions-table {
-            background: white;
-            border-radius: 15px;
-            overflow: hidden;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+        .table { 
+            color: #e5e7eb;
+            margin-bottom: 0;
         }
-        .table th {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
+        .table th { 
+            background: rgba(120, 119, 198, 0.1);
+            color: #d1d5db; 
+            border: none; 
             font-weight: 600;
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: 1rem;
         }
-        .profit-positive {
-            color: #28a745;
-            font-weight: bold;
+        .table td { 
+            border-color: rgba(255, 255, 255, 0.05);
+            padding: 0.875rem 1rem;
+            vertical-align: middle;
         }
-        .profit-negative {
-            color: #dc3545;
-            font-weight: bold;
+        .table tbody tr:hover {
+            background: rgba(120, 119, 198, 0.05);
+        }
+        .text-success { 
+            color: #10b981 !important; 
+            font-weight: 600;
+            text-shadow: 0 0 10px rgba(16, 185, 129, 0.5);
+        }
+        .text-danger { 
+            color: #ef4444 !important; 
+            font-weight: 600;
+            text-shadow: 0 0 10px rgba(239, 68, 68, 0.5);
         }
         .connection-status {
             position: fixed;
@@ -105,12 +165,10 @@
             font-weight: bold;
             z-index: 1000;
         }
-        .connected {
-            background-color: #28a745;
-        }
-        .disconnected {
-            background-color: #dc3545;
-        }
+        .connected { background-color: #17c964; }
+        .disconnected { background-color: #f21361; }
+        .tab-btn { cursor: pointer; padding: 8px 14px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.06); background: #12163a; color: #cfd6ff; }
+        .tab-btn.active { background: #1e255f; }
     </style>
 </head>
 <body>
@@ -122,8 +180,8 @@
         <div class="dashboard-container">
             <div class="row">
                 <div class="col-12">
-                    <h1 class="text-center mb-4">
-                        <i class="fas fa-robot"></i> AI Trading Bot Dashboard
+                    <h1 class="text-center mb-4" id="botTitle">
+                        <i class="fas fa-chart-line"></i> <span id="botNameDisplay">AI Hybrid Trader</span>
                     </h1>
                 </div>
             </div>
@@ -132,26 +190,18 @@
                 <div class="col-md-12">
                     <div class="status-card">
                         <div class="row align-items-center">
-                            <div class="col-md-3">
+                            <div class="col-md-6">
                                 <h5><i class="fas fa-cog"></i> Bot Status</h5>
                                 <p class="mb-0">
                                     <span class="status-indicator" id="statusIndicator"></span>
                                     <span id="status">Initializing...</span>
+                                    <span class="ms-3 text-muted">|</span>
+                                    <span class="ms-3" id="connectionStatus">Connecting...</span>
                                 </p>
                             </div>
-                            <div class="col-md-3">
-                                <h5><i class="fas fa-chart-line"></i> Trading</h5>
-                                <p class="mb-0"><strong>EPIC:</strong> <span id="epic">-</span></p>
-                                <p class="mb-0"><strong>Leverage:</strong> <span id="leverage">-</span>x</p>
-                            </div>
-                            <div class="col-md-3">
-                                <h5><i class="fas fa-clock"></i> Market Status</h5>
-                                <p class="mb-0" id="marketStatus">-</p>
-                                <p class="mb-0"><strong>Next:</strong> <span id="nextEvent">-</span></p>
-                            </div>
-                            <div class="col-md-3">
-                                <h5><i class="fas fa-stopwatch"></i> Countdown</h5>
-                                <p class="mb-0 countdown" id="countdown">--:--:--</p>
+                            <div class="col-md-6 text-end">
+                                <button class="btn btn-sm btn-outline-light" id="btnStart"><i class="fas fa-play"></i> Start</button>
+                                <button class="btn btn-sm btn-outline-warning ms-2" id="btnStop"><i class="fas fa-stop"></i> Stop</button>
                             </div>
                         </div>
                     </div>
@@ -159,72 +209,137 @@
             </div>
 
             <div class="row">
-                <div class="col-md-3">
+                <div class="col-lg-6">
                     <div class="metric-card">
-                        <div class="metric-label">Account Balance</div>
-                        <div class="metric-value" id="balance">$0.00</div>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="metric-label mb-1"><i class="fas fa-plug"></i> Environment</label>
+                                <select id="envSelect" class="form-select">
+                                    <option value="demo">Demo</option>
+                                    <option value="live">Live</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="metric-label mb-1"><i class="fas fa-user"></i> Account</label>
+                                <select id="accountSelect" class="form-select">
+                                    <option value="">Loading...</option>
+                                </select>
+                            </div>
+                        </div>
+                        <small class="text-muted">Changes apply immediately and are saved to settings.txt.</small>
+                    </div>
+
+                    <div class="metric-card">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="metric-label">Account Balance</div>
+                                <div class="metric-value" id="balance">$0.00</div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="metric-label">Available Funds</div>
+                                <div class="metric-value" id="available">$0.00</div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="metric-label">Total P&L</div>
+                                <div class="metric-value" id="pnl">$0.00</div>
+                            </div>
+                        </div>
                     </div>
                 </div>
-                <div class="col-md-3">
+                <div class="col-lg-6">
                     <div class="metric-card">
-                        <div class="metric-label">Available Funds</div>
-                        <div class="metric-value" id="available">$0.00</div>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="metric-card">
-                        <div class="metric-label">Total P&L</div>
-                        <div class="metric-value" id="pnl">$0.00</div>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="metric-card">
-                        <div class="metric-label">Account Name</div>
-                        <div class="metric-value" style="font-size: 1.2rem;" id="accountName">-</div>
+                        <h5 class="mb-3"><i class="fas fa-globe"></i> Market Information</h5>
+                        <div class="row">
+                            <div class="col-6">
+                                <h6 class="text-muted">Market Details</h6>
+                                <p class="mb-1"><strong>EPIC:</strong> <span id="epic">-</span></p>
+                                <p class="mb-1"><strong>Name:</strong> <span id="epicName">-</span></p>
+                                <p class="mb-1"><strong>Bid/Ask:</strong> <span id="bidAsk">-</span></p>
+                                <p class="mb-1"><strong>Spread:</strong> <span id="epicSpread">-</span></p>
+                                <p class="mb-1"><strong>Change:</strong> <span id="percentChange">-</span>%</p>
+                                <p class="mb-1"><strong>Leverage:</strong> <span id="leverage">-</span>x</p>
+                            </div>
+                            <div class="col-6">
+                                <h6 class="text-muted">Market Hours</h6>
+                                <p class="mb-1"><strong>Status:</strong> <span id="marketStatus">-</span></p>
+                                <p class="mb-1"><strong>Next:</strong> <span id="nextEvent">-</span></p>
+                                <p class="mb-1"><strong>Market Time:</strong> <span id="marketTime">-</span></p>
+                                <p class="mb-1"><strong>UAE Time:</strong> <span id="uaeTime">-</span></p>
+                                <div class="mt-2"><span class="metric-label">Countdown</span> <span class="countdown" id="countdown">--:--:--</span></div>
+                            </div>
+                        </div>
+                        <hr>
+                        <div class="row mt-3">
+                            <div class="col-12">
+                                <h6 class="text-muted">Trading Rules</h6>
+                                <div class="row">
+                                    <div class="col-6">
+                                        <p class="mb-1"><small><strong>Min Size:</strong> <span id="minDealSize">-</span></small></p>
+                                        <p class="mb-1"><small><strong>Max Size:</strong> <span id="maxDealSize">-</span></small></p>
+                                    </div>
+                                    <div class="col-6">
+                                        <p class="mb-1"><small><strong>Size Increment:</strong> <span id="minSizeIncrement">-</span></small></p>
+                                        <p class="mb-1"><small><strong>Lot Size:</strong> <span id="lotSize">-</span></small></p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <div class="row">
-                <div class="col-md-6">
-                    <div class="metric-card">
-                        <h5><i class="fas fa-globe"></i> Market Times</h5>
-                        <p><strong>Market Time:</strong> <span id="marketTime">-</span></p>
-                        <p><strong>UAE Time:</strong> <span id="uaeTime">-</span></p>
-                    </div>
-                </div>
-                <div class="col-md-6">
-                    <div class="metric-card">
-                        <h5><i class="fas fa-brain"></i> AI Status</h5>
-                        <p><strong>Bot Name:</strong> <span id="botName">-</span></p>
-                        <p><strong>Last Update:</strong> <span id="lastUpdate">-</span></p>
-                    </div>
-                </div>
-            </div>
+            
 
             <div class="row">
                 <div class="col-12">
                     <div class="positions-table">
-                        <h5 class="p-3 mb-0"><i class="fas fa-chart-bar"></i> Open Positions</h5>
-                        <div class="table-responsive">
+                        <div class="d-flex justify-content-between align-items-center p-3">
+                            <div>
+                                <button class="tab-btn active" id="tabOpen">Positions & Orders</button>
+                                <button class="tab-btn ms-2" id="tabHistory">Trade History</button>
+                            </div>
+                        </div>
+                        <div class="table-responsive" id="openPositionsPanel">
                             <table class="table table-hover mb-0">
                                 <thead>
                                     <tr>
-                                        <th>EPIC</th>
+                                        <th>Epic</th>
                                         <th>Direction</th>
-                                        <th>Size</th>
+                                        <th>Deal / Date</th>
+                                        <th>Size Details</th>
                                         <th>Open Level</th>
                                         <th>Current Level</th>
-                                        <th>P&L</th>
+                                        <th>P&L (UPL)</th>
                                         <th>Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody id="positionsTable">
                                     <tr>
-                                        <td colspan="7" class="text-center text-muted py-4">
+                                        <td colspan="8" class="text-center text-muted py-4">
                                             <i class="fas fa-chart-line fa-2x mb-2"></i><br>
                                             No open positions
                                         </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="table-responsive" id="historyPanel" style="display:none;">
+                            <table class="table table-hover mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>Entry</th>
+                                        <th>Exit</th>
+                                        <th>Dir</th>
+                                        <th>Size</th>
+                                        <th>Entry Px</th>
+                                        <th>Exit Px</th>
+                                        <th>Net P&L</th>
+                                        <th>Reason</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="historyTable">
+                                    <tr>
+                                        <td colspan="8" class="text-center text-muted py-4">No history</td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -241,10 +356,16 @@
             connectionStatus: document.getElementById("connectionStatus"),
             statusIndicator: document.getElementById("statusIndicator"),
             status: document.getElementById("status"),
-            botName: document.getElementById("botName"),
             epic: document.getElementById("epic"),
+            epicName: document.getElementById("epicName"),
+            bidAsk: document.getElementById("bidAsk"),
+            epicSpread: document.getElementById("epicSpread"),
+            percentChange: document.getElementById("percentChange"),
+            minDealSize: document.getElementById("minDealSize"),
+            maxDealSize: document.getElementById("maxDealSize"),
+            minSizeIncrement: document.getElementById("minSizeIncrement"),
+            lotSize: document.getElementById("lotSize"),
             leverage: document.getElementById("leverage"),
-            accountName: document.getElementById("accountName"),
             balance: document.getElementById("balance"),
             available: document.getElementById("available"),
             pnl: document.getElementById("pnl"),
@@ -253,8 +374,18 @@
             countdown: document.getElementById("countdown"),
             marketTime: document.getElementById("marketTime"),
             uaeTime: document.getElementById("uaeTime"),
-            lastUpdate: document.getElementById("lastUpdate"),
-            positionsTable: document.getElementById("positionsTable")
+            // lastUpdate: document.getElementById("lastUpdate"), // Removed - element doesn't exist
+            positionsTable: document.getElementById("positionsTable"),
+            envSelect: document.getElementById("envSelect"),
+            accountSelect: document.getElementById("accountSelect"),
+            botNameDisplay: document.getElementById("botNameDisplay"),
+            tabOpen: document.getElementById("tabOpen"),
+            tabHistory: document.getElementById("tabHistory"),
+            openPositionsPanel: document.getElementById("openPositionsPanel"),
+            historyPanel: document.getElementById("historyPanel"),
+            historyTable: document.getElementById("historyTable"),
+            btnStart: document.getElementById("btnStart"),
+            btnStop: document.getElementById("btnStop")
         };
 
         let ws;
@@ -267,7 +398,6 @@
             ws = new WebSocket(wsUrl);
 
             ws.onopen = function() {
-                console.log("WebSocket connected");
                 elements.connectionStatus.textContent = "Connected";
                 elements.connectionStatus.className = "connection-status connected";
                 if (reconnectInterval) {
@@ -279,6 +409,15 @@
             ws.onmessage = function(event) {
                 try {
                     const data = JSON.parse(event.data);
+                    // Debug logging
+                    if (!ws._debugLogged) {
+                        console.log("WebSocket data received:", data);
+                        if (data.account) {
+                            console.log("Account info:", data.account);
+                            console.log("Balance info:", data.account.balance);
+                        }
+                        ws._debugLogged = true;
+                    }
                     updateDashboard(data);
                 } catch (error) {
                     console.error("Error parsing WebSocket data:", error);
@@ -286,8 +425,7 @@
             };
 
             ws.onclose = function() {
-                console.log("WebSocket disconnected");
-                elements.connectionStatus.textContent = "Disconnected";
+                elements.connectionStatus.textContent = "Connecting...";
                 elements.connectionStatus.className = "connection-status disconnected";
                 
                 if (!reconnectInterval) {
@@ -295,16 +433,21 @@
                 }
             };
 
-            ws.onerror = function(error) {
-                console.error("WebSocket error:", error);
-            };
+            ws.onerror = function(error) { };
         }
 
-        function updateDashboard(data) {
+        async function updateDashboard(data) {
+            // Update bot name
+            if (data.bot_name && elements.botNameDisplay) {
+                elements.botNameDisplay.textContent = data.bot_name;
+            }
+            
             // Update bot status
-            elements.botName.textContent = data.bot_name || "AI Trading Bot";
             elements.epic.textContent = data.epic || "-";
             elements.leverage.textContent = data.leverage || "-";
+            if (data.environment) {
+                elements.envSelect.value = data.environment;
+            }
             
             if (data.is_running) {
                 elements.status.textContent = "Running";
@@ -314,9 +457,16 @@
                 elements.statusIndicator.className = "status-indicator status-stopped";
             }
 
+            // Badges removed - no longer needed
+
+            // Update connection status
+            const connStatus = data.is_connected ? 'Connected' : 'Connecting...';
+            const statusElem = document.getElementById('connectionStatus');
+            if (statusElem) statusElem.textContent = connStatus;
+            
             // Update account information
             if (data.account) {
-                elements.accountName.textContent = data.account.accountName || "-";
+                // Account name is shown in the dropdown and badge
                 if (data.account.balance) {
                     elements.balance.textContent = `$${data.account.balance.balance?.toFixed(2) || "0.00"}`;
                     elements.available.textContent = `$${data.account.balance.available?.toFixed(2) || "0.00"}`;
@@ -325,66 +475,306 @@
                     elements.pnl.textContent = `$${pnlValue.toFixed(2)}`;
                     elements.pnl.className = `metric-value ${pnlValue >= 0 ? 'profit-positive' : 'profit-negative'}`;
                 }
+            } else {
+                // No account data - show zeros
+                elements.balance.textContent = "$0.00";
+                elements.available.textContent = "$0.00";
+                elements.pnl.textContent = "$0.00";
             }
 
             // Update market information
             if (data.market_event) {
-                elements.marketStatus.textContent = data.market_event.is_open ? "Open" : "Closed";
-                elements.nextEvent.textContent = data.market_event.next_event || "-";
+                // Update market status - use actual market_status from API if available
+                const marketStatus = data.market_event.market_status || (data.market_event.is_open ? "OPEN" : "CLOSED");
+                elements.marketStatus.textContent = marketStatus;
                 
+                // Style the status based on open/closed
+                if (data.market_event.is_open) {
+                    elements.marketStatus.style.color = '#4caf50';
+                } else {
+                    elements.marketStatus.style.color = '#f44336';
+                }
+                
+                // Update next event with time
+                if (data.market_event.next_event === "close") {
+                    elements.nextEvent.textContent = "Market Close";
+                    if (data.market_event.next_event_time_local) {
+                        const closeTime = new Date(data.market_event.next_event_time_local);
+                        elements.nextEvent.textContent += ` at ${closeTime.toLocaleTimeString()}`;
+                    }
+                } else if (data.market_event.next_event === "open") {
+                    elements.nextEvent.textContent = "Market Open";
+                    if (data.market_event.next_event_time_local) {
+                        const openTime = new Date(data.market_event.next_event_time_local);
+                        const tomorrow = openTime.toDateString() !== new Date().toDateString();
+                        elements.nextEvent.textContent += ` at ${openTime.toLocaleTimeString()}`;
+                        if (tomorrow) {
+                            elements.nextEvent.textContent += ` (${openTime.toLocaleDateString()})`;
+                        }
+                    }
+                } else {
+                    elements.nextEvent.textContent = data.market_event.error || "Unknown";
+                }
+                
+                // Update countdown
                 const timeUntil = data.market_event.time_until_seconds || 0;
                 const hours = Math.floor(timeUntil / 3600);
                 const minutes = Math.floor((timeUntil % 3600) / 60);
                 const seconds = Math.floor(timeUntil % 60);
                 elements.countdown.textContent = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
 
-                if (data.market_event.current_market_time) {
-                    elements.marketTime.textContent = new Date(data.market_event.current_market_time).toLocaleString();
+                // Update times - show local time and UAE time
+                if (data.market_event.current_local_time) {
+                    const localTime = new Date(data.market_event.current_local_time);
+                    elements.marketTime.textContent = localTime.toLocaleTimeString();
                 }
                 if (data.market_event.current_uae_time) {
-                    elements.uaeTime.textContent = new Date(data.market_event.current_uae_time).toLocaleString();
+                    const uaeTime = new Date(data.market_event.current_uae_time);
+                    elements.uaeTime.textContent = uaeTime.toLocaleTimeString() + " (Dubai)";
+                }
+            }
+            
+            // Update market info details
+            if (data.market_info) {
+                const mi = data.market_info;
+                
+                // Update instrument name
+                if (mi.instrument && mi.instrument.name) {
+                    elements.epicName.textContent = mi.instrument.name;
+                }
+                
+                // Update market status from market_info
+                if (mi.marketStatus) {
+                    // Override with actual market status if different
+                    const actualStatus = mi.marketStatus === "TRADEABLE" ? "Open" : mi.marketStatus;
+                    if (actualStatus !== "Open" && actualStatus !== "Closed") {
+                        elements.marketStatus.textContent = actualStatus;
+                    }
+                }
+                
+                // Show bid/ask and spread if available
+                if (mi.snapshot) {
+                    const snapshot = mi.snapshot;
+                    if (snapshot.bid && snapshot.offer) {
+                        elements.bidAsk.textContent = `${snapshot.bid.toFixed(2)} / ${snapshot.offer.toFixed(2)}`;
+                        const spread = (snapshot.offer - snapshot.bid).toFixed(4);
+                        elements.epicSpread.textContent = spread;
+                    }
+                    if (snapshot.percentageChange !== undefined) {
+                        const change = snapshot.percentageChange;
+                        elements.percentChange.textContent = change.toFixed(2);
+                        elements.percentChange.style.color = change >= 0 ? '#4caf50' : '#f44336';
+                    }
+                }
+                
+                // Update dealing rules if available
+                if (mi.dealingRules) {
+                    const rules = mi.dealingRules;
+                    const currentPrice = mi.snapshot?.bid || mi.snapshot?.offer || 0;
+                    
+                    if (rules.minDealSize?.value !== undefined) {
+                        const minSize = rules.minDealSize.value;
+                        const minUSD = (minSize * currentPrice).toFixed(2);
+                        elements.minDealSize.textContent = `${minSize} ($${minUSD})`;
+                    }
+                    if (rules.maxDealSize?.value !== undefined) {
+                        const maxSize = rules.maxDealSize.value;
+                        const maxUSD = (maxSize * currentPrice).toFixed(2);
+                        elements.maxDealSize.textContent = `${maxSize} ($${maxUSD})`;
+                    }
+                    if (rules.minSizeIncrement?.value !== undefined) {
+                        const increment = rules.minSizeIncrement.value;
+                        const incrementUSD = (increment * currentPrice).toFixed(2);
+                        elements.minSizeIncrement.textContent = `${increment} ($${incrementUSD})`;
+                    }
+                }
+                
+                // Update lot size if available
+                if (mi.instrument?.lotSize !== undefined) {
+                    elements.lotSize.textContent = mi.instrument.lotSize;
+                }
+                
+                // Show market hours if available
+                if (mi.instrument && mi.instrument.openingHours) {
+                    // This is already handled by market_event, but we could show full schedule here
                 }
             }
 
             // Update positions
             updatePositionsTable(data.positions || []);
 
-            // Update last update time
-            elements.lastUpdate.textContent = new Date().toLocaleTimeString();
+            // Update history - combine bot trades and historic trades
+            const allTrades = [...(data.historic_trades || []), ...(data.trade_history || [])];
+            updateHistoryTable(allTrades);
+
+            // Update last update time - removed as element doesn't exist
+            // elements.lastUpdate.textContent = new Date().toLocaleTimeString();
         }
+
+        async function fetchConfig() {
+            try {
+                const res = await fetch('/config');
+                if (!res.ok) return;
+                const cfg = await res.json();
+                if (cfg.environment) elements.envSelect.value = cfg.environment;
+                // Only fetch accounts if connected
+                if (cfg.is_connected) {
+                    await fetchAccounts(cfg.selected_account_id);
+                } else {
+                    elements.accountSelect.innerHTML = '<option value="">Connecting...</option>';
+                }
+            } catch (e) { console.error(e); }
+        }
+
+        async function fetchAccounts(preselectId) {
+            try {
+                elements.accountSelect.innerHTML = '<option value="">Loading accounts...</option>';
+                const res = await fetch('/accounts');
+                if (!res.ok) {
+                    elements.accountSelect.innerHTML = '<option value="">Failed to load accounts</option>';
+                    return;
+                }
+                const data = await res.json();
+                const accounts = data.accounts || [];
+                
+                if (!accounts.length) {
+                    elements.accountSelect.innerHTML = '<option value="">No accounts available</option>';
+                    return;
+                }
+                
+                elements.accountSelect.innerHTML = '';
+                accounts.forEach(acc => {
+                    const opt = document.createElement('option');
+                    opt.value = acc.accountId;
+                    opt.textContent = `${acc.accountName} (${acc.accountId})`;
+                    elements.accountSelect.appendChild(opt);
+                });
+                
+                if (preselectId && accounts.find(a => a.accountId === preselectId)) {
+                    elements.accountSelect.value = preselectId;
+                } else if (accounts.length) {
+                    elements.accountSelect.value = accounts[0].accountId;
+                }
+                
+                if (elements.accountSelect.value) {
+                    await selectAccount(elements.accountSelect.value);
+                }
+            } catch (e) { 
+                console.error(e);
+                elements.accountSelect.innerHTML = '<option value="">Error loading accounts</option>';
+            }
+        }
+
+        elements.envSelect.addEventListener('change', async () => {
+            const env = elements.envSelect.value;
+            try {
+                const res = await fetch('/config/environment', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ environment: env })
+                });
+                if (res.ok) { await fetchAccounts(); }
+            } catch (e) { console.error(e); }
+        });
+
+        // Removed refresh button listener - accounts refresh automatically
+
+        async function selectAccount(account_id) {
+            try {
+                await fetch('/accounts/select', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ account_id })
+                });
+            } catch (e) { console.error(e); }
+        }
+
+        elements.accountSelect.addEventListener('change', async () => {
+            const account_id = elements.accountSelect.value;
+            if (!account_id) return;
+            await selectAccount(account_id);
+        });
+
+        // Initial loads
+        fetchConfig();
+        // Don't call fetchAccounts separately - fetchConfig will do it if connected
 
         function updatePositionsTable(positions) {
             if (!positions || positions.length === 0) {
                 elements.positionsTable.innerHTML = `
                     <tr>
-                        <td colspan="7" class="text-center text-muted py-4">
+                        <td colspan="8" class="text-center text-muted py-4">
                             <i class="fas fa-chart-line fa-2x mb-2"></i><br>
-                            No open positions
+                            No open positions or orders
                         </td>
                     </tr>
                 `;
                 return;
             }
 
+            // Log first position to understand structure
+            if (positions.length > 0) {
+                console.log('Position structure:', positions[0]);
+            }
+
             let html = '';
             positions.forEach(position => {
-                const pnl = position.position?.pnl || 0;
-                const pnlClass = pnl >= 0 ? 'profit-positive' : 'profit-negative';
+                // Extract fields from various possible structures
+                const dealId = position.position?.dealId || position.dealId || '-';
+                const dealReference = position.position?.dealReference || '-';
+                const epic = position.market?.epic || position.instrument?.epic || position.position?.epic || position.epic || '-';
+                const instrumentName = position.market?.instrumentName || position.instrument?.name || '';
+                const direction = position.position?.direction || position.direction || '-';
+                const size = parseFloat(position.position?.size || position.size || 0);
+                const leverage = parseFloat(position.position?.leverage || position.leverage || 1);
+                const level = parseFloat(position.position?.level || position.level || position.openLevel || 0);
+                const currentPrice = parseFloat(position.market?.bid || position.market?.offer || 0);
+                const upl = parseFloat(position.position?.upl || position.position?.profit || position.position?.pnl || position.profit || position.pnl || 0);
+                const pnlClass = upl >= 0 ? 'text-success fw-bold' : 'text-danger fw-bold';
+                const type = position.orderType ? 'ORDER' : 'POSITION';
+                const createdDate = position.position?.createdDate || position.createdDate || '-';
+                const stopLevel = position.position?.stopLevel || '-';
+                
+                // Calculate notional value and margin
+                const notionalValue = size * level;
+                const marginRequired = notionalValue / leverage;
+                
+                // Format date
+                let dateDisplay = '-';
+                if (createdDate !== '-') {
+                    const date = new Date(createdDate);
+                    dateDisplay = date.toLocaleDateString() + '<br>' + date.toLocaleTimeString();
+                }
                 
                 html += `
                     <tr>
-                        <td><strong>${position.instrument?.epic || '-'}</strong></td>
                         <td>
-                            <span class="badge ${position.position?.direction === 'BUY' ? 'bg-success' : 'bg-danger'}">
-                                ${position.position?.direction || '-'}
+                            <strong>${epic}</strong>
+                            ${instrumentName ? `<br><small class="text-muted">${instrumentName}</small>` : ''}
+                        </td>
+                        <td>
+                            <span class="badge ${direction === 'BUY' ? 'bg-success' : 'bg-danger'}">
+                                ${direction}
                             </span>
                         </td>
-                        <td>${position.position?.size || '-'}</td>
-                        <td>${position.position?.level || '-'}</td>
-                        <td>${position.market?.bid || position.market?.offer || '-'}</td>
-                        <td class="${pnlClass}">$${pnl.toFixed(2)}</td>
                         <td>
-                            <button class="btn btn-sm btn-outline-danger" onclick="closePosition('${position.position?.dealId}')">
+                            <small class="text-muted">${dealId}</small>
+                            <br>
+                            <small>${dateDisplay}</small>
+                            ${type === 'ORDER' ? '<br><span class="badge bg-warning">ORDER</span>' : ''}
+                        </td>
+                        <td>
+                            <small>
+                                <strong>Notional:</strong> $${notionalValue.toFixed(2)}<br>
+                                <strong>Margin:</strong> $${marginRequired.toFixed(2)}<br>
+                                <strong>Contracts:</strong> ${size.toFixed(2)}
+                            </small>
+                        </td>
+                        <td>$${level.toFixed(2)}</td>
+                        <td>${currentPrice ? '$' + currentPrice.toFixed(2) : '-'}</td>
+                        <td class="${pnlClass}">${upl >= 0 ? '+' : ''}$${Math.abs(upl).toFixed(2)}</td>
+                        <td>
+                            <button class="btn btn-sm btn-outline-danger" onclick="closePosition('${dealId}')">
                                 <i class="fas fa-times"></i> Close
                             </button>
                         </td>
@@ -394,12 +784,108 @@
             elements.positionsTable.innerHTML = html;
         }
 
+        function updateHistoryTable(history) {
+            if (!history || history.length === 0) {
+                elements.historyTable.innerHTML = '<tr><td colspan="8" class="text-center text-muted py-4">No trade history</td></tr>';
+                return;
+            }
+            
+            // Log first trade to understand structure  
+            if (history.length > 0) {
+                console.log('Trade history structure:', history[0]);
+            }
+            
+            let html = '';
+            history.forEach(h => {
+                // Handle both bot trades and historic trades from API
+                const isHistoricTrade = h.dateUTC || h.date || h.dealId;
+                
+                if (isHistoricTrade) {
+                    // Historic trade from Capital.com API
+                    const dateTime = h.dateUTC || h.date || h.timestamp || '-';
+                    const epic = h.epic || h.instrument?.epic || h.market?.epic || '-';
+                    const instrumentName = h.instrumentName || h.instrument?.name || '';
+                    const direction = h.direction || '-';
+                    const size = h.size || h.dealSize || '-';
+                    const openLevel = h.openLevel || h.level || '-';
+                    const closeLevel = h.closeLevel || '-';
+                    const profit = parseFloat(h.profit || h.pl || h.profitAndLoss || h.pnl || 0);
+                    const profitClass = profit >= 0 ? 'text-success fw-bold' : 'text-danger fw-bold';
+                    const dealId = h.dealId || h.reference || '-';
+                    
+                    html += `
+                        <tr>
+                            <td>${dateTime !== '-' ? new Date(dateTime).toLocaleString() : '-'}</td>
+                            <td>
+                                <strong>${epic}</strong>
+                                ${instrumentName ? `<br><small class="text-muted">${instrumentName}</small>` : ''}
+                            </td>
+                            <td>
+                                <span class="badge ${direction === 'BUY' ? 'bg-success' : 'bg-danger'}">
+                                    ${direction}
+                                </span>
+                            </td>
+                            <td>${size}</td>
+                            <td>${openLevel !== '-' ? '$' + openLevel : '-'}</td>
+                            <td>${closeLevel !== '-' ? '$' + closeLevel : '-'}</td>
+                            <td class="${profitClass}">${profit >= 0 ? '+' : ''}$${Math.abs(profit).toFixed(2)}</td>
+                            <td><small>${dealId}</small></td>
+                        </tr>
+                    `;
+                } else {
+                    // Bot trade from our system
+                    const profit = parseFloat(h.net_pnl || 0);
+                    const profitClass = profit >= 0 ? 'text-success fw-bold' : 'text-danger fw-bold';
+                    
+                    html += `
+                        <tr>
+                            <td>${h.entry_date || '-'}</td>
+                            <td>${h.exit_date || '-'}</td>
+                            <td>
+                                <span class="badge ${h.direction === 'BUY' ? 'bg-success' : 'bg-danger'}">
+                                    ${h.direction || '-'}
+                                </span>
+                            </td>
+                            <td>${(h.position_size||0).toFixed ? (h.position_size||0).toFixed(2) : h.position_size || '-'}</td>
+                            <td>${(h.entry_price||0).toFixed ? '$' + (h.entry_price||0).toFixed(4) : h.entry_price || '-'}</td>
+                            <td>${(h.exit_price||0).toFixed ? '$' + (h.exit_price||0).toFixed(4) : h.exit_price || '-'}</td>
+                            <td class="${profitClass}">${profit >= 0 ? '+' : ''}$${Math.abs(profit).toFixed(2)}</td>
+                            <td>${h.exit_reason || '-'}</td>
+                        </tr>
+                    `;
+                }
+            });
+            elements.historyTable.innerHTML = html;
+        }
+
+        // tabs
+        elements.tabOpen.addEventListener('click', () => {
+            elements.tabOpen.classList.add('active');
+            elements.tabHistory.classList.remove('active');
+            elements.openPositionsPanel.style.display = '';
+            elements.historyPanel.style.display = 'none';
+        });
+        elements.tabHistory.addEventListener('click', () => {
+            elements.tabHistory.classList.add('active');
+            elements.tabOpen.classList.remove('active');
+            elements.openPositionsPanel.style.display = 'none';
+            elements.historyPanel.style.display = '';
+        });
+
         function closePosition(dealId) {
             if (confirm('Are you sure you want to close this position?')) {
                 // This would need to be implemented as an API endpoint
                 console.log('Closing position:', dealId);
             }
         }
+
+        // Start/Stop controls
+        elements.btnStart.addEventListener('click', async () => {
+            try { await fetch('/bot/start', { method: 'POST' }); } catch (e) { console.error(e); }
+        });
+        elements.btnStop.addEventListener('click', async () => {
+            try { await fetch('/bot/stop', { method: 'POST' }); } catch (e) { console.error(e); }
+        });
 
         // Initialize WebSocket connection
         connectWebSocket();

@@ -42,3 +42,36 @@ class TradingBotSettings:
         self.load_settings()
         return self.config.getint(section, key, fallback=fallback)
 
+    def set_value(self, section: str, key: str, value) -> None:
+        """Set a setting value and persist to file."""
+        try:
+            logger.info(f"TradingBotSettings.set_value(section={section}, key={key}, value={value})")
+            if not self.config.has_section(section):
+                self.config.add_section(section)
+            self.config.set(section, key, str(value))
+            self.save()
+        except Exception as e:
+            logger.error(f"Error setting value: {e}")
+
+    def set_env_account(self, environment: str, account_id: str) -> None:
+        """Remember selected account per environment."""
+        try:
+            if not self.config.has_section("ENV_ACCOUNTS"):
+                self.config.add_section("ENV_ACCOUNTS")
+            self.config.set("ENV_ACCOUNTS", environment.lower(), account_id)
+            self.save()
+            logger.info(f"Saved environment account map: {environment} -> {account_id}")
+        except Exception as e:
+            logger.error(f"Error saving env account: {e}")
+
+    def save(self) -> None:
+        """Persist current config to settings file."""
+        try:
+            with open(self.settings_file, 'w') as f:
+                self.config.write(f)
+            # Update last modified timestamp so subsequent reads don't reload unnecessarily
+            self.last_modified = os.path.getmtime(self.settings_file)
+            logger.info("Settings saved to file")
+        except Exception as e:
+            logger.error(f"Error saving settings: {e}")
+

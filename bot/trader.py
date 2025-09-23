@@ -24,6 +24,7 @@ class TradingBot:
         self.ai_system = HybridIntelligentSystem()
         self.downloader = DataDownloader(self.api, self.db_manager)
         self.is_running = False
+        self.api_connected = False
         self.current_account = None
         self.market_info = {}
         self.positions = []
@@ -34,19 +35,23 @@ class TradingBot:
         self.winning_trades = 0
         self.losing_trades = 0
         self.total_fees = 0
+        self.keepalive_task = None
+        self.downloader_task = None
         
     async def initialize(self) -> bool:
         """Initialize the trading bot"""
         try:
             if not await self.api.authenticate():
                 return False
+            self.api_connected = True
             
             accounts = await self.api.get_accounts()
             if not accounts:
                 logger.error("No accounts found")
                 return False
             
-            account_id = self.settings.get("CREDENTIALS", "account_id")
+            env = self.api.environment
+            account_id = self.settings.get("ENV_ACCOUNTS", env, "") or self.settings.get("CREDENTIALS", "account_id")
             target_account = None
 
             if account_id:
@@ -68,8 +73,14 @@ class TradingBot:
             epic = self.settings.get("BOT_CONFIG", "epic", "TECL")
             self.market_info = await self.api.get_market_info(epic)
 
-            # Start continuous data download
-            asyncio.create_task(self.downloader.continuous_download(epic, ResolutionType.MINUTE_5, 300))
+            # Start continuous data download (cancel old if exists)
+            if self.downloader_task and not self.downloader_task.done():
+                self.downloader_task.cancel()
+            self.downloader_task = asyncio.create_task(
+                self.downloader.continuous_download(epic, ResolutionType.MINUTE_5, 300)
+            )
+            # Start keepalive pings every 4 minutes
+            self.keepalive_task = asyncio.create_task(self._keepalive_loop())
             
             return True
             
@@ -94,6 +105,8 @@ class TradingBot:
             market_data = await self.api.get_market_info(epic)
             if market_data:
                 self.market_info = market_data
+                # Log minimal market info snapshot for troubleshooting
+                logger.debug(f"Market snapshot updated for {epic}")
                 
         except Exception as e:
             logger.error(f"Error updating data: {e}")
@@ -107,6 +120,14 @@ class TradingBot:
             await self.update_data()
             await self.execute_hybrid_intelligent_strategy()
             await asyncio.sleep(5)
+
+    async def _keepalive_loop(self):
+        while True:
+            try:
+                await asyncio.sleep(240)
+                await self.api.keepalive()
+            except Exception as e:
+                logger.warning(f"Keepalive loop error: {e}")
 
     async def execute_hybrid_intelligent_strategy(self):
         """Execute the complete Hybrid Intelligent Trading Strategy"""
@@ -300,6 +321,10 @@ class TradingBot:
         """Stop the trading bot"""
         self.is_running = False
         logger.info("Trading bot stopped")
+        if self.keepalive_task:
+            self.keepalive_task.cancel()
+        if self.downloader_task:
+            self.downloader_task.cancel()
         
         # Log final statistics
         total_trades = self.winning_trades + self.losing_trades
