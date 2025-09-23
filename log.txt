@@ -1,568 +1,71 @@
-2025-09-24 02:27:53,464 - bot.settings - INFO - Settings reloaded from file
-2025-09-24 02:27:53,466 - bot.settings - INFO - Settings reloaded from file
-2025-09-24 02:27:53,501 - __main__ - INFO - Starting app connection layer...
-2025-09-24 02:27:53,501 - bot.api - INFO - CapitalComAPI.authenticate(environment=live)
-2025-09-24 02:27:53,976 - bot.api - INFO - Successfully authenticated with Capital.com
-2025-09-24 02:27:55,801 - bot.api - INFO - Switched to account: 211640169982416068
-2025-09-24 02:27:55,802 - __main__ - INFO - Connected to live account: MAIN ACCOUNT
-2025-09-24 02:27:55,802 - __main__ - INFO - Starting continuous data updates
-2025-09-24 02:27:55,802 - __main__ - INFO - Running data update #1
-2025-09-24 02:27:56,398 - __main__ - INFO - Account balance: $252.53
-2025-09-24 02:27:56,990 - __main__ - INFO - Found 1 open positions
-2025-09-24 02:27:56,990 - __main__ - INFO - Position fields: ['position', 'market']
-2025-09-24 02:27:56,992 - __main__ - INFO - First position: {'position': {'contractSize': 1, 'createdDate': '2025-09-11T18:15:17.438', 'createdDateUTC': '2025-09-11T14:15:17.438', 'dealId': '00015481-0001-54c4-0000-000080ad0086', 'dealReference': 'p_00015481-0001-54c4-0000-000080ad0086', 'workingOrderId': '00015481-0001-54c4-0000-000080ad0085', 'size': 21.0, 'leverage': 10, 'upl': 162.33, 'direction': 'BUY', 'level': 42.45, 'currency': 'USD', 'guaranteedStop': False, 'stopLevel': 43.92, 'trailingStop': False}, 'market': {'instrumentName': 'Global X Uranium ETF', 'instrumentId': 374388004312260, 'expiry': '-', 'epic': 'URA', 'symbol': 'URA', 'instrumentType': 'SHARES', 'marketStatus': 'CLOSED', 'lotSize': 1, 'percentageChange': -0.04, 'bid': 50.18, 'offer': 50.39, 'updateTime': '2025-09-23T23:59:58.954', 'updateTimeUTC': '2025-09-23T19:59:58.954', 'delayTime': 0, 'streamingPricesAvailable': True, 'scalingFactor': 1, 'marketModes': ['REGULAR'], 'pipPosition': 2, 'tickSize': 0.01}}
-2025-09-24 02:27:57,319 - bot.api - INFO - Market data keys for TECL: ['instrument', 'dealingRules', 'snapshot']
-2025-09-24 02:27:57,319 - bot.api - INFO - Snapshot for TECL: bid=122.14, offer=122.33, high=None, low=None, percentageChange=0.02
-2025-09-24 02:27:57,321 - bot.api - INFO - Instrument for TECL: name=Direxion Daily Technology Bull 3X Shares, type=SHARES, marketId=None, expiry=-, lotSize=1
-2025-09-24 02:27:57,321 - bot.api - INFO - Opening hours for TECL: {'mon': ['13:30 - 20:00'], 'tue': ['13:30 - 20:00'], 'wed': ['13:30 - 20:00'], 'thu': ['13:30 - 20:00'], 'fri': ['13:30 - 20:00'], 'sat': [], 'sun': [], 'zone': 'UTC'}
-2025-09-24 02:27:57,321 - bot.api - INFO - Dealing rules (top level): minDealSize={'unit': 'POINTS', 'value': 0.1}, maxDealSize={'unit': 'POINTS', 'value': 3250}, minSizeIncrement={'unit': 'POINTS', 'value': 0.1}
-2025-09-24 02:27:57,321 - __main__ - INFO - Market data updated for TECL
-2025-09-24 02:27:57,351 - __main__ - INFO - Market is CLOSED, next open in 15.0 hours
-2025-09-24 02:27:57,701 - bot.api - INFO - Fetched 0 historical trades
-2025-09-24 02:27:57,701 - __main__ - INFO - Found 0 historic trades
-2025-09-24 02:27:57,794 - __main__ - INFO - WebSocket connected
-2025-09-24 02:27:58,796 - __main__ - INFO - Account structure: accountName=MAIN ACCOUNT, balance_keys=['balance', 'deposit', 'profitLoss', 'available']
-2025-09-24 02:27:58,796 - __main__ - INFO - Balance values: balance=252.53, available=147.15, profitLoss=162.33
-2025-09-24 02:28:03,031 - __main__ - INFO - Running data update #2
-2025-09-24 02:28:03,829 - __main__ - INFO - Account balance: $252.53
-2025-09-24 02:28:04,178 - __main__ - INFO - Found 1 open positions
-2025-09-24 02:28:04,178 - __main__ - INFO - Position fields: ['position', 'market']
-2025-09-24 02:28:04,178 - __main__ - INFO - First position: {'position': {'contractSize': 1, 'createdDate': '2025-09-11T18:15:17.438', 'createdDateUTC': '2025-09-11T14:15:17.438', 'dealId': '00015481-0001-54c4-0000-000080ad0086', 'dealReference': 'p_00015481-0001-54c4-0000-000080ad0086', 'workingOrderId': '00015481-0001-54c4-0000-000080ad0085', 'size': 21.0, 'leverage': 10, 'upl': 162.33, 'direction': 'BUY', 'level': 42.45, 'currency': 'USD', 'guaranteedStop': False, 'stopLevel': 43.92, 'trailingStop': False}, 'market': {'instrumentName': 'Global X Uranium ETF', 'instrumentId': 374388004312260, 'expiry': '-', 'epic': 'URA', 'symbol': 'URA', 'instrumentType': 'SHARES', 'marketStatus': 'CLOSED', 'lotSize': 1, 'percentageChange': -0.04, 'bid': 50.18, 'offer': 50.39, 'updateTime': '2025-09-23T23:59:58.954', 'updateTimeUTC': '2025-09-23T19:59:58.954', 'delayTime': 0, 'streamingPricesAvailable': True, 'scalingFactor': 1, 'marketModes': ['REGULAR'], 'pipPosition': 2, 'tickSize': 0.01}}
-2025-09-24 02:28:04,751 - bot.api - INFO - Market data keys for TECL: ['instrument', 'dealingRules', 'snapshot']
-2025-09-24 02:28:04,751 - bot.api - INFO - Snapshot for TECL: bid=122.14, offer=122.33, high=None, low=None, percentageChange=0.02
-2025-09-24 02:28:04,751 - bot.api - INFO - Instrument for TECL: name=Direxion Daily Technology Bull 3X Shares, type=SHARES, marketId=None, expiry=-, lotSize=1
-2025-09-24 02:28:04,751 - bot.api - INFO - Opening hours for TECL: {'mon': ['13:30 - 20:00'], 'tue': ['13:30 - 20:00'], 'wed': ['13:30 - 20:00'], 'thu': ['13:30 - 20:00'], 'fri': ['13:30 - 20:00'], 'sat': [], 'sun': [], 'zone': 'UTC'}
-2025-09-24 02:28:04,751 - bot.api - INFO - Dealing rules (top level): minDealSize={'unit': 'POINTS', 'value': 0.1}, maxDealSize={'unit': 'POINTS', 'value': 3250}, minSizeIncrement={'unit': 'POINTS', 'value': 0.1}
-2025-09-24 02:28:04,753 - __main__ - INFO - Market data updated for TECL
-2025-09-24 02:28:04,753 - __main__ - INFO - Market is CLOSED, next open in 15.0 hours
-2025-09-24 02:28:05,117 - bot.api - INFO - Fetched 0 historical trades
-2025-09-24 02:28:05,118 - __main__ - INFO - Found 0 historic trades
-2025-09-24 02:28:10,422 - __main__ - INFO - Running data update #3
-2025-09-24 02:28:10,844 - __main__ - INFO - Account balance: $252.53
-2025-09-24 02:28:11,210 - __main__ - INFO - Found 1 open positions
-2025-09-24 02:28:11,210 - __main__ - INFO - Position fields: ['position', 'market']
-2025-09-24 02:28:11,210 - __main__ - INFO - First position: {'position': {'contractSize': 1, 'createdDate': '2025-09-11T18:15:17.438', 'createdDateUTC': '2025-09-11T14:15:17.438', 'dealId': '00015481-0001-54c4-0000-000080ad0086', 'dealReference': 'p_00015481-0001-54c4-0000-000080ad0086', 'workingOrderId': '00015481-0001-54c4-0000-000080ad0085', 'size': 21.0, 'leverage': 10, 'upl': 162.33, 'direction': 'BUY', 'level': 42.45, 'currency': 'USD', 'guaranteedStop': False, 'stopLevel': 43.92, 'trailingStop': False}, 'market': {'instrumentName': 'Global X Uranium ETF', 'instrumentId': 374388004312260, 'expiry': '-', 'epic': 'URA', 'symbol': 'URA', 'instrumentType': 'SHARES', 'marketStatus': 'CLOSED', 'lotSize': 1, 'percentageChange': -0.04, 'bid': 50.18, 'offer': 50.39, 'updateTime': '2025-09-23T23:59:58.954', 'updateTimeUTC': '2025-09-23T19:59:58.954', 'delayTime': 0, 'streamingPricesAvailable': True, 'scalingFactor': 1, 'marketModes': ['REGULAR'], 'pipPosition': 2, 'tickSize': 0.01}}
-2025-09-24 02:28:11,757 - bot.api - INFO - Market data keys for TECL: ['instrument', 'dealingRules', 'snapshot']
-2025-09-24 02:28:11,757 - bot.api - INFO - Snapshot for TECL: bid=122.14, offer=122.33, high=None, low=None, percentageChange=0.02
-2025-09-24 02:28:11,758 - bot.api - INFO - Instrument for TECL: name=Direxion Daily Technology Bull 3X Shares, type=SHARES, marketId=None, expiry=-, lotSize=1
-2025-09-24 02:28:11,758 - bot.api - INFO - Opening hours for TECL: {'mon': ['13:30 - 20:00'], 'tue': ['13:30 - 20:00'], 'wed': ['13:30 - 20:00'], 'thu': ['13:30 - 20:00'], 'fri': ['13:30 - 20:00'], 'sat': [], 'sun': [], 'zone': 'UTC'}
-2025-09-24 02:28:11,758 - bot.api - INFO - Dealing rules (top level): minDealSize={'unit': 'POINTS', 'value': 0.1}, maxDealSize={'unit': 'POINTS', 'value': 3250}, minSizeIncrement={'unit': 'POINTS', 'value': 0.1}
-2025-09-24 02:28:11,758 - __main__ - INFO - Market data updated for TECL
-2025-09-24 02:28:11,758 - __main__ - INFO - Market is CLOSED, next open in 15.0 hours
-2025-09-24 02:28:12,125 - bot.api - INFO - Fetched 0 historical trades
-2025-09-24 02:28:12,125 - __main__ - INFO - Found 0 historic trades
-2025-09-24 02:28:17,461 - __main__ - INFO - Running data update #4
-2025-09-24 02:28:17,887 - __main__ - INFO - Account balance: $252.53
-2025-09-24 02:28:18,499 - __main__ - INFO - Found 1 open positions
-2025-09-24 02:28:18,499 - __main__ - INFO - Position fields: ['position', 'market']
-2025-09-24 02:28:18,500 - __main__ - INFO - First position: {'position': {'contractSize': 1, 'createdDate': '2025-09-11T18:15:17.438', 'createdDateUTC': '2025-09-11T14:15:17.438', 'dealId': '00015481-0001-54c4-0000-000080ad0086', 'dealReference': 'p_00015481-0001-54c4-0000-000080ad0086', 'workingOrderId': '00015481-0001-54c4-0000-000080ad0085', 'size': 21.0, 'leverage': 10, 'upl': 162.33, 'direction': 'BUY', 'level': 42.45, 'currency': 'USD', 'guaranteedStop': False, 'stopLevel': 43.92, 'trailingStop': False}, 'market': {'instrumentName': 'Global X Uranium ETF', 'instrumentId': 374388004312260, 'expiry': '-', 'epic': 'URA', 'symbol': 'URA', 'instrumentType': 'SHARES', 'marketStatus': 'CLOSED', 'lotSize': 1, 'percentageChange': -0.04, 'bid': 50.18, 'offer': 50.39, 'updateTime': '2025-09-23T23:59:58.954', 'updateTimeUTC': '2025-09-23T19:59:58.954', 'delayTime': 0, 'streamingPricesAvailable': True, 'scalingFactor': 1, 'marketModes': ['REGULAR'], 'pipPosition': 2, 'tickSize': 0.01}}
-2025-09-24 02:28:19,090 - bot.api - INFO - Market data keys for TECL: ['instrument', 'dealingRules', 'snapshot']
-2025-09-24 02:28:19,090 - bot.api - INFO - Snapshot for TECL: bid=122.14, offer=122.33, high=None, low=None, percentageChange=0.02
-2025-09-24 02:28:19,090 - bot.api - INFO - Instrument for TECL: name=Direxion Daily Technology Bull 3X Shares, type=SHARES, marketId=None, expiry=-, lotSize=1
-2025-09-24 02:28:19,090 - bot.api - INFO - Opening hours for TECL: {'mon': ['13:30 - 20:00'], 'tue': ['13:30 - 20:00'], 'wed': ['13:30 - 20:00'], 'thu': ['13:30 - 20:00'], 'fri': ['13:30 - 20:00'], 'sat': [], 'sun': [], 'zone': 'UTC'}
-2025-09-24 02:28:19,090 - bot.api - INFO - Dealing rules (top level): minDealSize={'unit': 'POINTS', 'value': 0.1}, maxDealSize={'unit': 'POINTS', 'value': 3250}, minSizeIncrement={'unit': 'POINTS', 'value': 0.1}
-2025-09-24 02:28:19,090 - __main__ - INFO - Market data updated for TECL
-2025-09-24 02:28:19,091 - __main__ - INFO - Market is CLOSED, next open in 15.0 hours
-2025-09-24 02:28:19,454 - bot.api - INFO - Fetched 0 historical trades
-2025-09-24 02:28:19,454 - __main__ - INFO - Found 0 historic trades
-2025-09-24 02:28:25,015 - __main__ - INFO - Running data update #5
-2025-09-24 02:28:25,415 - __main__ - INFO - Account balance: $252.53
-2025-09-24 02:28:25,757 - __main__ - INFO - Found 1 open positions
-2025-09-24 02:28:25,757 - __main__ - INFO - Position fields: ['position', 'market']
-2025-09-24 02:28:25,757 - __main__ - INFO - First position: {'position': {'contractSize': 1, 'createdDate': '2025-09-11T18:15:17.438', 'createdDateUTC': '2025-09-11T14:15:17.438', 'dealId': '00015481-0001-54c4-0000-000080ad0086', 'dealReference': 'p_00015481-0001-54c4-0000-000080ad0086', 'workingOrderId': '00015481-0001-54c4-0000-000080ad0085', 'size': 21.0, 'leverage': 10, 'upl': 162.33, 'direction': 'BUY', 'level': 42.45, 'currency': 'USD', 'guaranteedStop': False, 'stopLevel': 43.92, 'trailingStop': False}, 'market': {'instrumentName': 'Global X Uranium ETF', 'instrumentId': 374388004312260, 'expiry': '-', 'epic': 'URA', 'symbol': 'URA', 'instrumentType': 'SHARES', 'marketStatus': 'CLOSED', 'lotSize': 1, 'percentageChange': -0.04, 'bid': 50.18, 'offer': 50.39, 'updateTime': '2025-09-23T23:59:58.954', 'updateTimeUTC': '2025-09-23T19:59:58.954', 'delayTime': 0, 'streamingPricesAvailable': True, 'scalingFactor': 1, 'marketModes': ['REGULAR'], 'pipPosition': 2, 'tickSize': 0.01}}
-2025-09-24 02:28:26,333 - bot.api - INFO - Market data keys for TECL: ['instrument', 'dealingRules', 'snapshot']
-2025-09-24 02:28:26,334 - bot.api - INFO - Snapshot for TECL: bid=122.14, offer=122.33, high=None, low=None, percentageChange=0.02
-2025-09-24 02:28:26,334 - bot.api - INFO - Instrument for TECL: name=Direxion Daily Technology Bull 3X Shares, type=SHARES, marketId=None, expiry=-, lotSize=1
-2025-09-24 02:28:26,334 - bot.api - INFO - Opening hours for TECL: {'mon': ['13:30 - 20:00'], 'tue': ['13:30 - 20:00'], 'wed': ['13:30 - 20:00'], 'thu': ['13:30 - 20:00'], 'fri': ['13:30 - 20:00'], 'sat': [], 'sun': [], 'zone': 'UTC'}
-2025-09-24 02:28:26,335 - bot.api - INFO - Dealing rules (top level): minDealSize={'unit': 'POINTS', 'value': 0.1}, maxDealSize={'unit': 'POINTS', 'value': 3250}, minSizeIncrement={'unit': 'POINTS', 'value': 0.1}
-2025-09-24 02:28:26,335 - __main__ - INFO - Market data updated for TECL
-2025-09-24 02:28:26,335 - __main__ - INFO - Market is CLOSED, next open in 15.0 hours
-2025-09-24 02:28:27,425 - bot.api - INFO - Fetched 0 historical trades
-2025-09-24 02:28:27,425 - __main__ - INFO - Found 0 historic trades
-2025-09-24 02:28:32,991 - __main__ - INFO - Running data update #6
-2025-09-24 02:28:33,443 - __main__ - INFO - Account balance: $252.53
-2025-09-24 02:28:34,034 - __main__ - INFO - Found 1 open positions
-2025-09-24 02:28:34,034 - __main__ - INFO - Position fields: ['position', 'market']
-2025-09-24 02:28:34,034 - __main__ - INFO - First position: {'position': {'contractSize': 1, 'createdDate': '2025-09-11T18:15:17.438', 'createdDateUTC': '2025-09-11T14:15:17.438', 'dealId': '00015481-0001-54c4-0000-000080ad0086', 'dealReference': 'p_00015481-0001-54c4-0000-000080ad0086', 'workingOrderId': '00015481-0001-54c4-0000-000080ad0085', 'size': 21.0, 'leverage': 10, 'upl': 162.33, 'direction': 'BUY', 'level': 42.45, 'currency': 'USD', 'guaranteedStop': False, 'stopLevel': 43.92, 'trailingStop': False}, 'market': {'instrumentName': 'Global X Uranium ETF', 'instrumentId': 374388004312260, 'expiry': '-', 'epic': 'URA', 'symbol': 'URA', 'instrumentType': 'SHARES', 'marketStatus': 'CLOSED', 'lotSize': 1, 'percentageChange': -0.04, 'bid': 50.18, 'offer': 50.39, 'updateTime': '2025-09-23T23:59:58.954', 'updateTimeUTC': '2025-09-23T19:59:58.954', 'delayTime': 0, 'streamingPricesAvailable': True, 'scalingFactor': 1, 'marketModes': ['REGULAR'], 'pipPosition': 2, 'tickSize': 0.01}}
-2025-09-24 02:28:34,618 - bot.api - INFO - Market data keys for TECL: ['instrument', 'dealingRules', 'snapshot']
-2025-09-24 02:28:34,618 - bot.api - INFO - Snapshot for TECL: bid=122.14, offer=122.33, high=None, low=None, percentageChange=0.02
-2025-09-24 02:28:34,618 - bot.api - INFO - Instrument for TECL: name=Direxion Daily Technology Bull 3X Shares, type=SHARES, marketId=None, expiry=-, lotSize=1
-2025-09-24 02:28:34,618 - bot.api - INFO - Opening hours for TECL: {'mon': ['13:30 - 20:00'], 'tue': ['13:30 - 20:00'], 'wed': ['13:30 - 20:00'], 'thu': ['13:30 - 20:00'], 'fri': ['13:30 - 20:00'], 'sat': [], 'sun': [], 'zone': 'UTC'}
-2025-09-24 02:28:34,618 - bot.api - INFO - Dealing rules (top level): minDealSize={'unit': 'POINTS', 'value': 0.1}, maxDealSize={'unit': 'POINTS', 'value': 3250}, minSizeIncrement={'unit': 'POINTS', 'value': 0.1}
-2025-09-24 02:28:34,618 - __main__ - INFO - Market data updated for TECL
-2025-09-24 02:28:34,620 - __main__ - INFO - Market is CLOSED, next open in 15.0 hours
-2025-09-24 02:28:35,215 - bot.api - INFO - Fetched 0 historical trades
-2025-09-24 02:28:35,215 - __main__ - INFO - Found 0 historic trades
-2025-09-24 02:28:40,896 - __main__ - INFO - Running data update #7
-2025-09-24 02:28:41,298 - __main__ - INFO - Account balance: $252.53
-2025-09-24 02:28:42,004 - __main__ - INFO - Found 1 open positions
-2025-09-24 02:28:42,004 - __main__ - INFO - Position fields: ['position', 'market']
-2025-09-24 02:28:42,006 - __main__ - INFO - First position: {'position': {'contractSize': 1, 'createdDate': '2025-09-11T18:15:17.438', 'createdDateUTC': '2025-09-11T14:15:17.438', 'dealId': '00015481-0001-54c4-0000-000080ad0086', 'dealReference': 'p_00015481-0001-54c4-0000-000080ad0086', 'workingOrderId': '00015481-0001-54c4-0000-000080ad0085', 'size': 21.0, 'leverage': 10, 'upl': 162.33, 'direction': 'BUY', 'level': 42.45, 'currency': 'USD', 'guaranteedStop': False, 'stopLevel': 43.92, 'trailingStop': False}, 'market': {'instrumentName': 'Global X Uranium ETF', 'instrumentId': 374388004312260, 'expiry': '-', 'epic': 'URA', 'symbol': 'URA', 'instrumentType': 'SHARES', 'marketStatus': 'CLOSED', 'lotSize': 1, 'percentageChange': -0.04, 'bid': 50.18, 'offer': 50.39, 'updateTime': '2025-09-23T23:59:58.954', 'updateTimeUTC': '2025-09-23T19:59:58.954', 'delayTime': 0, 'streamingPricesAvailable': True, 'scalingFactor': 1, 'marketModes': ['REGULAR'], 'pipPosition': 2, 'tickSize': 0.01}}
-2025-09-24 02:28:42,341 - bot.api - INFO - Market data keys for TECL: ['instrument', 'dealingRules', 'snapshot']
-2025-09-24 02:28:42,341 - bot.api - INFO - Snapshot for TECL: bid=122.14, offer=122.33, high=None, low=None, percentageChange=0.02
-2025-09-24 02:28:42,341 - bot.api - INFO - Instrument for TECL: name=Direxion Daily Technology Bull 3X Shares, type=SHARES, marketId=None, expiry=-, lotSize=1
-2025-09-24 02:28:42,341 - bot.api - INFO - Opening hours for TECL: {'mon': ['13:30 - 20:00'], 'tue': ['13:30 - 20:00'], 'wed': ['13:30 - 20:00'], 'thu': ['13:30 - 20:00'], 'fri': ['13:30 - 20:00'], 'sat': [], 'sun': [], 'zone': 'UTC'}
-2025-09-24 02:28:42,341 - bot.api - INFO - Dealing rules (top level): minDealSize={'unit': 'POINTS', 'value': 0.1}, maxDealSize={'unit': 'POINTS', 'value': 3250}, minSizeIncrement={'unit': 'POINTS', 'value': 0.1}
-2025-09-24 02:28:42,341 - __main__ - INFO - Market data updated for TECL
-2025-09-24 02:28:42,341 - __main__ - INFO - Market is CLOSED, next open in 15.0 hours
-2025-09-24 02:28:42,942 - bot.api - INFO - Fetched 0 historical trades
-2025-09-24 02:28:42,942 - __main__ - INFO - Found 0 historic trades
-2025-09-24 02:28:48,552 - __main__ - INFO - Running data update #8
-2025-09-24 02:28:49,637 - __main__ - INFO - Account balance: $252.53
-2025-09-24 02:28:49,975 - __main__ - INFO - Found 1 open positions
-2025-09-24 02:28:49,977 - __main__ - INFO - Position fields: ['position', 'market']
-2025-09-24 02:28:49,977 - __main__ - INFO - First position: {'position': {'contractSize': 1, 'createdDate': '2025-09-11T18:15:17.438', 'createdDateUTC': '2025-09-11T14:15:17.438', 'dealId': '00015481-0001-54c4-0000-000080ad0086', 'dealReference': 'p_00015481-0001-54c4-0000-000080ad0086', 'workingOrderId': '00015481-0001-54c4-0000-000080ad0085', 'size': 21.0, 'leverage': 10, 'upl': 162.33, 'direction': 'BUY', 'level': 42.45, 'currency': 'USD', 'guaranteedStop': False, 'stopLevel': 43.92, 'trailingStop': False}, 'market': {'instrumentName': 'Global X Uranium ETF', 'instrumentId': 374388004312260, 'expiry': '-', 'epic': 'URA', 'symbol': 'URA', 'instrumentType': 'SHARES', 'marketStatus': 'CLOSED', 'lotSize': 1, 'percentageChange': -0.04, 'bid': 50.18, 'offer': 50.39, 'updateTime': '2025-09-23T23:59:58.954', 'updateTimeUTC': '2025-09-23T19:59:58.954', 'delayTime': 0, 'streamingPricesAvailable': True, 'scalingFactor': 1, 'marketModes': ['REGULAR'], 'pipPosition': 2, 'tickSize': 0.01}}
-2025-09-24 02:28:50,677 - bot.api - INFO - Market data keys for TECL: ['instrument', 'dealingRules', 'snapshot']
-2025-09-24 02:28:50,677 - bot.api - INFO - Snapshot for TECL: bid=122.14, offer=122.33, high=None, low=None, percentageChange=0.02
-2025-09-24 02:28:50,677 - bot.api - INFO - Instrument for TECL: name=Direxion Daily Technology Bull 3X Shares, type=SHARES, marketId=None, expiry=-, lotSize=1
-2025-09-24 02:28:50,677 - bot.api - INFO - Opening hours for TECL: {'mon': ['13:30 - 20:00'], 'tue': ['13:30 - 20:00'], 'wed': ['13:30 - 20:00'], 'thu': ['13:30 - 20:00'], 'fri': ['13:30 - 20:00'], 'sat': [], 'sun': [], 'zone': 'UTC'}
-2025-09-24 02:28:50,677 - bot.api - INFO - Dealing rules (top level): minDealSize={'unit': 'POINTS', 'value': 0.1}, maxDealSize={'unit': 'POINTS', 'value': 3250}, minSizeIncrement={'unit': 'POINTS', 'value': 0.1}
-2025-09-24 02:28:50,677 - __main__ - INFO - Market data updated for TECL
-2025-09-24 02:28:50,677 - __main__ - INFO - Market is CLOSED, next open in 15.0 hours
-2025-09-24 02:28:51,018 - bot.api - INFO - Fetched 0 historical trades
-2025-09-24 02:28:51,018 - __main__ - INFO - Found 0 historic trades
-2025-09-24 02:28:56,677 - __main__ - INFO - Running data update #9
-2025-09-24 02:28:57,077 - __main__ - INFO - Account balance: $252.53
-2025-09-24 02:28:57,667 - __main__ - INFO - Found 1 open positions
-2025-09-24 02:28:57,667 - __main__ - INFO - Position fields: ['position', 'market']
-2025-09-24 02:28:57,667 - __main__ - INFO - First position: {'position': {'contractSize': 1, 'createdDate': '2025-09-11T18:15:17.438', 'createdDateUTC': '2025-09-11T14:15:17.438', 'dealId': '00015481-0001-54c4-0000-000080ad0086', 'dealReference': 'p_00015481-0001-54c4-0000-000080ad0086', 'workingOrderId': '00015481-0001-54c4-0000-000080ad0085', 'size': 21.0, 'leverage': 10, 'upl': 162.33, 'direction': 'BUY', 'level': 42.45, 'currency': 'USD', 'guaranteedStop': False, 'stopLevel': 43.92, 'trailingStop': False}, 'market': {'instrumentName': 'Global X Uranium ETF', 'instrumentId': 374388004312260, 'expiry': '-', 'epic': 'URA', 'symbol': 'URA', 'instrumentType': 'SHARES', 'marketStatus': 'CLOSED', 'lotSize': 1, 'percentageChange': -0.04, 'bid': 50.18, 'offer': 50.39, 'updateTime': '2025-09-23T23:59:58.954', 'updateTimeUTC': '2025-09-23T19:59:58.954', 'delayTime': 0, 'streamingPricesAvailable': True, 'scalingFactor': 1, 'marketModes': ['REGULAR'], 'pipPosition': 2, 'tickSize': 0.01}}
-2025-09-24 02:28:57,997 - bot.api - INFO - Market data keys for TECL: ['instrument', 'dealingRules', 'snapshot']
-2025-09-24 02:28:57,997 - bot.api - INFO - Snapshot for TECL: bid=122.14, offer=122.33, high=None, low=None, percentageChange=0.02
-2025-09-24 02:28:57,997 - bot.api - INFO - Instrument for TECL: name=Direxion Daily Technology Bull 3X Shares, type=SHARES, marketId=None, expiry=-, lotSize=1
-2025-09-24 02:28:57,997 - bot.api - INFO - Opening hours for TECL: {'mon': ['13:30 - 20:00'], 'tue': ['13:30 - 20:00'], 'wed': ['13:30 - 20:00'], 'thu': ['13:30 - 20:00'], 'fri': ['13:30 - 20:00'], 'sat': [], 'sun': [], 'zone': 'UTC'}
-2025-09-24 02:28:57,998 - bot.api - INFO - Dealing rules (top level): minDealSize={'unit': 'POINTS', 'value': 0.1}, maxDealSize={'unit': 'POINTS', 'value': 3250}, minSizeIncrement={'unit': 'POINTS', 'value': 0.1}
-2025-09-24 02:28:57,998 - __main__ - INFO - Market data updated for TECL
-2025-09-24 02:28:57,998 - __main__ - INFO - Market is CLOSED, next open in 15.0 hours
-2025-09-24 02:28:58,378 - bot.api - INFO - Fetched 0 historical trades
-2025-09-24 02:28:58,378 - __main__ - INFO - Found 0 historic trades
-2025-09-24 02:29:03,701 - __main__ - INFO - Running data update #10
-2025-09-24 02:29:04,094 - __main__ - INFO - Account balance: $252.53
-2025-09-24 02:29:04,688 - __main__ - INFO - Found 1 open positions
-2025-09-24 02:29:04,689 - __main__ - INFO - Position fields: ['position', 'market']
-2025-09-24 02:29:04,689 - __main__ - INFO - First position: {'position': {'contractSize': 1, 'createdDate': '2025-09-11T18:15:17.438', 'createdDateUTC': '2025-09-11T14:15:17.438', 'dealId': '00015481-0001-54c4-0000-000080ad0086', 'dealReference': 'p_00015481-0001-54c4-0000-000080ad0086', 'workingOrderId': '00015481-0001-54c4-0000-000080ad0085', 'size': 21.0, 'leverage': 10, 'upl': 162.33, 'direction': 'BUY', 'level': 42.45, 'currency': 'USD', 'guaranteedStop': False, 'stopLevel': 43.92, 'trailingStop': False}, 'market': {'instrumentName': 'Global X Uranium ETF', 'instrumentId': 374388004312260, 'expiry': '-', 'epic': 'URA', 'symbol': 'URA', 'instrumentType': 'SHARES', 'marketStatus': 'CLOSED', 'lotSize': 1, 'percentageChange': -0.04, 'bid': 50.18, 'offer': 50.39, 'updateTime': '2025-09-23T23:59:58.954', 'updateTimeUTC': '2025-09-23T19:59:58.954', 'delayTime': 0, 'streamingPricesAvailable': True, 'scalingFactor': 1, 'marketModes': ['REGULAR'], 'pipPosition': 2, 'tickSize': 0.01}}
-2025-09-24 02:29:05,261 - bot.api - INFO - Market data keys for TECL: ['instrument', 'dealingRules', 'snapshot']
-2025-09-24 02:29:05,261 - bot.api - INFO - Snapshot for TECL: bid=122.14, offer=122.33, high=None, low=None, percentageChange=0.02
-2025-09-24 02:29:05,263 - bot.api - INFO - Instrument for TECL: name=Direxion Daily Technology Bull 3X Shares, type=SHARES, marketId=None, expiry=-, lotSize=1
-2025-09-24 02:29:05,263 - bot.api - INFO - Opening hours for TECL: {'mon': ['13:30 - 20:00'], 'tue': ['13:30 - 20:00'], 'wed': ['13:30 - 20:00'], 'thu': ['13:30 - 20:00'], 'fri': ['13:30 - 20:00'], 'sat': [], 'sun': [], 'zone': 'UTC'}
-2025-09-24 02:29:05,263 - bot.api - INFO - Dealing rules (top level): minDealSize={'unit': 'POINTS', 'value': 0.1}, maxDealSize={'unit': 'POINTS', 'value': 3250}, minSizeIncrement={'unit': 'POINTS', 'value': 0.1}
-2025-09-24 02:29:05,263 - __main__ - INFO - Market data updated for TECL
-2025-09-24 02:29:05,263 - __main__ - INFO - Market is CLOSED, next open in 15.0 hours
-2025-09-24 02:29:05,638 - bot.api - INFO - Fetched 0 historical trades
-2025-09-24 02:29:05,640 - __main__ - INFO - Found 0 historic trades
-2025-09-24 02:29:10,955 - __main__ - INFO - Running data update #11
-2025-09-24 02:29:11,338 - __main__ - INFO - Account balance: $252.53
-2025-09-24 02:29:12,106 - __main__ - INFO - Found 1 open positions
-2025-09-24 02:29:12,106 - __main__ - INFO - Position fields: ['position', 'market']
-2025-09-24 02:29:12,107 - __main__ - INFO - First position: {'position': {'contractSize': 1, 'createdDate': '2025-09-11T18:15:17.438', 'createdDateUTC': '2025-09-11T14:15:17.438', 'dealId': '00015481-0001-54c4-0000-000080ad0086', 'dealReference': 'p_00015481-0001-54c4-0000-000080ad0086', 'workingOrderId': '00015481-0001-54c4-0000-000080ad0085', 'size': 21.0, 'leverage': 10, 'upl': 162.33, 'direction': 'BUY', 'level': 42.45, 'currency': 'USD', 'guaranteedStop': False, 'stopLevel': 43.92, 'trailingStop': False}, 'market': {'instrumentName': 'Global X Uranium ETF', 'instrumentId': 374388004312260, 'expiry': '-', 'epic': 'URA', 'symbol': 'URA', 'instrumentType': 'SHARES', 'marketStatus': 'CLOSED', 'lotSize': 1, 'percentageChange': -0.04, 'bid': 50.18, 'offer': 50.39, 'updateTime': '2025-09-23T23:59:58.954', 'updateTimeUTC': '2025-09-23T19:59:58.954', 'delayTime': 0, 'streamingPricesAvailable': True, 'scalingFactor': 1, 'marketModes': ['REGULAR'], 'pipPosition': 2, 'tickSize': 0.01}}
-2025-09-24 02:29:12,440 - bot.api - INFO - Market data keys for TECL: ['instrument', 'dealingRules', 'snapshot']
-2025-09-24 02:29:12,440 - bot.api - INFO - Snapshot for TECL: bid=122.14, offer=122.33, high=None, low=None, percentageChange=0.02
-2025-09-24 02:29:12,440 - bot.api - INFO - Instrument for TECL: name=Direxion Daily Technology Bull 3X Shares, type=SHARES, marketId=None, expiry=-, lotSize=1
-2025-09-24 02:29:12,440 - bot.api - INFO - Opening hours for TECL: {'mon': ['13:30 - 20:00'], 'tue': ['13:30 - 20:00'], 'wed': ['13:30 - 20:00'], 'thu': ['13:30 - 20:00'], 'fri': ['13:30 - 20:00'], 'sat': [], 'sun': [], 'zone': 'UTC'}
-2025-09-24 02:29:12,440 - bot.api - INFO - Dealing rules (top level): minDealSize={'unit': 'POINTS', 'value': 0.1}, maxDealSize={'unit': 'POINTS', 'value': 3250}, minSizeIncrement={'unit': 'POINTS', 'value': 0.1}
-2025-09-24 02:29:12,440 - __main__ - INFO - Market data updated for TECL
-2025-09-24 02:29:12,440 - __main__ - INFO - Market is CLOSED, next open in 15.0 hours
-2025-09-24 02:29:12,787 - bot.api - INFO - Fetched 0 historical trades
-2025-09-24 02:29:12,787 - __main__ - INFO - Found 0 historic trades
-2025-09-24 02:29:18,148 - __main__ - INFO - Running data update #12
-2025-09-24 02:29:18,783 - __main__ - INFO - Account balance: $252.53
-2025-09-24 02:29:19,123 - __main__ - INFO - Found 1 open positions
-2025-09-24 02:29:19,123 - __main__ - INFO - Position fields: ['position', 'market']
-2025-09-24 02:29:19,123 - __main__ - INFO - First position: {'position': {'contractSize': 1, 'createdDate': '2025-09-11T18:15:17.438', 'createdDateUTC': '2025-09-11T14:15:17.438', 'dealId': '00015481-0001-54c4-0000-000080ad0086', 'dealReference': 'p_00015481-0001-54c4-0000-000080ad0086', 'workingOrderId': '00015481-0001-54c4-0000-000080ad0085', 'size': 21.0, 'leverage': 10, 'upl': 162.33, 'direction': 'BUY', 'level': 42.45, 'currency': 'USD', 'guaranteedStop': False, 'stopLevel': 43.92, 'trailingStop': False}, 'market': {'instrumentName': 'Global X Uranium ETF', 'instrumentId': 374388004312260, 'expiry': '-', 'epic': 'URA', 'symbol': 'URA', 'instrumentType': 'SHARES', 'marketStatus': 'CLOSED', 'lotSize': 1, 'percentageChange': -0.04, 'bid': 50.18, 'offer': 50.39, 'updateTime': '2025-09-23T23:59:58.954', 'updateTimeUTC': '2025-09-23T19:59:58.954', 'delayTime': 0, 'streamingPricesAvailable': True, 'scalingFactor': 1, 'marketModes': ['REGULAR'], 'pipPosition': 2, 'tickSize': 0.01}}
-2025-09-24 02:29:19,730 - bot.api - INFO - Market data keys for TECL: ['instrument', 'dealingRules', 'snapshot']
-2025-09-24 02:29:19,730 - bot.api - INFO - Snapshot for TECL: bid=122.14, offer=122.33, high=None, low=None, percentageChange=0.02
-2025-09-24 02:29:19,730 - bot.api - INFO - Instrument for TECL: name=Direxion Daily Technology Bull 3X Shares, type=SHARES, marketId=None, expiry=-, lotSize=1
-2025-09-24 02:29:19,731 - bot.api - INFO - Opening hours for TECL: {'mon': ['13:30 - 20:00'], 'tue': ['13:30 - 20:00'], 'wed': ['13:30 - 20:00'], 'thu': ['13:30 - 20:00'], 'fri': ['13:30 - 20:00'], 'sat': [], 'sun': [], 'zone': 'UTC'}
-2025-09-24 02:29:19,731 - bot.api - INFO - Dealing rules (top level): minDealSize={'unit': 'POINTS', 'value': 0.1}, maxDealSize={'unit': 'POINTS', 'value': 3250}, minSizeIncrement={'unit': 'POINTS', 'value': 0.1}
-2025-09-24 02:29:19,731 - __main__ - INFO - Market data updated for TECL
-2025-09-24 02:29:19,731 - __main__ - INFO - Market is CLOSED, next open in 15.0 hours
-2025-09-24 02:29:20,072 - bot.api - INFO - Fetched 0 historical trades
-2025-09-24 02:29:20,072 - __main__ - INFO - Found 0 historic trades
-2025-09-24 02:29:25,666 - __main__ - INFO - Running data update #13
-2025-09-24 02:29:26,280 - __main__ - INFO - Account balance: $252.53
-2025-09-24 02:29:26,751 - __main__ - INFO - Found 1 open positions
-2025-09-24 02:29:26,752 - __main__ - INFO - Position fields: ['position', 'market']
-2025-09-24 02:29:26,752 - __main__ - INFO - First position: {'position': {'contractSize': 1, 'createdDate': '2025-09-11T18:15:17.438', 'createdDateUTC': '2025-09-11T14:15:17.438', 'dealId': '00015481-0001-54c4-0000-000080ad0086', 'dealReference': 'p_00015481-0001-54c4-0000-000080ad0086', 'workingOrderId': '00015481-0001-54c4-0000-000080ad0085', 'size': 21.0, 'leverage': 10, 'upl': 162.33, 'direction': 'BUY', 'level': 42.45, 'currency': 'USD', 'guaranteedStop': False, 'stopLevel': 43.92, 'trailingStop': False}, 'market': {'instrumentName': 'Global X Uranium ETF', 'instrumentId': 374388004312260, 'expiry': '-', 'epic': 'URA', 'symbol': 'URA', 'instrumentType': 'SHARES', 'marketStatus': 'CLOSED', 'lotSize': 1, 'percentageChange': -0.04, 'bid': 50.18, 'offer': 50.39, 'updateTime': '2025-09-23T23:59:58.954', 'updateTimeUTC': '2025-09-23T19:59:58.954', 'delayTime': 0, 'streamingPricesAvailable': True, 'scalingFactor': 1, 'marketModes': ['REGULAR'], 'pipPosition': 2, 'tickSize': 0.01}}
-2025-09-24 02:29:27,477 - bot.api - INFO - Market data keys for TECL: ['instrument', 'dealingRules', 'snapshot']
-2025-09-24 02:29:27,477 - bot.api - INFO - Snapshot for TECL: bid=122.14, offer=122.33, high=None, low=None, percentageChange=0.02
-2025-09-24 02:29:27,477 - bot.api - INFO - Instrument for TECL: name=Direxion Daily Technology Bull 3X Shares, type=SHARES, marketId=None, expiry=-, lotSize=1
-2025-09-24 02:29:27,477 - bot.api - INFO - Opening hours for TECL: {'mon': ['13:30 - 20:00'], 'tue': ['13:30 - 20:00'], 'wed': ['13:30 - 20:00'], 'thu': ['13:30 - 20:00'], 'fri': ['13:30 - 20:00'], 'sat': [], 'sun': [], 'zone': 'UTC'}
-2025-09-24 02:29:27,477 - bot.api - INFO - Dealing rules (top level): minDealSize={'unit': 'POINTS', 'value': 0.1}, maxDealSize={'unit': 'POINTS', 'value': 3250}, minSizeIncrement={'unit': 'POINTS', 'value': 0.1}
-2025-09-24 02:29:27,477 - __main__ - INFO - Market data updated for TECL
-2025-09-24 02:29:27,477 - __main__ - INFO - Market is CLOSED, next open in 15.0 hours
-2025-09-24 02:29:27,881 - bot.api - INFO - Fetched 0 historical trades
-2025-09-24 02:29:27,881 - __main__ - INFO - Found 0 historic trades
-2025-09-24 02:29:33,304 - __main__ - INFO - Running data update #14
-2025-09-24 02:29:33,972 - __main__ - INFO - Account balance: $252.53
-2025-09-24 02:29:34,610 - __main__ - INFO - Found 1 open positions
-2025-09-24 02:29:34,612 - __main__ - INFO - Position fields: ['position', 'market']
-2025-09-24 02:29:34,612 - __main__ - INFO - First position: {'position': {'contractSize': 1, 'createdDate': '2025-09-11T18:15:17.438', 'createdDateUTC': '2025-09-11T14:15:17.438', 'dealId': '00015481-0001-54c4-0000-000080ad0086', 'dealReference': 'p_00015481-0001-54c4-0000-000080ad0086', 'workingOrderId': '00015481-0001-54c4-0000-000080ad0085', 'size': 21.0, 'leverage': 10, 'upl': 162.33, 'direction': 'BUY', 'level': 42.45, 'currency': 'USD', 'guaranteedStop': False, 'stopLevel': 43.92, 'trailingStop': False}, 'market': {'instrumentName': 'Global X Uranium ETF', 'instrumentId': 374388004312260, 'expiry': '-', 'epic': 'URA', 'symbol': 'URA', 'instrumentType': 'SHARES', 'marketStatus': 'CLOSED', 'lotSize': 1, 'percentageChange': -0.04, 'bid': 50.18, 'offer': 50.39, 'updateTime': '2025-09-23T23:59:58.954', 'updateTimeUTC': '2025-09-23T19:59:58.954', 'delayTime': 0, 'streamingPricesAvailable': True, 'scalingFactor': 1, 'marketModes': ['REGULAR'], 'pipPosition': 2, 'tickSize': 0.01}}
-2025-09-24 02:29:35,195 - bot.api - INFO - Market data keys for TECL: ['instrument', 'dealingRules', 'snapshot']
-2025-09-24 02:29:35,195 - bot.api - INFO - Snapshot for TECL: bid=122.14, offer=122.33, high=None, low=None, percentageChange=0.02
-2025-09-24 02:29:35,195 - bot.api - INFO - Instrument for TECL: name=Direxion Daily Technology Bull 3X Shares, type=SHARES, marketId=None, expiry=-, lotSize=1
-2025-09-24 02:29:35,196 - bot.api - INFO - Opening hours for TECL: {'mon': ['13:30 - 20:00'], 'tue': ['13:30 - 20:00'], 'wed': ['13:30 - 20:00'], 'thu': ['13:30 - 20:00'], 'fri': ['13:30 - 20:00'], 'sat': [], 'sun': [], 'zone': 'UTC'}
-2025-09-24 02:29:35,196 - bot.api - INFO - Dealing rules (top level): minDealSize={'unit': 'POINTS', 'value': 0.1}, maxDealSize={'unit': 'POINTS', 'value': 3250}, minSizeIncrement={'unit': 'POINTS', 'value': 0.1}
-2025-09-24 02:29:35,196 - __main__ - INFO - Market data updated for TECL
-2025-09-24 02:29:35,196 - __main__ - INFO - Market is CLOSED, next open in 15.0 hours
-2025-09-24 02:29:35,542 - bot.api - INFO - Fetched 0 historical trades
-2025-09-24 02:29:35,542 - __main__ - INFO - Found 0 historic trades
-2025-09-24 02:29:41,116 - __main__ - INFO - Running data update #15
-2025-09-24 02:29:41,605 - __main__ - INFO - Account balance: $252.53
-2025-09-24 02:29:41,961 - __main__ - INFO - Found 1 open positions
-2025-09-24 02:29:41,961 - __main__ - INFO - Position fields: ['position', 'market']
-2025-09-24 02:29:41,962 - __main__ - INFO - First position: {'position': {'contractSize': 1, 'createdDate': '2025-09-11T18:15:17.438', 'createdDateUTC': '2025-09-11T14:15:17.438', 'dealId': '00015481-0001-54c4-0000-000080ad0086', 'dealReference': 'p_00015481-0001-54c4-0000-000080ad0086', 'workingOrderId': '00015481-0001-54c4-0000-000080ad0085', 'size': 21.0, 'leverage': 10, 'upl': 162.33, 'direction': 'BUY', 'level': 42.45, 'currency': 'USD', 'guaranteedStop': False, 'stopLevel': 43.92, 'trailingStop': False}, 'market': {'instrumentName': 'Global X Uranium ETF', 'instrumentId': 374388004312260, 'expiry': '-', 'epic': 'URA', 'symbol': 'URA', 'instrumentType': 'SHARES', 'marketStatus': 'CLOSED', 'lotSize': 1, 'percentageChange': -0.04, 'bid': 50.18, 'offer': 50.39, 'updateTime': '2025-09-23T23:59:58.954', 'updateTimeUTC': '2025-09-23T19:59:58.954', 'delayTime': 0, 'streamingPricesAvailable': True, 'scalingFactor': 1, 'marketModes': ['REGULAR'], 'pipPosition': 2, 'tickSize': 0.01}}
-2025-09-24 02:29:42,312 - bot.api - INFO - Market data keys for TECL: ['instrument', 'dealingRules', 'snapshot']
-2025-09-24 02:29:42,312 - bot.api - INFO - Snapshot for TECL: bid=122.14, offer=122.33, high=None, low=None, percentageChange=0.02
-2025-09-24 02:29:42,312 - bot.api - INFO - Instrument for TECL: name=Direxion Daily Technology Bull 3X Shares, type=SHARES, marketId=None, expiry=-, lotSize=1
-2025-09-24 02:29:42,312 - bot.api - INFO - Opening hours for TECL: {'mon': ['13:30 - 20:00'], 'tue': ['13:30 - 20:00'], 'wed': ['13:30 - 20:00'], 'thu': ['13:30 - 20:00'], 'fri': ['13:30 - 20:00'], 'sat': [], 'sun': [], 'zone': 'UTC'}
-2025-09-24 02:29:42,313 - bot.api - INFO - Dealing rules (top level): minDealSize={'unit': 'POINTS', 'value': 0.1}, maxDealSize={'unit': 'POINTS', 'value': 3250}, minSizeIncrement={'unit': 'POINTS', 'value': 0.1}
-2025-09-24 02:29:42,313 - __main__ - INFO - Market data updated for TECL
-2025-09-24 02:29:42,313 - __main__ - INFO - Market is CLOSED, next open in 15.0 hours
-2025-09-24 02:29:43,072 - bot.api - INFO - Fetched 0 historical trades
-2025-09-24 02:29:43,072 - __main__ - INFO - Found 0 historic trades
-2025-09-24 02:29:49,118 - __main__ - INFO - Running data update #16
-2025-09-24 02:29:50,321 - __main__ - INFO - Account balance: $252.53
-2025-09-24 02:29:51,067 - __main__ - INFO - Found 1 open positions
-2025-09-24 02:29:51,067 - __main__ - INFO - Position fields: ['position', 'market']
-2025-09-24 02:29:51,067 - __main__ - INFO - First position: {'position': {'contractSize': 1, 'createdDate': '2025-09-11T18:15:17.438', 'createdDateUTC': '2025-09-11T14:15:17.438', 'dealId': '00015481-0001-54c4-0000-000080ad0086', 'dealReference': 'p_00015481-0001-54c4-0000-000080ad0086', 'workingOrderId': '00015481-0001-54c4-0000-000080ad0085', 'size': 21.0, 'leverage': 10, 'upl': 162.33, 'direction': 'BUY', 'level': 42.45, 'currency': 'USD', 'guaranteedStop': False, 'stopLevel': 43.92, 'trailingStop': False}, 'market': {'instrumentName': 'Global X Uranium ETF', 'instrumentId': 374388004312260, 'expiry': '-', 'epic': 'URA', 'symbol': 'URA', 'instrumentType': 'SHARES', 'marketStatus': 'CLOSED', 'lotSize': 1, 'percentageChange': -0.04, 'bid': 50.18, 'offer': 50.39, 'updateTime': '2025-09-23T23:59:58.954', 'updateTimeUTC': '2025-09-23T19:59:58.954', 'delayTime': 0, 'streamingPricesAvailable': True, 'scalingFactor': 1, 'marketModes': ['REGULAR'], 'pipPosition': 2, 'tickSize': 0.01}}
-2025-09-24 02:29:51,419 - bot.api - INFO - Market data keys for TECL: ['instrument', 'dealingRules', 'snapshot']
-2025-09-24 02:29:51,419 - bot.api - INFO - Snapshot for TECL: bid=122.14, offer=122.33, high=None, low=None, percentageChange=0.02
-2025-09-24 02:29:51,419 - bot.api - INFO - Instrument for TECL: name=Direxion Daily Technology Bull 3X Shares, type=SHARES, marketId=None, expiry=-, lotSize=1
-2025-09-24 02:29:51,419 - bot.api - INFO - Opening hours for TECL: {'mon': ['13:30 - 20:00'], 'tue': ['13:30 - 20:00'], 'wed': ['13:30 - 20:00'], 'thu': ['13:30 - 20:00'], 'fri': ['13:30 - 20:00'], 'sat': [], 'sun': [], 'zone': 'UTC'}
-2025-09-24 02:29:51,419 - bot.api - INFO - Dealing rules (top level): minDealSize={'unit': 'POINTS', 'value': 0.1}, maxDealSize={'unit': 'POINTS', 'value': 3250}, minSizeIncrement={'unit': 'POINTS', 'value': 0.1}
-2025-09-24 02:29:51,419 - __main__ - INFO - Market data updated for TECL
-2025-09-24 02:29:51,419 - __main__ - INFO - Market is CLOSED, next open in 15.0 hours
-2025-09-24 02:29:52,053 - bot.api - INFO - Fetched 0 historical trades
-2025-09-24 02:29:52,055 - __main__ - INFO - Found 0 historic trades
-2025-09-24 02:29:57,709 - __main__ - INFO - Running data update #17
-2025-09-24 02:29:58,138 - __main__ - INFO - Account balance: $252.53
-2025-09-24 02:29:58,787 - __main__ - INFO - Found 1 open positions
-2025-09-24 02:29:58,787 - __main__ - INFO - Position fields: ['position', 'market']
-2025-09-24 02:29:58,787 - __main__ - INFO - First position: {'position': {'contractSize': 1, 'createdDate': '2025-09-11T18:15:17.438', 'createdDateUTC': '2025-09-11T14:15:17.438', 'dealId': '00015481-0001-54c4-0000-000080ad0086', 'dealReference': 'p_00015481-0001-54c4-0000-000080ad0086', 'workingOrderId': '00015481-0001-54c4-0000-000080ad0085', 'size': 21.0, 'leverage': 10, 'upl': 162.33, 'direction': 'BUY', 'level': 42.45, 'currency': 'USD', 'guaranteedStop': False, 'stopLevel': 43.92, 'trailingStop': False}, 'market': {'instrumentName': 'Global X Uranium ETF', 'instrumentId': 374388004312260, 'expiry': '-', 'epic': 'URA', 'symbol': 'URA', 'instrumentType': 'SHARES', 'marketStatus': 'CLOSED', 'lotSize': 1, 'percentageChange': -0.04, 'bid': 50.18, 'offer': 50.39, 'updateTime': '2025-09-23T23:59:58.954', 'updateTimeUTC': '2025-09-23T19:59:58.954', 'delayTime': 0, 'streamingPricesAvailable': True, 'scalingFactor': 1, 'marketModes': ['REGULAR'], 'pipPosition': 2, 'tickSize': 0.01}}
-2025-09-24 02:29:59,151 - bot.api - INFO - Market data keys for TECL: ['instrument', 'dealingRules', 'snapshot']
-2025-09-24 02:29:59,153 - bot.api - INFO - Snapshot for TECL: bid=122.14, offer=122.33, high=None, low=None, percentageChange=0.02
-2025-09-24 02:29:59,153 - bot.api - INFO - Instrument for TECL: name=Direxion Daily Technology Bull 3X Shares, type=SHARES, marketId=None, expiry=-, lotSize=1
-2025-09-24 02:29:59,153 - bot.api - INFO - Opening hours for TECL: {'mon': ['13:30 - 20:00'], 'tue': ['13:30 - 20:00'], 'wed': ['13:30 - 20:00'], 'thu': ['13:30 - 20:00'], 'fri': ['13:30 - 20:00'], 'sat': [], 'sun': [], 'zone': 'UTC'}
-2025-09-24 02:29:59,153 - bot.api - INFO - Dealing rules (top level): minDealSize={'unit': 'POINTS', 'value': 0.1}, maxDealSize={'unit': 'POINTS', 'value': 3250}, minSizeIncrement={'unit': 'POINTS', 'value': 0.1}
-2025-09-24 02:29:59,153 - __main__ - INFO - Market data updated for TECL
-2025-09-24 02:29:59,153 - __main__ - INFO - Market is CLOSED, next open in 15.0 hours
-2025-09-24 02:29:59,752 - bot.api - INFO - Fetched 0 historical trades
-2025-09-24 02:29:59,752 - __main__ - INFO - Found 0 historic trades
-2025-09-24 02:30:05,082 - __main__ - INFO - Running data update #18
-2025-09-24 02:30:05,768 - __main__ - INFO - Account balance: $252.53
-2025-09-24 02:30:06,646 - __main__ - INFO - Found 1 open positions
-2025-09-24 02:30:06,646 - __main__ - INFO - Position fields: ['position', 'market']
-2025-09-24 02:30:06,646 - __main__ - INFO - First position: {'position': {'contractSize': 1, 'createdDate': '2025-09-11T18:15:17.438', 'createdDateUTC': '2025-09-11T14:15:17.438', 'dealId': '00015481-0001-54c4-0000-000080ad0086', 'dealReference': 'p_00015481-0001-54c4-0000-000080ad0086', 'workingOrderId': '00015481-0001-54c4-0000-000080ad0085', 'size': 21.0, 'leverage': 10, 'upl': 162.33, 'direction': 'BUY', 'level': 42.45, 'currency': 'USD', 'guaranteedStop': False, 'stopLevel': 43.92, 'trailingStop': False}, 'market': {'instrumentName': 'Global X Uranium ETF', 'instrumentId': 374388004312260, 'expiry': '-', 'epic': 'URA', 'symbol': 'URA', 'instrumentType': 'SHARES', 'marketStatus': 'CLOSED', 'lotSize': 1, 'percentageChange': -0.04, 'bid': 50.18, 'offer': 50.39, 'updateTime': '2025-09-23T23:59:58.954', 'updateTimeUTC': '2025-09-23T19:59:58.954', 'delayTime': 0, 'streamingPricesAvailable': True, 'scalingFactor': 1, 'marketModes': ['REGULAR'], 'pipPosition': 2, 'tickSize': 0.01}}
-2025-09-24 02:30:06,984 - bot.api - INFO - Market data keys for TECL: ['instrument', 'dealingRules', 'snapshot']
-2025-09-24 02:30:06,985 - bot.api - INFO - Snapshot for TECL: bid=122.14, offer=122.33, high=None, low=None, percentageChange=0.02
-2025-09-24 02:30:06,985 - bot.api - INFO - Instrument for TECL: name=Direxion Daily Technology Bull 3X Shares, type=SHARES, marketId=None, expiry=-, lotSize=1
-2025-09-24 02:30:06,985 - bot.api - INFO - Opening hours for TECL: {'mon': ['13:30 - 20:00'], 'tue': ['13:30 - 20:00'], 'wed': ['13:30 - 20:00'], 'thu': ['13:30 - 20:00'], 'fri': ['13:30 - 20:00'], 'sat': [], 'sun': [], 'zone': 'UTC'}
-2025-09-24 02:30:06,985 - bot.api - INFO - Dealing rules (top level): minDealSize={'unit': 'POINTS', 'value': 0.1}, maxDealSize={'unit': 'POINTS', 'value': 3250}, minSizeIncrement={'unit': 'POINTS', 'value': 0.1}
-2025-09-24 02:30:06,986 - __main__ - INFO - Market data updated for TECL
-2025-09-24 02:30:06,986 - __main__ - INFO - Market is CLOSED, next open in 15.0 hours
-2025-09-24 02:30:07,829 - bot.api - INFO - Fetched 0 historical trades
-2025-09-24 02:30:07,831 - __main__ - INFO - Found 0 historic trades
-2025-09-24 02:30:13,156 - __main__ - INFO - Running data update #19
-2025-09-24 02:30:13,953 - __main__ - INFO - Account balance: $252.53
-2025-09-24 02:30:14,628 - __main__ - INFO - Found 1 open positions
-2025-09-24 02:30:14,628 - __main__ - INFO - Position fields: ['position', 'market']
-2025-09-24 02:30:14,628 - __main__ - INFO - First position: {'position': {'contractSize': 1, 'createdDate': '2025-09-11T18:15:17.438', 'createdDateUTC': '2025-09-11T14:15:17.438', 'dealId': '00015481-0001-54c4-0000-000080ad0086', 'dealReference': 'p_00015481-0001-54c4-0000-000080ad0086', 'workingOrderId': '00015481-0001-54c4-0000-000080ad0085', 'size': 21.0, 'leverage': 10, 'upl': 162.33, 'direction': 'BUY', 'level': 42.45, 'currency': 'USD', 'guaranteedStop': False, 'stopLevel': 43.92, 'trailingStop': False}, 'market': {'instrumentName': 'Global X Uranium ETF', 'instrumentId': 374388004312260, 'expiry': '-', 'epic': 'URA', 'symbol': 'URA', 'instrumentType': 'SHARES', 'marketStatus': 'CLOSED', 'lotSize': 1, 'percentageChange': -0.04, 'bid': 50.18, 'offer': 50.39, 'updateTime': '2025-09-23T23:59:58.954', 'updateTimeUTC': '2025-09-23T19:59:58.954', 'delayTime': 0, 'streamingPricesAvailable': True, 'scalingFactor': 1, 'marketModes': ['REGULAR'], 'pipPosition': 2, 'tickSize': 0.01}}
-2025-09-24 02:30:15,039 - bot.api - INFO - Market data keys for TECL: ['instrument', 'dealingRules', 'snapshot']
-2025-09-24 02:30:15,039 - bot.api - INFO - Snapshot for TECL: bid=122.14, offer=122.33, high=None, low=None, percentageChange=0.02
-2025-09-24 02:30:15,039 - bot.api - INFO - Instrument for TECL: name=Direxion Daily Technology Bull 3X Shares, type=SHARES, marketId=None, expiry=-, lotSize=1
-2025-09-24 02:30:15,041 - bot.api - INFO - Opening hours for TECL: {'mon': ['13:30 - 20:00'], 'tue': ['13:30 - 20:00'], 'wed': ['13:30 - 20:00'], 'thu': ['13:30 - 20:00'], 'fri': ['13:30 - 20:00'], 'sat': [], 'sun': [], 'zone': 'UTC'}
-2025-09-24 02:30:15,041 - bot.api - INFO - Dealing rules (top level): minDealSize={'unit': 'POINTS', 'value': 0.1}, maxDealSize={'unit': 'POINTS', 'value': 3250}, minSizeIncrement={'unit': 'POINTS', 'value': 0.1}
-2025-09-24 02:30:15,041 - __main__ - INFO - Market data updated for TECL
-2025-09-24 02:30:15,042 - __main__ - INFO - Market is CLOSED, next open in 15.0 hours
-2025-09-24 02:30:15,746 - bot.api - INFO - Fetched 0 historical trades
-2025-09-24 02:30:15,746 - __main__ - INFO - Found 0 historic trades
-2025-09-24 02:30:21,347 - __main__ - INFO - Running data update #20
-2025-09-24 02:30:21,970 - __main__ - INFO - Account balance: $252.53
-2025-09-24 02:30:22,660 - __main__ - INFO - Found 1 open positions
-2025-09-24 02:30:22,660 - __main__ - INFO - Position fields: ['position', 'market']
-2025-09-24 02:30:22,660 - __main__ - INFO - First position: {'position': {'contractSize': 1, 'createdDate': '2025-09-11T18:15:17.438', 'createdDateUTC': '2025-09-11T14:15:17.438', 'dealId': '00015481-0001-54c4-0000-000080ad0086', 'dealReference': 'p_00015481-0001-54c4-0000-000080ad0086', 'workingOrderId': '00015481-0001-54c4-0000-000080ad0085', 'size': 21.0, 'leverage': 10, 'upl': 162.33, 'direction': 'BUY', 'level': 42.45, 'currency': 'USD', 'guaranteedStop': False, 'stopLevel': 43.92, 'trailingStop': False}, 'market': {'instrumentName': 'Global X Uranium ETF', 'instrumentId': 374388004312260, 'expiry': '-', 'epic': 'URA', 'symbol': 'URA', 'instrumentType': 'SHARES', 'marketStatus': 'CLOSED', 'lotSize': 1, 'percentageChange': -0.04, 'bid': 50.18, 'offer': 50.39, 'updateTime': '2025-09-23T23:59:58.954', 'updateTimeUTC': '2025-09-23T19:59:58.954', 'delayTime': 0, 'streamingPricesAvailable': True, 'scalingFactor': 1, 'marketModes': ['REGULAR'], 'pipPosition': 2, 'tickSize': 0.01}}
-2025-09-24 02:30:23,340 - bot.api - INFO - Market data keys for TECL: ['instrument', 'dealingRules', 'snapshot']
-2025-09-24 02:30:23,340 - bot.api - INFO - Snapshot for TECL: bid=122.14, offer=122.33, high=None, low=None, percentageChange=0.02
-2025-09-24 02:30:23,340 - bot.api - INFO - Instrument for TECL: name=Direxion Daily Technology Bull 3X Shares, type=SHARES, marketId=None, expiry=-, lotSize=1
-2025-09-24 02:30:23,340 - bot.api - INFO - Opening hours for TECL: {'mon': ['13:30 - 20:00'], 'tue': ['13:30 - 20:00'], 'wed': ['13:30 - 20:00'], 'thu': ['13:30 - 20:00'], 'fri': ['13:30 - 20:00'], 'sat': [], 'sun': [], 'zone': 'UTC'}
-2025-09-24 02:30:23,340 - bot.api - INFO - Dealing rules (top level): minDealSize={'unit': 'POINTS', 'value': 0.1}, maxDealSize={'unit': 'POINTS', 'value': 3250}, minSizeIncrement={'unit': 'POINTS', 'value': 0.1}
-2025-09-24 02:30:23,340 - __main__ - INFO - Market data updated for TECL
-2025-09-24 02:30:23,342 - __main__ - INFO - Market is CLOSED, next open in 15.0 hours
-2025-09-24 02:30:23,708 - bot.api - INFO - Fetched 0 historical trades
-2025-09-24 02:30:23,708 - __main__ - INFO - Found 0 historic trades
-2025-09-24 02:30:29,051 - __main__ - INFO - Running data update #21
-2025-09-24 02:30:29,533 - __main__ - INFO - Account balance: $252.53
-2025-09-24 02:30:29,898 - __main__ - INFO - Found 1 open positions
-2025-09-24 02:30:29,898 - __main__ - INFO - Position fields: ['position', 'market']
-2025-09-24 02:30:29,898 - __main__ - INFO - First position: {'position': {'contractSize': 1, 'createdDate': '2025-09-11T18:15:17.438', 'createdDateUTC': '2025-09-11T14:15:17.438', 'dealId': '00015481-0001-54c4-0000-000080ad0086', 'dealReference': 'p_00015481-0001-54c4-0000-000080ad0086', 'workingOrderId': '00015481-0001-54c4-0000-000080ad0085', 'size': 21.0, 'leverage': 10, 'upl': 162.33, 'direction': 'BUY', 'level': 42.45, 'currency': 'USD', 'guaranteedStop': False, 'stopLevel': 43.92, 'trailingStop': False}, 'market': {'instrumentName': 'Global X Uranium ETF', 'instrumentId': 374388004312260, 'expiry': '-', 'epic': 'URA', 'symbol': 'URA', 'instrumentType': 'SHARES', 'marketStatus': 'CLOSED', 'lotSize': 1, 'percentageChange': -0.04, 'bid': 50.18, 'offer': 50.39, 'updateTime': '2025-09-23T23:59:58.954', 'updateTimeUTC': '2025-09-23T19:59:58.954', 'delayTime': 0, 'streamingPricesAvailable': True, 'scalingFactor': 1, 'marketModes': ['REGULAR'], 'pipPosition': 2, 'tickSize': 0.01}}
-2025-09-24 02:30:30,279 - bot.api - INFO - Market data keys for TECL: ['instrument', 'dealingRules', 'snapshot']
-2025-09-24 02:30:30,279 - bot.api - INFO - Snapshot for TECL: bid=122.14, offer=122.33, high=None, low=None, percentageChange=0.02
-2025-09-24 02:30:30,279 - bot.api - INFO - Instrument for TECL: name=Direxion Daily Technology Bull 3X Shares, type=SHARES, marketId=None, expiry=-, lotSize=1
-2025-09-24 02:30:30,279 - bot.api - INFO - Opening hours for TECL: {'mon': ['13:30 - 20:00'], 'tue': ['13:30 - 20:00'], 'wed': ['13:30 - 20:00'], 'thu': ['13:30 - 20:00'], 'fri': ['13:30 - 20:00'], 'sat': [], 'sun': [], 'zone': 'UTC'}
-2025-09-24 02:30:30,279 - bot.api - INFO - Dealing rules (top level): minDealSize={'unit': 'POINTS', 'value': 0.1}, maxDealSize={'unit': 'POINTS', 'value': 3250}, minSizeIncrement={'unit': 'POINTS', 'value': 0.1}
-2025-09-24 02:30:30,279 - __main__ - INFO - Market data updated for TECL
-2025-09-24 02:30:30,281 - __main__ - INFO - Market is CLOSED, next open in 15.0 hours
-2025-09-24 02:30:30,643 - bot.api - INFO - Fetched 0 historical trades
-2025-09-24 02:30:30,643 - __main__ - INFO - Found 0 historic trades
-2025-09-24 02:30:35,974 - __main__ - INFO - Running data update #22
-2025-09-24 02:30:36,435 - __main__ - INFO - Account balance: $252.53
-2025-09-24 02:30:36,784 - __main__ - INFO - Found 1 open positions
-2025-09-24 02:30:36,786 - __main__ - INFO - Position fields: ['position', 'market']
-2025-09-24 02:30:36,786 - __main__ - INFO - First position: {'position': {'contractSize': 1, 'createdDate': '2025-09-11T18:15:17.438', 'createdDateUTC': '2025-09-11T14:15:17.438', 'dealId': '00015481-0001-54c4-0000-000080ad0086', 'dealReference': 'p_00015481-0001-54c4-0000-000080ad0086', 'workingOrderId': '00015481-0001-54c4-0000-000080ad0085', 'size': 21.0, 'leverage': 10, 'upl': 162.33, 'direction': 'BUY', 'level': 42.45, 'currency': 'USD', 'guaranteedStop': False, 'stopLevel': 43.92, 'trailingStop': False}, 'market': {'instrumentName': 'Global X Uranium ETF', 'instrumentId': 374388004312260, 'expiry': '-', 'epic': 'URA', 'symbol': 'URA', 'instrumentType': 'SHARES', 'marketStatus': 'CLOSED', 'lotSize': 1, 'percentageChange': -0.04, 'bid': 50.18, 'offer': 50.39, 'updateTime': '2025-09-23T23:59:58.954', 'updateTimeUTC': '2025-09-23T19:59:58.954', 'delayTime': 0, 'streamingPricesAvailable': True, 'scalingFactor': 1, 'marketModes': ['REGULAR'], 'pipPosition': 2, 'tickSize': 0.01}}
-2025-09-24 02:30:37,521 - bot.api - INFO - Market data keys for TECL: ['instrument', 'dealingRules', 'snapshot']
-2025-09-24 02:30:37,521 - bot.api - INFO - Snapshot for TECL: bid=122.14, offer=122.33, high=None, low=None, percentageChange=0.02
-2025-09-24 02:30:37,521 - bot.api - INFO - Instrument for TECL: name=Direxion Daily Technology Bull 3X Shares, type=SHARES, marketId=None, expiry=-, lotSize=1
-2025-09-24 02:30:37,521 - bot.api - INFO - Opening hours for TECL: {'mon': ['13:30 - 20:00'], 'tue': ['13:30 - 20:00'], 'wed': ['13:30 - 20:00'], 'thu': ['13:30 - 20:00'], 'fri': ['13:30 - 20:00'], 'sat': [], 'sun': [], 'zone': 'UTC'}
-2025-09-24 02:30:37,521 - bot.api - INFO - Dealing rules (top level): minDealSize={'unit': 'POINTS', 'value': 0.1}, maxDealSize={'unit': 'POINTS', 'value': 3250}, minSizeIncrement={'unit': 'POINTS', 'value': 0.1}
-2025-09-24 02:30:37,521 - __main__ - INFO - Market data updated for TECL
-2025-09-24 02:30:37,521 - __main__ - INFO - Market is CLOSED, next open in 15.0 hours
-2025-09-24 02:30:38,621 - bot.api - INFO - Fetched 0 historical trades
-2025-09-24 02:30:38,621 - __main__ - INFO - Found 0 historic trades
-2025-09-24 02:30:44,034 - __main__ - INFO - Running data update #23
-2025-09-24 02:30:44,759 - __main__ - INFO - Account balance: $252.53
-2025-09-24 02:30:45,178 - __main__ - INFO - Found 1 open positions
-2025-09-24 02:30:45,178 - __main__ - INFO - Position fields: ['position', 'market']
-2025-09-24 02:30:45,178 - __main__ - INFO - First position: {'position': {'contractSize': 1, 'createdDate': '2025-09-11T18:15:17.438', 'createdDateUTC': '2025-09-11T14:15:17.438', 'dealId': '00015481-0001-54c4-0000-000080ad0086', 'dealReference': 'p_00015481-0001-54c4-0000-000080ad0086', 'workingOrderId': '00015481-0001-54c4-0000-000080ad0085', 'size': 21.0, 'leverage': 10, 'upl': 162.33, 'direction': 'BUY', 'level': 42.45, 'currency': 'USD', 'guaranteedStop': False, 'stopLevel': 43.92, 'trailingStop': False}, 'market': {'instrumentName': 'Global X Uranium ETF', 'instrumentId': 374388004312260, 'expiry': '-', 'epic': 'URA', 'symbol': 'URA', 'instrumentType': 'SHARES', 'marketStatus': 'CLOSED', 'lotSize': 1, 'percentageChange': -0.04, 'bid': 50.18, 'offer': 50.39, 'updateTime': '2025-09-23T23:59:58.954', 'updateTimeUTC': '2025-09-23T19:59:58.954', 'delayTime': 0, 'streamingPricesAvailable': True, 'scalingFactor': 1, 'marketModes': ['REGULAR'], 'pipPosition': 2, 'tickSize': 0.01}}
-2025-09-24 02:30:46,200 - bot.api - INFO - Market data keys for TECL: ['instrument', 'dealingRules', 'snapshot']
-2025-09-24 02:30:46,200 - bot.api - INFO - Snapshot for TECL: bid=122.14, offer=122.33, high=None, low=None, percentageChange=0.02
-2025-09-24 02:30:46,200 - bot.api - INFO - Instrument for TECL: name=Direxion Daily Technology Bull 3X Shares, type=SHARES, marketId=None, expiry=-, lotSize=1
-2025-09-24 02:30:46,200 - bot.api - INFO - Opening hours for TECL: {'mon': ['13:30 - 20:00'], 'tue': ['13:30 - 20:00'], 'wed': ['13:30 - 20:00'], 'thu': ['13:30 - 20:00'], 'fri': ['13:30 - 20:00'], 'sat': [], 'sun': [], 'zone': 'UTC'}
-2025-09-24 02:30:46,200 - bot.api - INFO - Dealing rules (top level): minDealSize={'unit': 'POINTS', 'value': 0.1}, maxDealSize={'unit': 'POINTS', 'value': 3250}, minSizeIncrement={'unit': 'POINTS', 'value': 0.1}
-2025-09-24 02:30:46,200 - __main__ - INFO - Market data updated for TECL
-2025-09-24 02:30:46,200 - __main__ - INFO - Market is CLOSED, next open in 15.0 hours
-2025-09-24 02:30:46,865 - bot.api - INFO - Fetched 0 historical trades
-2025-09-24 02:30:46,865 - __main__ - INFO - Found 0 historic trades
-2025-09-24 02:30:52,471 - __main__ - INFO - Running data update #24
-2025-09-24 02:30:52,878 - __main__ - INFO - Account balance: $252.53
-2025-09-24 02:30:53,248 - __main__ - INFO - Found 1 open positions
-2025-09-24 02:30:53,248 - __main__ - INFO - Position fields: ['position', 'market']
-2025-09-24 02:30:53,248 - __main__ - INFO - First position: {'position': {'contractSize': 1, 'createdDate': '2025-09-11T18:15:17.438', 'createdDateUTC': '2025-09-11T14:15:17.438', 'dealId': '00015481-0001-54c4-0000-000080ad0086', 'dealReference': 'p_00015481-0001-54c4-0000-000080ad0086', 'workingOrderId': '00015481-0001-54c4-0000-000080ad0085', 'size': 21.0, 'leverage': 10, 'upl': 162.33, 'direction': 'BUY', 'level': 42.45, 'currency': 'USD', 'guaranteedStop': False, 'stopLevel': 43.92, 'trailingStop': False}, 'market': {'instrumentName': 'Global X Uranium ETF', 'instrumentId': 374388004312260, 'expiry': '-', 'epic': 'URA', 'symbol': 'URA', 'instrumentType': 'SHARES', 'marketStatus': 'CLOSED', 'lotSize': 1, 'percentageChange': -0.04, 'bid': 50.18, 'offer': 50.39, 'updateTime': '2025-09-23T23:59:58.954', 'updateTimeUTC': '2025-09-23T19:59:58.954', 'delayTime': 0, 'streamingPricesAvailable': True, 'scalingFactor': 1, 'marketModes': ['REGULAR'], 'pipPosition': 2, 'tickSize': 0.01}}
-2025-09-24 02:30:53,836 - bot.api - INFO - Market data keys for TECL: ['instrument', 'dealingRules', 'snapshot']
-2025-09-24 02:30:53,838 - bot.api - INFO - Snapshot for TECL: bid=122.14, offer=122.33, high=None, low=None, percentageChange=0.02
-2025-09-24 02:30:53,838 - bot.api - INFO - Instrument for TECL: name=Direxion Daily Technology Bull 3X Shares, type=SHARES, marketId=None, expiry=-, lotSize=1
-2025-09-24 02:30:53,838 - bot.api - INFO - Opening hours for TECL: {'mon': ['13:30 - 20:00'], 'tue': ['13:30 - 20:00'], 'wed': ['13:30 - 20:00'], 'thu': ['13:30 - 20:00'], 'fri': ['13:30 - 20:00'], 'sat': [], 'sun': [], 'zone': 'UTC'}
-2025-09-24 02:30:53,838 - bot.api - INFO - Dealing rules (top level): minDealSize={'unit': 'POINTS', 'value': 0.1}, maxDealSize={'unit': 'POINTS', 'value': 3250}, minSizeIncrement={'unit': 'POINTS', 'value': 0.1}
-2025-09-24 02:30:53,838 - __main__ - INFO - Market data updated for TECL
-2025-09-24 02:30:53,838 - __main__ - INFO - Market is CLOSED, next open in 15.0 hours
-2025-09-24 02:30:54,524 - bot.api - INFO - Fetched 0 historical trades
-2025-09-24 02:30:54,524 - __main__ - INFO - Found 0 historic trades
-2025-09-24 02:31:00,002 - __main__ - INFO - Running data update #25
-2025-09-24 02:31:00,471 - __main__ - INFO - Account balance: $252.53
-2025-09-24 02:31:01,063 - __main__ - INFO - Found 1 open positions
-2025-09-24 02:31:01,063 - __main__ - INFO - Position fields: ['position', 'market']
-2025-09-24 02:31:01,063 - __main__ - INFO - First position: {'position': {'contractSize': 1, 'createdDate': '2025-09-11T18:15:17.438', 'createdDateUTC': '2025-09-11T14:15:17.438', 'dealId': '00015481-0001-54c4-0000-000080ad0086', 'dealReference': 'p_00015481-0001-54c4-0000-000080ad0086', 'workingOrderId': '00015481-0001-54c4-0000-000080ad0085', 'size': 21.0, 'leverage': 10, 'upl': 162.33, 'direction': 'BUY', 'level': 42.45, 'currency': 'USD', 'guaranteedStop': False, 'stopLevel': 43.92, 'trailingStop': False}, 'market': {'instrumentName': 'Global X Uranium ETF', 'instrumentId': 374388004312260, 'expiry': '-', 'epic': 'URA', 'symbol': 'URA', 'instrumentType': 'SHARES', 'marketStatus': 'CLOSED', 'lotSize': 1, 'percentageChange': -0.04, 'bid': 50.18, 'offer': 50.39, 'updateTime': '2025-09-23T23:59:58.954', 'updateTimeUTC': '2025-09-23T19:59:58.954', 'delayTime': 0, 'streamingPricesAvailable': True, 'scalingFactor': 1, 'marketModes': ['REGULAR'], 'pipPosition': 2, 'tickSize': 0.01}}
-2025-09-24 02:31:01,410 - bot.api - INFO - Market data keys for TECL: ['instrument', 'dealingRules', 'snapshot']
-2025-09-24 02:31:01,410 - bot.api - INFO - Snapshot for TECL: bid=122.14, offer=122.33, high=None, low=None, percentageChange=0.02
-2025-09-24 02:31:01,410 - bot.api - INFO - Instrument for TECL: name=Direxion Daily Technology Bull 3X Shares, type=SHARES, marketId=None, expiry=-, lotSize=1
-2025-09-24 02:31:01,411 - bot.api - INFO - Opening hours for TECL: {'mon': ['13:30 - 20:00'], 'tue': ['13:30 - 20:00'], 'wed': ['13:30 - 20:00'], 'thu': ['13:30 - 20:00'], 'fri': ['13:30 - 20:00'], 'sat': [], 'sun': [], 'zone': 'UTC'}
-2025-09-24 02:31:01,411 - bot.api - INFO - Dealing rules (top level): minDealSize={'unit': 'POINTS', 'value': 0.1}, maxDealSize={'unit': 'POINTS', 'value': 3250}, minSizeIncrement={'unit': 'POINTS', 'value': 0.1}
-2025-09-24 02:31:01,411 - __main__ - INFO - Market data updated for TECL
-2025-09-24 02:31:01,411 - __main__ - INFO - Market is CLOSED, next open in 15.0 hours
-2025-09-24 02:31:01,854 - bot.api - INFO - Fetched 0 historical trades
-2025-09-24 02:31:01,854 - __main__ - INFO - Found 0 historic trades
-2025-09-24 02:31:07,350 - __main__ - INFO - Running data update #26
-2025-09-24 02:31:08,080 - __main__ - INFO - Account balance: $252.53
-2025-09-24 02:31:08,447 - __main__ - INFO - Found 1 open positions
-2025-09-24 02:31:08,447 - __main__ - INFO - Position fields: ['position', 'market']
-2025-09-24 02:31:08,447 - __main__ - INFO - First position: {'position': {'contractSize': 1, 'createdDate': '2025-09-11T18:15:17.438', 'createdDateUTC': '2025-09-11T14:15:17.438', 'dealId': '00015481-0001-54c4-0000-000080ad0086', 'dealReference': 'p_00015481-0001-54c4-0000-000080ad0086', 'workingOrderId': '00015481-0001-54c4-0000-000080ad0085', 'size': 21.0, 'leverage': 10, 'upl': 162.33, 'direction': 'BUY', 'level': 42.45, 'currency': 'USD', 'guaranteedStop': False, 'stopLevel': 43.92, 'trailingStop': False}, 'market': {'instrumentName': 'Global X Uranium ETF', 'instrumentId': 374388004312260, 'expiry': '-', 'epic': 'URA', 'symbol': 'URA', 'instrumentType': 'SHARES', 'marketStatus': 'CLOSED', 'lotSize': 1, 'percentageChange': -0.04, 'bid': 50.18, 'offer': 50.39, 'updateTime': '2025-09-23T23:59:58.954', 'updateTimeUTC': '2025-09-23T19:59:58.954', 'delayTime': 0, 'streamingPricesAvailable': True, 'scalingFactor': 1, 'marketModes': ['REGULAR'], 'pipPosition': 2, 'tickSize': 0.01}}
-2025-09-24 02:31:09,025 - bot.api - INFO - Market data keys for TECL: ['instrument', 'dealingRules', 'snapshot']
-2025-09-24 02:31:09,025 - bot.api - INFO - Snapshot for TECL: bid=122.14, offer=122.33, high=None, low=None, percentageChange=0.02
-2025-09-24 02:31:09,025 - bot.api - INFO - Instrument for TECL: name=Direxion Daily Technology Bull 3X Shares, type=SHARES, marketId=None, expiry=-, lotSize=1
-2025-09-24 02:31:09,025 - bot.api - INFO - Opening hours for TECL: {'mon': ['13:30 - 20:00'], 'tue': ['13:30 - 20:00'], 'wed': ['13:30 - 20:00'], 'thu': ['13:30 - 20:00'], 'fri': ['13:30 - 20:00'], 'sat': [], 'sun': [], 'zone': 'UTC'}
-2025-09-24 02:31:09,025 - bot.api - INFO - Dealing rules (top level): minDealSize={'unit': 'POINTS', 'value': 0.1}, maxDealSize={'unit': 'POINTS', 'value': 3250}, minSizeIncrement={'unit': 'POINTS', 'value': 0.1}
-2025-09-24 02:31:09,026 - __main__ - INFO - Market data updated for TECL
-2025-09-24 02:31:09,026 - __main__ - INFO - Market is CLOSED, next open in 15.0 hours
-2025-09-24 02:31:09,379 - bot.api - INFO - Fetched 0 historical trades
-2025-09-24 02:31:09,379 - __main__ - INFO - Found 0 historic trades
-2025-09-24 02:31:15,160 - __main__ - INFO - Running data update #27
-2025-09-24 02:31:15,581 - __main__ - INFO - Account balance: $252.53
-2025-09-24 02:31:16,168 - __main__ - INFO - Found 1 open positions
-2025-09-24 02:31:16,168 - __main__ - INFO - Position fields: ['position', 'market']
-2025-09-24 02:31:16,170 - __main__ - INFO - First position: {'position': {'contractSize': 1, 'createdDate': '2025-09-11T18:15:17.438', 'createdDateUTC': '2025-09-11T14:15:17.438', 'dealId': '00015481-0001-54c4-0000-000080ad0086', 'dealReference': 'p_00015481-0001-54c4-0000-000080ad0086', 'workingOrderId': '00015481-0001-54c4-0000-000080ad0085', 'size': 21.0, 'leverage': 10, 'upl': 162.33, 'direction': 'BUY', 'level': 42.45, 'currency': 'USD', 'guaranteedStop': False, 'stopLevel': 43.92, 'trailingStop': False}, 'market': {'instrumentName': 'Global X Uranium ETF', 'instrumentId': 374388004312260, 'expiry': '-', 'epic': 'URA', 'symbol': 'URA', 'instrumentType': 'SHARES', 'marketStatus': 'CLOSED', 'lotSize': 1, 'percentageChange': -0.04, 'bid': 50.18, 'offer': 50.39, 'updateTime': '2025-09-23T23:59:58.954', 'updateTimeUTC': '2025-09-23T19:59:58.954', 'delayTime': 0, 'streamingPricesAvailable': True, 'scalingFactor': 1, 'marketModes': ['REGULAR'], 'pipPosition': 2, 'tickSize': 0.01}}
-2025-09-24 02:31:16,536 - bot.api - INFO - Market data keys for TECL: ['instrument', 'dealingRules', 'snapshot']
-2025-09-24 02:31:16,536 - bot.api - INFO - Snapshot for TECL: bid=122.14, offer=122.33, high=None, low=None, percentageChange=0.02
-2025-09-24 02:31:16,536 - bot.api - INFO - Instrument for TECL: name=Direxion Daily Technology Bull 3X Shares, type=SHARES, marketId=None, expiry=-, lotSize=1
-2025-09-24 02:31:16,536 - bot.api - INFO - Opening hours for TECL: {'mon': ['13:30 - 20:00'], 'tue': ['13:30 - 20:00'], 'wed': ['13:30 - 20:00'], 'thu': ['13:30 - 20:00'], 'fri': ['13:30 - 20:00'], 'sat': [], 'sun': [], 'zone': 'UTC'}
-2025-09-24 02:31:16,538 - bot.api - INFO - Dealing rules (top level): minDealSize={'unit': 'POINTS', 'value': 0.1}, maxDealSize={'unit': 'POINTS', 'value': 3250}, minSizeIncrement={'unit': 'POINTS', 'value': 0.1}
-2025-09-24 02:31:16,538 - __main__ - INFO - Market data updated for TECL
-2025-09-24 02:31:16,538 - __main__ - INFO - Market is CLOSED, next open in 15.0 hours
-2025-09-24 02:31:17,134 - bot.api - INFO - Fetched 0 historical trades
-2025-09-24 02:31:17,135 - __main__ - INFO - Found 0 historic trades
-2025-09-24 02:31:22,519 - __main__ - INFO - Running data update #28
-2025-09-24 02:31:23,175 - __main__ - INFO - Account balance: $252.53
-2025-09-24 02:31:23,605 - __main__ - INFO - Found 1 open positions
-2025-09-24 02:31:23,605 - __main__ - INFO - Position fields: ['position', 'market']
-2025-09-24 02:31:23,605 - __main__ - INFO - First position: {'position': {'contractSize': 1, 'createdDate': '2025-09-11T18:15:17.438', 'createdDateUTC': '2025-09-11T14:15:17.438', 'dealId': '00015481-0001-54c4-0000-000080ad0086', 'dealReference': 'p_00015481-0001-54c4-0000-000080ad0086', 'workingOrderId': '00015481-0001-54c4-0000-000080ad0085', 'size': 21.0, 'leverage': 10, 'upl': 162.33, 'direction': 'BUY', 'level': 42.45, 'currency': 'USD', 'guaranteedStop': False, 'stopLevel': 43.92, 'trailingStop': False}, 'market': {'instrumentName': 'Global X Uranium ETF', 'instrumentId': 374388004312260, 'expiry': '-', 'epic': 'URA', 'symbol': 'URA', 'instrumentType': 'SHARES', 'marketStatus': 'CLOSED', 'lotSize': 1, 'percentageChange': -0.04, 'bid': 50.18, 'offer': 50.39, 'updateTime': '2025-09-23T23:59:58.954', 'updateTimeUTC': '2025-09-23T19:59:58.954', 'delayTime': 0, 'streamingPricesAvailable': True, 'scalingFactor': 1, 'marketModes': ['REGULAR'], 'pipPosition': 2, 'tickSize': 0.01}}
-2025-09-24 02:31:24,006 - bot.api - INFO - Market data keys for TECL: ['instrument', 'dealingRules', 'snapshot']
-2025-09-24 02:31:24,006 - bot.api - INFO - Snapshot for TECL: bid=122.14, offer=122.33, high=None, low=None, percentageChange=0.02
-2025-09-24 02:31:24,006 - bot.api - INFO - Instrument for TECL: name=Direxion Daily Technology Bull 3X Shares, type=SHARES, marketId=None, expiry=-, lotSize=1
-2025-09-24 02:31:24,006 - bot.api - INFO - Opening hours for TECL: {'mon': ['13:30 - 20:00'], 'tue': ['13:30 - 20:00'], 'wed': ['13:30 - 20:00'], 'thu': ['13:30 - 20:00'], 'fri': ['13:30 - 20:00'], 'sat': [], 'sun': [], 'zone': 'UTC'}
-2025-09-24 02:31:24,006 - bot.api - INFO - Dealing rules (top level): minDealSize={'unit': 'POINTS', 'value': 0.1}, maxDealSize={'unit': 'POINTS', 'value': 3250}, minSizeIncrement={'unit': 'POINTS', 'value': 0.1}
-2025-09-24 02:31:24,006 - __main__ - INFO - Market data updated for TECL
-2025-09-24 02:31:24,006 - __main__ - INFO - Market is CLOSED, next open in 15.0 hours
-2025-09-24 02:31:24,425 - bot.api - INFO - Fetched 0 historical trades
-2025-09-24 02:31:24,426 - __main__ - INFO - Found 0 historic trades
-2025-09-24 02:31:24,734 - __main__ - INFO - WebSocket connected
-2025-09-24 02:31:25,195 - __main__ - INFO - Selecting account 211640169982416068
-2025-09-24 02:31:25,524 - bot.api - INFO - Switched to account: 211640169982416068
-2025-09-24 02:31:25,524 - bot.settings - INFO - Settings saved to file
-2025-09-24 02:31:25,524 - bot.settings - INFO - Saved environment account map: live -> 211640169982416068
-2025-09-24 02:31:29,834 - __main__ - INFO - Running data update #29
-2025-09-24 02:31:30,284 - __main__ - INFO - Account balance: $252.53
-2025-09-24 02:31:30,980 - __main__ - INFO - Found 1 open positions
-2025-09-24 02:31:30,980 - __main__ - INFO - Position fields: ['position', 'market']
-2025-09-24 02:31:30,980 - __main__ - INFO - First position: {'position': {'contractSize': 1, 'createdDate': '2025-09-11T18:15:17.438', 'createdDateUTC': '2025-09-11T14:15:17.438', 'dealId': '00015481-0001-54c4-0000-000080ad0086', 'dealReference': 'p_00015481-0001-54c4-0000-000080ad0086', 'workingOrderId': '00015481-0001-54c4-0000-000080ad0085', 'size': 21.0, 'leverage': 10, 'upl': 162.33, 'direction': 'BUY', 'level': 42.45, 'currency': 'USD', 'guaranteedStop': False, 'stopLevel': 43.92, 'trailingStop': False}, 'market': {'instrumentName': 'Global X Uranium ETF', 'instrumentId': 374388004312260, 'expiry': '-', 'epic': 'URA', 'symbol': 'URA', 'instrumentType': 'SHARES', 'marketStatus': 'CLOSED', 'lotSize': 1, 'percentageChange': -0.04, 'bid': 50.18, 'offer': 50.39, 'updateTime': '2025-09-23T23:59:58.954', 'updateTimeUTC': '2025-09-23T19:59:58.954', 'delayTime': 0, 'streamingPricesAvailable': True, 'scalingFactor': 1, 'marketModes': ['REGULAR'], 'pipPosition': 2, 'tickSize': 0.01}}
-2025-09-24 02:31:31,358 - bot.api - INFO - Market data keys for TECL: ['instrument', 'dealingRules', 'snapshot']
-2025-09-24 02:31:31,358 - bot.api - INFO - Snapshot for TECL: bid=122.14, offer=122.33, high=None, low=None, percentageChange=0.02
-2025-09-24 02:31:31,358 - bot.api - INFO - Instrument for TECL: name=Direxion Daily Technology Bull 3X Shares, type=SHARES, marketId=None, expiry=-, lotSize=1
-2025-09-24 02:31:31,358 - bot.api - INFO - Opening hours for TECL: {'mon': ['13:30 - 20:00'], 'tue': ['13:30 - 20:00'], 'wed': ['13:30 - 20:00'], 'thu': ['13:30 - 20:00'], 'fri': ['13:30 - 20:00'], 'sat': [], 'sun': [], 'zone': 'UTC'}
-2025-09-24 02:31:31,359 - bot.api - INFO - Dealing rules (top level): minDealSize={'unit': 'POINTS', 'value': 0.1}, maxDealSize={'unit': 'POINTS', 'value': 3250}, minSizeIncrement={'unit': 'POINTS', 'value': 0.1}
-2025-09-24 02:31:31,359 - __main__ - INFO - Market data updated for TECL
-2025-09-24 02:31:31,359 - __main__ - INFO - Market is CLOSED, next open in 15.0 hours
-2025-09-24 02:31:31,779 - bot.api - INFO - Fetched 0 historical trades
-2025-09-24 02:31:31,779 - __main__ - INFO - Found 0 historic trades
-2025-09-24 02:31:37,149 - __main__ - INFO - Running data update #30
-2025-09-24 02:31:37,638 - __main__ - INFO - Account balance: $252.53
-2025-09-24 02:31:38,230 - __main__ - INFO - Found 1 open positions
-2025-09-24 02:31:38,231 - __main__ - INFO - Position fields: ['position', 'market']
-2025-09-24 02:31:38,231 - __main__ - INFO - First position: {'position': {'contractSize': 1, 'createdDate': '2025-09-11T18:15:17.438', 'createdDateUTC': '2025-09-11T14:15:17.438', 'dealId': '00015481-0001-54c4-0000-000080ad0086', 'dealReference': 'p_00015481-0001-54c4-0000-000080ad0086', 'workingOrderId': '00015481-0001-54c4-0000-000080ad0085', 'size': 21.0, 'leverage': 10, 'upl': 162.33, 'direction': 'BUY', 'level': 42.45, 'currency': 'USD', 'guaranteedStop': False, 'stopLevel': 43.92, 'trailingStop': False}, 'market': {'instrumentName': 'Global X Uranium ETF', 'instrumentId': 374388004312260, 'expiry': '-', 'epic': 'URA', 'symbol': 'URA', 'instrumentType': 'SHARES', 'marketStatus': 'CLOSED', 'lotSize': 1, 'percentageChange': -0.04, 'bid': 50.18, 'offer': 50.39, 'updateTime': '2025-09-23T23:59:58.954', 'updateTimeUTC': '2025-09-23T19:59:58.954', 'delayTime': 0, 'streamingPricesAvailable': True, 'scalingFactor': 1, 'marketModes': ['REGULAR'], 'pipPosition': 2, 'tickSize': 0.01}}
-2025-09-24 02:31:38,572 - bot.api - INFO - Market data keys for TECL: ['instrument', 'dealingRules', 'snapshot']
-2025-09-24 02:31:38,572 - bot.api - INFO - Snapshot for TECL: bid=122.14, offer=122.33, high=None, low=None, percentageChange=0.02
-2025-09-24 02:31:38,572 - bot.api - INFO - Instrument for TECL: name=Direxion Daily Technology Bull 3X Shares, type=SHARES, marketId=None, expiry=-, lotSize=1
-2025-09-24 02:31:38,572 - bot.api - INFO - Opening hours for TECL: {'mon': ['13:30 - 20:00'], 'tue': ['13:30 - 20:00'], 'wed': ['13:30 - 20:00'], 'thu': ['13:30 - 20:00'], 'fri': ['13:30 - 20:00'], 'sat': [], 'sun': [], 'zone': 'UTC'}
-2025-09-24 02:31:38,572 - bot.api - INFO - Dealing rules (top level): minDealSize={'unit': 'POINTS', 'value': 0.1}, maxDealSize={'unit': 'POINTS', 'value': 3250}, minSizeIncrement={'unit': 'POINTS', 'value': 0.1}
-2025-09-24 02:31:38,572 - __main__ - INFO - Market data updated for TECL
-2025-09-24 02:31:38,572 - __main__ - INFO - Market is CLOSED, next open in 15.0 hours
-2025-09-24 02:31:39,578 - bot.api - INFO - Fetched 0 historical trades
-2025-09-24 02:31:39,578 - __main__ - INFO - Found 0 historic trades
-2025-09-24 02:31:44,895 - __main__ - INFO - Running data update #31
-2025-09-24 02:31:45,552 - __main__ - INFO - Account balance: $252.53
-2025-09-24 02:31:45,979 - __main__ - INFO - Found 1 open positions
-2025-09-24 02:31:45,981 - __main__ - INFO - Position fields: ['position', 'market']
-2025-09-24 02:31:45,981 - __main__ - INFO - First position: {'position': {'contractSize': 1, 'createdDate': '2025-09-11T18:15:17.438', 'createdDateUTC': '2025-09-11T14:15:17.438', 'dealId': '00015481-0001-54c4-0000-000080ad0086', 'dealReference': 'p_00015481-0001-54c4-0000-000080ad0086', 'workingOrderId': '00015481-0001-54c4-0000-000080ad0085', 'size': 21.0, 'leverage': 10, 'upl': 162.33, 'direction': 'BUY', 'level': 42.45, 'currency': 'USD', 'guaranteedStop': False, 'stopLevel': 43.92, 'trailingStop': False}, 'market': {'instrumentName': 'Global X Uranium ETF', 'instrumentId': 374388004312260, 'expiry': '-', 'epic': 'URA', 'symbol': 'URA', 'instrumentType': 'SHARES', 'marketStatus': 'CLOSED', 'lotSize': 1, 'percentageChange': -0.04, 'bid': 50.18, 'offer': 50.39, 'updateTime': '2025-09-23T23:59:58.954', 'updateTimeUTC': '2025-09-23T19:59:58.954', 'delayTime': 0, 'streamingPricesAvailable': True, 'scalingFactor': 1, 'marketModes': ['REGULAR'], 'pipPosition': 2, 'tickSize': 0.01}}
-2025-09-24 02:31:47,055 - bot.api - INFO - Market data keys for TECL: ['instrument', 'dealingRules', 'snapshot']
-2025-09-24 02:31:47,055 - bot.api - INFO - Snapshot for TECL: bid=122.14, offer=122.33, high=None, low=None, percentageChange=0.02
-2025-09-24 02:31:47,055 - bot.api - INFO - Instrument for TECL: name=Direxion Daily Technology Bull 3X Shares, type=SHARES, marketId=None, expiry=-, lotSize=1
-2025-09-24 02:31:47,055 - bot.api - INFO - Opening hours for TECL: {'mon': ['13:30 - 20:00'], 'tue': ['13:30 - 20:00'], 'wed': ['13:30 - 20:00'], 'thu': ['13:30 - 20:00'], 'fri': ['13:30 - 20:00'], 'sat': [], 'sun': [], 'zone': 'UTC'}
-2025-09-24 02:31:47,055 - bot.api - INFO - Dealing rules (top level): minDealSize={'unit': 'POINTS', 'value': 0.1}, maxDealSize={'unit': 'POINTS', 'value': 3250}, minSizeIncrement={'unit': 'POINTS', 'value': 0.1}
-2025-09-24 02:31:47,055 - __main__ - INFO - Market data updated for TECL
-2025-09-24 02:31:47,055 - __main__ - INFO - Market is CLOSED, next open in 15.0 hours
-2025-09-24 02:31:47,413 - bot.api - INFO - Fetched 0 historical trades
-2025-09-24 02:31:47,413 - __main__ - INFO - Found 0 historic trades
-2025-09-24 02:31:53,005 - __main__ - INFO - Running data update #32
-2025-09-24 02:31:53,441 - __main__ - INFO - Account balance: $252.53
-2025-09-24 02:31:54,029 - __main__ - INFO - Found 1 open positions
-2025-09-24 02:31:54,029 - __main__ - INFO - Position fields: ['position', 'market']
-2025-09-24 02:31:54,029 - __main__ - INFO - First position: {'position': {'contractSize': 1, 'createdDate': '2025-09-11T18:15:17.438', 'createdDateUTC': '2025-09-11T14:15:17.438', 'dealId': '00015481-0001-54c4-0000-000080ad0086', 'dealReference': 'p_00015481-0001-54c4-0000-000080ad0086', 'workingOrderId': '00015481-0001-54c4-0000-000080ad0085', 'size': 21.0, 'leverage': 10, 'upl': 162.33, 'direction': 'BUY', 'level': 42.45, 'currency': 'USD', 'guaranteedStop': False, 'stopLevel': 43.92, 'trailingStop': False}, 'market': {'instrumentName': 'Global X Uranium ETF', 'instrumentId': 374388004312260, 'expiry': '-', 'epic': 'URA', 'symbol': 'URA', 'instrumentType': 'SHARES', 'marketStatus': 'CLOSED', 'lotSize': 1, 'percentageChange': -0.04, 'bid': 50.18, 'offer': 50.39, 'updateTime': '2025-09-23T23:59:58.954', 'updateTimeUTC': '2025-09-23T19:59:58.954', 'delayTime': 0, 'streamingPricesAvailable': True, 'scalingFactor': 1, 'marketModes': ['REGULAR'], 'pipPosition': 2, 'tickSize': 0.01}}
-2025-09-24 02:31:54,396 - bot.api - INFO - Market data keys for TECL: ['instrument', 'dealingRules', 'snapshot']
-2025-09-24 02:31:54,396 - bot.api - INFO - Snapshot for TECL: bid=122.14, offer=122.33, high=None, low=None, percentageChange=0.02
-2025-09-24 02:31:54,397 - bot.api - INFO - Instrument for TECL: name=Direxion Daily Technology Bull 3X Shares, type=SHARES, marketId=None, expiry=-, lotSize=1
-2025-09-24 02:31:54,397 - bot.api - INFO - Opening hours for TECL: {'mon': ['13:30 - 20:00'], 'tue': ['13:30 - 20:00'], 'wed': ['13:30 - 20:00'], 'thu': ['13:30 - 20:00'], 'fri': ['13:30 - 20:00'], 'sat': [], 'sun': [], 'zone': 'UTC'}
-2025-09-24 02:31:54,397 - bot.api - INFO - Dealing rules (top level): minDealSize={'unit': 'POINTS', 'value': 0.1}, maxDealSize={'unit': 'POINTS', 'value': 3250}, minSizeIncrement={'unit': 'POINTS', 'value': 0.1}
-2025-09-24 02:31:54,397 - __main__ - INFO - Market data updated for TECL
-2025-09-24 02:31:54,397 - __main__ - INFO - Market is CLOSED, next open in 15.0 hours
-2025-09-24 02:31:54,770 - bot.api - INFO - Fetched 0 historical trades
-2025-09-24 02:31:54,770 - __main__ - INFO - Found 0 historic trades
-2025-09-24 02:32:00,094 - __main__ - INFO - Running data update #33
-2025-09-24 02:32:00,727 - __main__ - INFO - Account balance: $252.53
-2025-09-24 02:32:01,317 - __main__ - INFO - Found 1 open positions
-2025-09-24 02:32:01,317 - __main__ - INFO - Position fields: ['position', 'market']
-2025-09-24 02:32:01,317 - __main__ - INFO - First position: {'position': {'contractSize': 1, 'createdDate': '2025-09-11T18:15:17.438', 'createdDateUTC': '2025-09-11T14:15:17.438', 'dealId': '00015481-0001-54c4-0000-000080ad0086', 'dealReference': 'p_00015481-0001-54c4-0000-000080ad0086', 'workingOrderId': '00015481-0001-54c4-0000-000080ad0085', 'size': 21.0, 'leverage': 10, 'upl': 162.33, 'direction': 'BUY', 'level': 42.45, 'currency': 'USD', 'guaranteedStop': False, 'stopLevel': 43.92, 'trailingStop': False}, 'market': {'instrumentName': 'Global X Uranium ETF', 'instrumentId': 374388004312260, 'expiry': '-', 'epic': 'URA', 'symbol': 'URA', 'instrumentType': 'SHARES', 'marketStatus': 'CLOSED', 'lotSize': 1, 'percentageChange': -0.04, 'bid': 50.18, 'offer': 50.39, 'updateTime': '2025-09-23T23:59:58.954', 'updateTimeUTC': '2025-09-23T19:59:58.954', 'delayTime': 0, 'streamingPricesAvailable': True, 'scalingFactor': 1, 'marketModes': ['REGULAR'], 'pipPosition': 2, 'tickSize': 0.01}}
-2025-09-24 02:32:01,781 - bot.api - INFO - Market data keys for TECL: ['instrument', 'dealingRules', 'snapshot']
-2025-09-24 02:32:01,781 - bot.api - INFO - Snapshot for TECL: bid=122.14, offer=122.33, high=None, low=None, percentageChange=0.02
-2025-09-24 02:32:01,781 - bot.api - INFO - Instrument for TECL: name=Direxion Daily Technology Bull 3X Shares, type=SHARES, marketId=None, expiry=-, lotSize=1
-2025-09-24 02:32:01,781 - bot.api - INFO - Opening hours for TECL: {'mon': ['13:30 - 20:00'], 'tue': ['13:30 - 20:00'], 'wed': ['13:30 - 20:00'], 'thu': ['13:30 - 20:00'], 'fri': ['13:30 - 20:00'], 'sat': [], 'sun': [], 'zone': 'UTC'}
-2025-09-24 02:32:01,783 - bot.api - INFO - Dealing rules (top level): minDealSize={'unit': 'POINTS', 'value': 0.1}, maxDealSize={'unit': 'POINTS', 'value': 3250}, minSizeIncrement={'unit': 'POINTS', 'value': 0.1}
-2025-09-24 02:32:01,783 - __main__ - INFO - Market data updated for TECL
-2025-09-24 02:32:01,783 - __main__ - INFO - Market is CLOSED, next open in 15.0 hours
-2025-09-24 02:32:02,368 - bot.api - INFO - Fetched 0 historical trades
-2025-09-24 02:32:02,368 - __main__ - INFO - Found 0 historic trades
-2025-09-24 02:32:07,705 - __main__ - INFO - Running data update #34
-2025-09-24 02:32:08,083 - __main__ - INFO - Account balance: $252.53
-2025-09-24 02:32:08,420 - __main__ - INFO - Found 1 open positions
-2025-09-24 02:32:08,420 - __main__ - INFO - Position fields: ['position', 'market']
-2025-09-24 02:32:08,420 - __main__ - INFO - First position: {'position': {'contractSize': 1, 'createdDate': '2025-09-11T18:15:17.438', 'createdDateUTC': '2025-09-11T14:15:17.438', 'dealId': '00015481-0001-54c4-0000-000080ad0086', 'dealReference': 'p_00015481-0001-54c4-0000-000080ad0086', 'workingOrderId': '00015481-0001-54c4-0000-000080ad0085', 'size': 21.0, 'leverage': 10, 'upl': 162.33, 'direction': 'BUY', 'level': 42.45, 'currency': 'USD', 'guaranteedStop': False, 'stopLevel': 43.92, 'trailingStop': False}, 'market': {'instrumentName': 'Global X Uranium ETF', 'instrumentId': 374388004312260, 'expiry': '-', 'epic': 'URA', 'symbol': 'URA', 'instrumentType': 'SHARES', 'marketStatus': 'CLOSED', 'lotSize': 1, 'percentageChange': -0.04, 'bid': 50.18, 'offer': 50.39, 'updateTime': '2025-09-23T23:59:58.954', 'updateTimeUTC': '2025-09-23T19:59:58.954', 'delayTime': 0, 'streamingPricesAvailable': True, 'scalingFactor': 1, 'marketModes': ['REGULAR'], 'pipPosition': 2, 'tickSize': 0.01}}
-2025-09-24 02:32:08,753 - bot.api - INFO - Market data keys for TECL: ['instrument', 'dealingRules', 'snapshot']
-2025-09-24 02:32:08,753 - bot.api - INFO - Snapshot for TECL: bid=122.14, offer=122.33, high=None, low=None, percentageChange=0.02
-2025-09-24 02:32:08,753 - bot.api - INFO - Instrument for TECL: name=Direxion Daily Technology Bull 3X Shares, type=SHARES, marketId=None, expiry=-, lotSize=1
-2025-09-24 02:32:08,753 - bot.api - INFO - Opening hours for TECL: {'mon': ['13:30 - 20:00'], 'tue': ['13:30 - 20:00'], 'wed': ['13:30 - 20:00'], 'thu': ['13:30 - 20:00'], 'fri': ['13:30 - 20:00'], 'sat': [], 'sun': [], 'zone': 'UTC'}
-2025-09-24 02:32:08,753 - bot.api - INFO - Dealing rules (top level): minDealSize={'unit': 'POINTS', 'value': 0.1}, maxDealSize={'unit': 'POINTS', 'value': 3250}, minSizeIncrement={'unit': 'POINTS', 'value': 0.1}
-2025-09-24 02:32:08,753 - __main__ - INFO - Market data updated for TECL
-2025-09-24 02:32:08,753 - __main__ - INFO - Market is CLOSED, next open in 15.0 hours
-2025-09-24 02:32:09,347 - bot.api - INFO - Fetched 0 historical trades
-2025-09-24 02:32:09,348 - __main__ - INFO - Found 0 historic trades
-2025-09-24 02:32:10,440 - bot.settings - INFO - Settings reloaded from file
-2025-09-24 02:32:10,442 - bot.database - INFO - Connected to database: database.db
-2025-09-24 02:32:10,442 - bot.database - INFO - Candles table created or already exists
-2025-09-24 02:32:10,443 - __main__ - INFO - Bot start requested
-2025-09-24 02:32:10,443 - bot.api - INFO - CapitalComAPI.authenticate(environment=live)
-2025-09-24 02:32:11,153 - bot.api - INFO - Successfully authenticated with Capital.com
-2025-09-24 02:32:11,430 - __main__ - INFO - Bot start requested
-2025-09-24 02:32:11,430 - bot.api - INFO - CapitalComAPI.authenticate(environment=live)
-2025-09-24 02:32:11,893 - bot.api - INFO - Switched to account: 211640169982416068
-2025-09-24 02:32:11,893 - bot.trader - INFO - Using account: MAIN ACCOUNT
-2025-09-24 02:32:12,182 - bot.api - INFO - Successfully authenticated with Capital.com
-2025-09-24 02:32:12,221 - bot.api - INFO - Market data keys for TECL: ['instrument', 'dealingRules', 'snapshot']
-2025-09-24 02:32:12,222 - bot.api - INFO - Snapshot for TECL: bid=122.14, offer=122.33, high=None, low=None, percentageChange=0.02
-2025-09-24 02:32:12,222 - bot.api - INFO - Instrument for TECL: name=Direxion Daily Technology Bull 3X Shares, type=SHARES, marketId=None, expiry=-, lotSize=1
-2025-09-24 02:32:12,222 - bot.api - INFO - Opening hours for TECL: {'mon': ['13:30 - 20:00'], 'tue': ['13:30 - 20:00'], 'wed': ['13:30 - 20:00'], 'thu': ['13:30 - 20:00'], 'fri': ['13:30 - 20:00'], 'sat': [], 'sun': [], 'zone': 'UTC'}
-2025-09-24 02:32:12,222 - bot.api - INFO - Dealing rules (top level): minDealSize={'unit': 'POINTS', 'value': 0.1}, maxDealSize={'unit': 'POINTS', 'value': 3250}, minSizeIncrement={'unit': 'POINTS', 'value': 0.1}
-2025-09-24 02:32:12,223 - bot.data_downloader - INFO - Downloading 100 MINUTE_5 candles for TECL...
-2025-09-24 02:32:12,223 - bot.api - ERROR - Error getting historical prices for TECL: 'NoneType' object has no attribute 'historical_price'
-2025-09-24 02:32:12,224 - bot.data_downloader - WARNING - No price data received for TECL.
-2025-09-24 02:32:12,224 - bot.trader - INFO - Trading bot started with Hybrid Intelligent System
-2025-09-24 02:32:13,178 - bot.api - INFO - Switched to account: 211640169982416068
-2025-09-24 02:32:13,180 - bot.trader - INFO - Using account: MAIN ACCOUNT
-2025-09-24 02:32:13,673 - bot.api - INFO - Market data keys for TECL: ['instrument', 'dealingRules', 'snapshot']
-2025-09-24 02:32:13,673 - bot.api - INFO - Snapshot for TECL: bid=122.14, offer=122.33, high=None, low=None, percentageChange=0.02
-2025-09-24 02:32:13,675 - bot.api - INFO - Instrument for TECL: name=Direxion Daily Technology Bull 3X Shares, type=SHARES, marketId=None, expiry=-, lotSize=1
-2025-09-24 02:32:13,675 - bot.api - INFO - Opening hours for TECL: {'mon': ['13:30 - 20:00'], 'tue': ['13:30 - 20:00'], 'wed': ['13:30 - 20:00'], 'thu': ['13:30 - 20:00'], 'fri': ['13:30 - 20:00'], 'sat': [], 'sun': [], 'zone': 'UTC'}
-2025-09-24 02:32:13,675 - bot.api - INFO - Dealing rules (top level): minDealSize={'unit': 'POINTS', 'value': 0.1}, maxDealSize={'unit': 'POINTS', 'value': 3250}, minSizeIncrement={'unit': 'POINTS', 'value': 0.1}
-2025-09-24 02:32:13,689 - bot.api - INFO - Market data keys for TECL: ['instrument', 'dealingRules', 'snapshot']
-2025-09-24 02:32:13,690 - bot.api - INFO - Snapshot for TECL: bid=122.14, offer=122.33, high=None, low=None, percentageChange=0.02
-2025-09-24 02:32:13,690 - bot.api - INFO - Instrument for TECL: name=Direxion Daily Technology Bull 3X Shares, type=SHARES, marketId=None, expiry=-, lotSize=1
-2025-09-24 02:32:13,690 - bot.api - INFO - Opening hours for TECL: {'mon': ['13:30 - 20:00'], 'tue': ['13:30 - 20:00'], 'wed': ['13:30 - 20:00'], 'thu': ['13:30 - 20:00'], 'fri': ['13:30 - 20:00'], 'sat': [], 'sun': [], 'zone': 'UTC'}
-2025-09-24 02:32:13,690 - bot.api - INFO - Dealing rules (top level): minDealSize={'unit': 'POINTS', 'value': 0.1}, maxDealSize={'unit': 'POINTS', 'value': 3250}, minSizeIncrement={'unit': 'POINTS', 'value': 0.1}
-2025-09-24 02:32:13,691 - bot.data_downloader - INFO - Downloading 100 MINUTE_5 candles for TECL...
-2025-09-24 02:32:13,691 - bot.api - ERROR - Error getting historical prices for TECL: 'NoneType' object has no attribute 'historical_price'
-2025-09-24 02:32:13,691 - bot.data_downloader - WARNING - No price data received for TECL.
-2025-09-24 02:32:13,692 - bot.trader - INFO - Trading bot started with Hybrid Intelligent System
-2025-09-24 02:32:14,754 - bot.api - INFO - Market data keys for TECL: ['instrument', 'dealingRules', 'snapshot']
-2025-09-24 02:32:14,754 - bot.api - INFO - Snapshot for TECL: bid=122.14, offer=122.33, high=None, low=None, percentageChange=0.02
-2025-09-24 02:32:14,754 - bot.api - INFO - Instrument for TECL: name=Direxion Daily Technology Bull 3X Shares, type=SHARES, marketId=None, expiry=-, lotSize=1
-2025-09-24 02:32:14,754 - bot.api - INFO - Opening hours for TECL: {'mon': ['13:30 - 20:00'], 'tue': ['13:30 - 20:00'], 'wed': ['13:30 - 20:00'], 'thu': ['13:30 - 20:00'], 'fri': ['13:30 - 20:00'], 'sat': [], 'sun': [], 'zone': 'UTC'}
-2025-09-24 02:32:14,754 - bot.api - INFO - Dealing rules (top level): minDealSize={'unit': 'POINTS', 'value': 0.1}, maxDealSize={'unit': 'POINTS', 'value': 3250}, minSizeIncrement={'unit': 'POINTS', 'value': 0.1}
-2025-09-24 02:32:14,956 - __main__ - INFO - Running data update #35
-2025-09-24 02:32:15,338 - __main__ - INFO - Account balance: $252.53
-2025-09-24 02:32:15,713 - __main__ - INFO - Found 1 open positions
-2025-09-24 02:32:15,713 - __main__ - INFO - Position fields: ['position', 'market']
-2025-09-24 02:32:15,713 - __main__ - INFO - First position: {'position': {'contractSize': 1, 'createdDate': '2025-09-11T18:15:17.438', 'createdDateUTC': '2025-09-11T14:15:17.438', 'dealId': '00015481-0001-54c4-0000-000080ad0086', 'dealReference': 'p_00015481-0001-54c4-0000-000080ad0086', 'workingOrderId': '00015481-0001-54c4-0000-000080ad0085', 'size': 21.0, 'leverage': 10, 'upl': 162.33, 'direction': 'BUY', 'level': 42.45, 'currency': 'USD', 'guaranteedStop': False, 'stopLevel': 43.92, 'trailingStop': False}, 'market': {'instrumentName': 'Global X Uranium ETF', 'instrumentId': 374388004312260, 'expiry': '-', 'epic': 'URA', 'symbol': 'URA', 'instrumentType': 'SHARES', 'marketStatus': 'CLOSED', 'lotSize': 1, 'percentageChange': -0.04, 'bid': 50.18, 'offer': 50.39, 'updateTime': '2025-09-23T23:59:58.954', 'updateTimeUTC': '2025-09-23T19:59:58.954', 'delayTime': 0, 'streamingPricesAvailable': True, 'scalingFactor': 1, 'marketModes': ['REGULAR'], 'pipPosition': 2, 'tickSize': 0.01}}
-2025-09-24 02:32:16,298 - bot.api - INFO - Market data keys for TECL: ['instrument', 'dealingRules', 'snapshot']
-2025-09-24 02:32:16,298 - bot.api - INFO - Snapshot for TECL: bid=122.14, offer=122.33, high=None, low=None, percentageChange=0.02
-2025-09-24 02:32:16,298 - bot.api - INFO - Instrument for TECL: name=Direxion Daily Technology Bull 3X Shares, type=SHARES, marketId=None, expiry=-, lotSize=1
-2025-09-24 02:32:16,298 - bot.api - INFO - Opening hours for TECL: {'mon': ['13:30 - 20:00'], 'tue': ['13:30 - 20:00'], 'wed': ['13:30 - 20:00'], 'thu': ['13:30 - 20:00'], 'fri': ['13:30 - 20:00'], 'sat': [], 'sun': [], 'zone': 'UTC'}
-2025-09-24 02:32:16,299 - bot.api - INFO - Dealing rules (top level): minDealSize={'unit': 'POINTS', 'value': 0.1}, maxDealSize={'unit': 'POINTS', 'value': 3250}, minSizeIncrement={'unit': 'POINTS', 'value': 0.1}
-2025-09-24 02:32:16,299 - __main__ - INFO - Market data updated for TECL
-2025-09-24 02:32:16,299 - __main__ - INFO - Market is CLOSED, next open in 15.0 hours
-2025-09-24 02:32:16,626 - __main__ - INFO - Bot stop requested
-2025-09-24 02:32:16,626 - bot.trader - INFO - Trading bot stopped
-2025-09-24 02:32:16,656 - bot.api - INFO - Fetched 0 historical trades
-2025-09-24 02:32:16,656 - __main__ - INFO - Found 0 historic trades
-2025-09-24 02:32:22,288 - __main__ - INFO - Running data update #36
-2025-09-24 02:32:22,709 - __main__ - INFO - Account balance: $252.53
-2025-09-24 02:32:23,085 - __main__ - INFO - Found 1 open positions
-2025-09-24 02:32:23,085 - __main__ - INFO - Position fields: ['position', 'market']
-2025-09-24 02:32:23,087 - __main__ - INFO - First position: {'position': {'contractSize': 1, 'createdDate': '2025-09-11T18:15:17.438', 'createdDateUTC': '2025-09-11T14:15:17.438', 'dealId': '00015481-0001-54c4-0000-000080ad0086', 'dealReference': 'p_00015481-0001-54c4-0000-000080ad0086', 'workingOrderId': '00015481-0001-54c4-0000-000080ad0085', 'size': 21.0, 'leverage': 10, 'upl': 162.33, 'direction': 'BUY', 'level': 42.45, 'currency': 'USD', 'guaranteedStop': False, 'stopLevel': 43.92, 'trailingStop': False}, 'market': {'instrumentName': 'Global X Uranium ETF', 'instrumentId': 374388004312260, 'expiry': '-', 'epic': 'URA', 'symbol': 'URA', 'instrumentType': 'SHARES', 'marketStatus': 'CLOSED', 'lotSize': 1, 'percentageChange': -0.04, 'bid': 50.18, 'offer': 50.39, 'updateTime': '2025-09-23T23:59:58.954', 'updateTimeUTC': '2025-09-23T19:59:58.954', 'delayTime': 0, 'streamingPricesAvailable': True, 'scalingFactor': 1, 'marketModes': ['REGULAR'], 'pipPosition': 2, 'tickSize': 0.01}}
-2025-09-24 02:32:23,444 - bot.api - INFO - Market data keys for TECL: ['instrument', 'dealingRules', 'snapshot']
-2025-09-24 02:32:23,444 - bot.api - INFO - Snapshot for TECL: bid=122.14, offer=122.33, high=None, low=None, percentageChange=0.02
-2025-09-24 02:32:23,444 - bot.api - INFO - Instrument for TECL: name=Direxion Daily Technology Bull 3X Shares, type=SHARES, marketId=None, expiry=-, lotSize=1
-2025-09-24 02:32:23,444 - bot.api - INFO - Opening hours for TECL: {'mon': ['13:30 - 20:00'], 'tue': ['13:30 - 20:00'], 'wed': ['13:30 - 20:00'], 'thu': ['13:30 - 20:00'], 'fri': ['13:30 - 20:00'], 'sat': [], 'sun': [], 'zone': 'UTC'}
-2025-09-24 02:32:23,446 - bot.api - INFO - Dealing rules (top level): minDealSize={'unit': 'POINTS', 'value': 0.1}, maxDealSize={'unit': 'POINTS', 'value': 3250}, minSizeIncrement={'unit': 'POINTS', 'value': 0.1}
-2025-09-24 02:32:23,446 - __main__ - INFO - Market data updated for TECL
-2025-09-24 02:32:23,446 - __main__ - INFO - Market is CLOSED, next open in 15.0 hours
-2025-09-24 02:32:24,030 - bot.api - INFO - Fetched 0 historical trades
-2025-09-24 02:32:24,030 - __main__ - INFO - Found 0 historic trades
-2025-09-24 02:32:27,115 - __main__ - INFO - WebSocket disconnected
-2025-09-24 02:32:27,896 - __main__ - INFO - WebSocket disconnected
-2025-09-24 02:32:27,998 - __main__ - INFO - Stopping app...
-2025-09-24 02:32:27,998 - bot.trader - INFO - Trading bot stopped
-2025-09-24 02:32:27,998 - bot.database - INFO - Database connection closed
+2025-09-24 02:41:57,525 - bot.settings - INFO - Settings reloaded from file
+2025-09-24 02:41:57,527 - uvicorn.error - INFO - Started server process [8576]
+2025-09-24 02:41:57,527 - uvicorn.error - INFO - Waiting for application startup.
+2025-09-24 02:41:57,527 - main - INFO - Starting app connection layer...
+2025-09-24 02:41:57,529 - bot.api - INFO - CapitalComAPI.authenticate(environment=live)
+2025-09-24 02:41:58,983 - bot.api - INFO - Successfully authenticated with Capital.com
+2025-09-24 02:42:00,795 - bot.api - INFO - Switched to account: 290795266196460740
+2025-09-24 02:42:00,795 - main - INFO - Connected to live account: Account 1
+2025-09-24 02:42:00,797 - main - INFO - Starting continuous data updates
+2025-09-24 02:42:00,797 - main - INFO - Running data update #1
+2025-09-24 02:42:00,797 - uvicorn.error - INFO - Application startup complete.
+2025-09-24 02:42:00,797 - uvicorn.error - INFO - Uvicorn running on http://127.0.0.1:8011 (Press CTRL+C to quit)
+2025-09-24 02:42:00,958 - uvicorn.access - INFO - 127.0.0.1:54855 - "GET / HTTP/1.1" 200
+2025-09-24 02:42:01,364 - main - INFO - Account balance: $0.0
+2025-09-24 02:42:01,489 - uvicorn.error - INFO - ('127.0.0.1', 54861) - "WebSocket /ws" [accepted]
+2025-09-24 02:42:01,490 - main - INFO - WebSocket connected
+2025-09-24 02:42:01,491 - uvicorn.access - INFO - 127.0.0.1:54855 - "GET /config HTTP/1.1" 200
+2025-09-24 02:42:01,492 - uvicorn.error - INFO - connection open
+2025-09-24 02:42:02,183 - main - INFO - Found 0 open positions
+2025-09-24 02:42:02,494 - main - INFO - Account structure: accountName=Account 1, balance_keys=['balance', 'deposit', 'profitLoss', 'available']
+2025-09-24 02:42:02,494 - main - INFO - Balance values: balance=0.0, available=0.0, profitLoss=0.0
+2025-09-24 02:42:02,591 - bot.api - INFO - Market data keys for TECL: ['instrument', 'dealingRules', 'snapshot']
+2025-09-24 02:42:02,593 - bot.api - INFO - Snapshot for TECL: bid=122.14, offer=122.33, high=None, low=None, percentageChange=0.02
+2025-09-24 02:42:02,593 - bot.api - INFO - Instrument for TECL: name=Direxion Daily Technology Bull 3X Shares, type=SHARES, marketId=None, expiry=-, lotSize=1
+2025-09-24 02:42:02,593 - bot.api - INFO - Opening hours for TECL: {'mon': ['13:30 - 20:00'], 'tue': ['13:30 - 20:00'], 'wed': ['13:30 - 20:00'], 'thu': ['13:30 - 20:00'], 'fri': ['13:30 - 20:00'], 'sat': [], 'sun': [], 'zone': 'UTC'}
+2025-09-24 02:42:02,593 - bot.api - INFO - Dealing rules (top level): minDealSize={'unit': 'POINTS', 'value': 0.1}, maxDealSize={'unit': 'POINTS', 'value': 3250}, minSizeIncrement={'unit': 'POINTS', 'value': 0.1}
+2025-09-24 02:42:02,593 - main - INFO - Market data updated for TECL
+2025-09-24 02:42:02,621 - main - INFO - Market is CLOSED, next open in 14.8 hours
+2025-09-24 02:42:03,001 - uvicorn.access - INFO - 127.0.0.1:54855 - "GET /accounts HTTP/1.1" 200
+2025-09-24 02:42:03,006 - main - INFO - Selecting account 290795266196460740
+2025-09-24 02:42:03,823 - bot.api - INFO - Switched to account: 290795266196460740
+2025-09-24 02:42:03,825 - bot.settings - INFO - Settings saved to file
+2025-09-24 02:42:03,825 - bot.settings - INFO - Saved environment account map: live -> 290795266196460740
+2025-09-24 02:42:04,230 - bot.api - INFO - Fetched 0 historical trades
+2025-09-24 02:42:04,230 - main - INFO - Found 0 historic trades
+2025-09-24 02:42:04,853 - uvicorn.access - INFO - 127.0.0.1:54855 - "POST /accounts/select HTTP/1.1" 200
+2025-09-24 02:42:09,596 - main - INFO - Running data update #2
+2025-09-24 02:42:10,027 - main - INFO - Account balance: $0.0
+2025-09-24 02:42:11,010 - main - INFO - Found 0 open positions
+2025-09-24 02:42:11,584 - bot.api - INFO - Market data keys for TECL: ['instrument', 'dealingRules', 'snapshot']
+2025-09-24 02:42:11,585 - bot.api - INFO - Snapshot for TECL: bid=122.14, offer=122.33, high=None, low=None, percentageChange=0.02
+2025-09-24 02:42:11,585 - bot.api - INFO - Instrument for TECL: name=Direxion Daily Technology Bull 3X Shares, type=SHARES, marketId=None, expiry=-, lotSize=1
+2025-09-24 02:42:11,585 - bot.api - INFO - Opening hours for TECL: {'mon': ['13:30 - 20:00'], 'tue': ['13:30 - 20:00'], 'wed': ['13:30 - 20:00'], 'thu': ['13:30 - 20:00'], 'fri': ['13:30 - 20:00'], 'sat': [], 'sun': [], 'zone': 'UTC'}
+2025-09-24 02:42:11,585 - bot.api - INFO - Dealing rules (top level): minDealSize={'unit': 'POINTS', 'value': 0.1}, maxDealSize={'unit': 'POINTS', 'value': 3250}, minSizeIncrement={'unit': 'POINTS', 'value': 0.1}
+2025-09-24 02:42:11,585 - main - INFO - Market data updated for TECL
+2025-09-24 02:42:11,586 - main - INFO - Market is CLOSED, next open in 14.8 hours
+2025-09-24 02:42:11,937 - bot.api - INFO - Fetched 0 historical trades
+2025-09-24 02:42:11,937 - main - INFO - Found 0 historic trades
+2025-09-24 02:42:17,107 - uvicorn.error - INFO - ('127.0.0.1', 54887) - "WebSocket /ws" [accepted]
+2025-09-24 02:42:17,109 - main - INFO - WebSocket connected
+2025-09-24 02:42:17,109 - uvicorn.error - INFO - connection open
+2025-09-24 02:42:17,503 - main - INFO - Running data update #3
+2025-09-24 02:42:18,159 - main - INFO - Account balance: $0.0
+2025-09-24 02:42:18,483 - uvicorn.error - INFO - Shutting down
+2025-09-24 02:42:18,484 - uvicorn.error - INFO - connection closed
+2025-09-24 02:42:18,485 - uvicorn.error - INFO - connection closed
+2025-09-24 02:42:18,587 - main - INFO - WebSocket disconnected
+2025-09-24 02:42:18,587 - uvicorn.error - INFO - Waiting for background tasks to complete. (CTRL+C to force quit)
+2025-09-24 02:42:18,745 - main - INFO - Found 0 open positions
+2025-09-24 02:42:19,081 - bot.api - INFO - Market data keys for TECL: ['instrument', 'dealingRules', 'snapshot']
+2025-09-24 02:42:19,081 - bot.api - INFO - Snapshot for TECL: bid=122.14, offer=122.33, high=None, low=None, percentageChange=0.02
+2025-09-24 02:42:19,081 - bot.api - INFO - Instrument for TECL: name=Direxion Daily Technology Bull 3X Shares, type=SHARES, marketId=None, expiry=-, lotSize=1
+2025-09-24 02:42:19,081 - bot.api - INFO - Opening hours for TECL: {'mon': ['13:30 - 20:00'], 'tue': ['13:30 - 20:00'], 'wed': ['13:30 - 20:00'], 'thu': ['13:30 - 20:00'], 'fri': ['13:30 - 20:00'], 'sat': [], 'sun': [], 'zone': 'UTC'}
+2025-09-24 02:42:19,081 - bot.api - INFO - Dealing rules (top level): minDealSize={'unit': 'POINTS', 'value': 0.1}, maxDealSize={'unit': 'POINTS', 'value': 3250}, minSizeIncrement={'unit': 'POINTS', 'value': 0.1}
+2025-09-24 02:42:19,081 - main - INFO - Market data updated for TECL
+2025-09-24 02:42:19,081 - main - INFO - Market is CLOSED, next open in 14.8 hours
+2025-09-24 02:42:19,139 - main - INFO - WebSocket disconnected
+2025-09-24 02:42:19,253 - uvicorn.error - INFO - Waiting for application shutdown.
+2025-09-24 02:42:19,253 - main - INFO - Stopping app...
+2025-09-24 02:42:19,253 - uvicorn.error - INFO - Application shutdown complete.
+2025-09-24 02:42:19,253 - uvicorn.error - INFO - Finished server process [8576]
