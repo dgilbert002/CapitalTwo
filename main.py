@@ -53,6 +53,19 @@ logger = logging.getLogger(__name__)
 app = FastAPI()
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
+# Helper: kill any process on the port (POSIX only)
+def kill_port_if_posix(port: int) -> None:
+    if os.name == 'posix':  # Unix/Linux/Mac
+        try:
+            pid_str = os.popen(f"lsof -t -i:{port}").read().strip()
+            if pid_str:
+                for pid in pid_str.split('\n'):
+                    if pid:
+                        os.kill(int(pid), signal.SIGKILL)
+                        logger.info(f"Killed process {pid} on port {port}")
+        except Exception as e:
+            logger.warning(f"Could not kill process on port {port}: {e}")
+
 # Global state for GUI connection layer (always active)
 class AppState:
     def __init__(self):
@@ -74,7 +87,8 @@ app_state = AppState()
 async def get():
     try:
         with open("static/index.html", "r", encoding="utf-8") as f:
-            return HTMLResponse(f.read())
+            html = f.read()
+        return HTMLResponse(html)
     except Exception as e:
         logger.error(f"Error loading index.html: {e}")
         return HTMLResponse(f"<h1>Error loading page: {e}</h1>", status_code=500)
@@ -120,6 +134,7 @@ async def websocket_endpoint(websocket: WebSocket):
             "trade_history": app_state.bot.trade_history if app_state.bot else [],
             "action_log": getattr(app_state.bot, 'action_log', []) if app_state.bot else [],
             "historic_trades": app_state.historic_trades,
+                "stop_loss_type": app_state.settings.get("BOT_CONFIG", "stop_loss_type", "normal"),
                 "environment": app_state.api.environment if app_state.api else "demo",
                 "is_connected": app_state.is_connected
             }
@@ -312,6 +327,129 @@ async def bot_simulate():
         return result
     return {"ok": bool(result), "message": "Simulation complete" if result else None, "error": None if result else "simulation_failed"}
 
+@app.post("/brains/preview")
+async def brains_preview():
+    """Run Brains analysis without trading and return the decision details."""
+    try:
+        # Ensure API and market info
+        if not app_state.api:
+            return {"ok": False, "error": "no_api_connection"}
+        epic = app_state.settings.get("BOT_CONFIG", "epic", "TECL")
+        market_info = await app_state.api.get_market_info(epic)
+        if not market_info:
+            return {"ok": False, "error": "no_market_info"}
+
+        # Build candles DataFrame similar to bot path; ensure latest candles
+        from bot.database import DatabaseManager
+        from bot.data_downloader import DataDownloader
+        from Brains.ai_system import HybridIntelligentSystem
+        import pandas as pd
+        db = DatabaseManager(app_state.settings.get('DATABASE', 'path', 'database.db'))
+        # Attempt to top-up recent candles to ensure we have the previous closed 5m bar
+        try:
+            downloader = DataDownloader(app_state.api, db)
+            await downloader.download_and_store_candles(epic, app_state.api.ResolutionType.MINUTE_5, 50)
+        except Exception:
+            pass
+        candles = db.get_candles(epic, limit=200)
+        if not candles or len(candles) < 50:
+            return {"ok": False, "error": "insufficient_history"}
+
+        df = pd.DataFrame(candles, columns=['epic', 'timestamp', 'open', 'high', 'low', 'close', 'volume'])
+        if 'epic' in df.columns:
+            df = df.drop(columns=['epic'])
+        df = df.rename(columns={
+            'open': 'openPrice',
+            'high': 'highPrice',
+            'low': 'lowPrice',
+            'close': 'closePrice',
+            'volume': 'lastTradedVolume'
+        })
+        df['timestamp'] = pd.to_datetime(df['timestamp'], utc=True)
+        df = df.sort_values('timestamp').reset_index(drop=True)
+
+        ai = HybridIntelligentSystem()
+        df_for_ai = ai.calculate_technical_indicators(df.copy())
+        latest_row = df_for_ai.iloc[-1]
+        decision = ai.analyze_market_conditions(latest_row, df_for_ai, __import__('datetime').datetime.now())
+
+        # Prepare last candle (5m) summary
+        # Display time in local timezone for UI consistency
+        import pytz
+        local_ts = latest_row['timestamp']
+        try:
+            local_ts = local_ts.tz_convert(pytz.timezone('UTC')).astimezone()
+        except Exception:
+            try:
+                local_ts = local_ts.tz_localize('UTC').astimezone()
+            except Exception:
+                pass
+        last_candle = {
+            'timestamp': local_ts.isoformat() if hasattr(local_ts, 'isoformat') else str(local_ts),
+            'open': float(latest_row.get('openPrice', latest_row.get('open', 0)) or 0),
+            'high': float(latest_row.get('highPrice', latest_row.get('high', 0)) or 0),
+            'low': float(latest_row.get('lowPrice', latest_row.get('low', 0)) or 0),
+            'close': float(latest_row.get('closePrice', latest_row.get('close', 0)) or 0),
+            'volume': float(latest_row.get('lastTradedVolume', latest_row.get('volume', 0)) or 0)
+        }
+
+        # Also compute sizing preview with dealing rules
+        rules = market_info.get('dealingRules', {})
+        snapshot = market_info.get('snapshot', {})
+        bid = float(snapshot.get('bid', 0) or 0)
+        offer = float(snapshot.get('offer', 0) or 0)
+        direction = 'long' if decision.get('trade_signal') == 'buy' else ('short' if decision.get('trade_signal') == 'sell' else 'hold')
+        entry_price = offer if direction == 'long' else (bid if direction == 'short' else 0)
+        min_size = float(rules.get('minDealSize', {}).get('value', 0.1))
+        max_size = float(rules.get('maxDealSize', {}).get('value', 3250))
+        increment = float(rules.get('minSizeIncrement', {}).get('value', 0.1))
+
+        sizing = None
+        if direction in ('long', 'short') and entry_price:
+            # Use account available for preview if available
+            available = 0.0
+            if app_state.current_account and app_state.current_account.get('balance'):
+                available = float(app_state.current_account['balance'].get('available', 0) or 0)
+            invest_pct = app_state.settings.getfloat('BOT_CONFIG', 'investment_pct', 99) / 100
+            leverage = app_state.settings.getfloat('BOT_CONFIG', 'leverage', 1)
+            raw_contracts = (available * invest_pct * leverage) / entry_price
+            # Clamp and floor to increment
+            tsz = raw_contracts
+            if tsz < min_size:
+                tsz = min_size
+            elif tsz > max_size:
+                tsz = max_size
+            tsz = (tsz // increment) * increment
+
+            # Stop level preview using configured SL type
+            sl_type = app_state.settings.get('BOT_CONFIG', 'stop_loss_type', 'normal')
+            sl_pct = app_state.settings.getfloat('BOT_CONFIG', 'stop_loss_pct', 2) / 100
+            if sl_type in ('normal', 'trailing'):
+                stop_level = entry_price * (1 - sl_pct) if direction == 'long' else entry_price * (1 + sl_pct)
+            else:
+                # staggered: use first value if provided
+                first_use = app_state.settings.get('BOT_CONFIG', 'sl_use', '0,1,2,4,6,8,10').split(',')[0]
+                first_pct = float(first_use) / 100 if first_use and first_use != '0' else sl_pct
+                stop_level = entry_price * (1 - first_pct) if direction == 'long' else entry_price * (1 + first_pct)
+
+            sizing = {
+                'available': available,
+                'investment_pct': invest_pct,
+                'leverage': leverage,
+                'entry_price': entry_price,
+                'contracts': tsz,
+                'min_size': min_size,
+                'max_size': max_size,
+                'increment': increment,
+                'stop_level': stop_level,
+                'sl_type': sl_type
+            }
+
+        return {"ok": True, "decision": decision, "sizing": sizing, "market_info": market_info, "last_candle": last_candle}
+    except Exception as e:
+        logger.error(f"Brains preview error: {e}")
+        return {"ok": False, "error": str(e)}
+
 @app.get("/config")
 async def get_config():
     env = app_state.api.environment if app_state.api else "demo"
@@ -407,18 +545,8 @@ async def select_account(payload: dict = Body(...)):
 if __name__ == "__main__":
     settings = TradingBotSettings()
     port = settings.getint("DISPLAY_CONFIG", "port", 8011)
-
     # Note: On Windows, we can't easily kill processes on a port
     # If port is in use, uvicorn will fail and user needs to restart manually
-    if os.name == 'posix':  # Unix/Linux/Mac
-        try:
-            pid_str = os.popen(f"lsof -t -i:{port}").read().strip()
-            if pid_str:
-                for pid in pid_str.split('\n'):
-                    if pid:
-                        os.kill(int(pid), signal.SIGKILL)
-                        logger.info(f"Killed process {pid} on port {port}")
-        except Exception as e:
-            logger.warning(f"Could not kill process on port {port}: {e}")
+    kill_port_if_posix(port)
 
     uvicorn.run(app, host="0.0.0.0", port=port)

@@ -187,32 +187,52 @@ class CapitalComAPI:
             # which returns all transactions - we can filter for trades
             history = await self._run_sync(self.client.account_transactions_history)
             
+            transactions = []
             if history and 'transactions' in history:
                 transactions = history['transactions']
                 
-                # Filter for TRADE type transactions only
-                trades = [t for t in transactions if t.get('type') == 'TRADE']
-                
-                # Sort by date (newest first)
-                trades.sort(key=lambda x: x.get('dateUTC', ''), reverse=True)
-                
-                # Filter by date if needed
-                if days and days > 0:
-                    from datetime import datetime, timedelta
-                    cutoff = datetime.utcnow() - timedelta(days=days)
-                    cutoff_str = cutoff.isoformat()
-                    trades = [t for t in trades if t.get('dateUTC', '') >= cutoff_str]
-                
-                logger.info(f"Fetched {len(trades)} historical trades")
-                if trades:
-                    logger.info(f"Trade history fields: {list(trades[0].keys())}")
-                    sample = str(trades[0])[:500]
-                    logger.info(f"First trade sample: {sample}")
-                
-                return trades
-            else:
-                logger.info("No transaction history found")
-                return []
+            # Fallback: try account_activity_history if transactions empty
+            if not transactions:
+                try:
+                    activity = await self._run_sync(self.client.account_activity_history)
+                    if activity and 'activities' in activity:
+                        # Normalize activity entries with trade-like fields
+                        for a in activity.get('activities', []):
+                            if a.get('type') in ('TRADE', 'POSITION'):
+                                transactions.append({
+                                    'dateUTC': a.get('dateUTC') or a.get('date') or '',
+                                    'epic': a.get('epic') or a.get('instrument', {}).get('epic'),
+                                    'instrumentName': a.get('instrumentName') or a.get('instrument', {}).get('name'),
+                                    'direction': a.get('direction'),
+                                    'size': a.get('size') or a.get('dealSize'),
+                                    'openLevel': a.get('openLevel') or a.get('level'),
+                                    'closeLevel': a.get('closeLevel'),
+                                    'profit': a.get('profitAndLoss') or a.get('profit') or a.get('pnl'),
+                                    'dealId': a.get('dealId') or a.get('reference')
+                                })
+                except Exception:
+                    pass
+
+            # Filter for TRADE type transactions only
+            trades = [t for t in transactions if t.get('type') == 'TRADE' or 'openLevel' in t or 'closeLevel' in t]
+
+            # Sort by date (newest first)
+            trades.sort(key=lambda x: x.get('dateUTC', ''), reverse=True)
+
+            # Filter by date if needed
+            if days and days > 0:
+                from datetime import datetime, timedelta
+                cutoff = datetime.utcnow() - timedelta(days=days)
+                cutoff_str = cutoff.isoformat()
+                trades = [t for t in trades if t.get('dateUTC', '') >= cutoff_str]
+
+            logger.info(f"Fetched {len(trades)} historical trades")
+            if trades:
+                logger.info(f"Trade history fields: {list(trades[0].keys())}")
+                sample = str(trades[0])[:500]
+                logger.info(f"First trade sample: {sample}")
+
+            return trades
                 
         except Exception as e:
             logger.error(f"Error getting trade history: {e}", exc_info=True)

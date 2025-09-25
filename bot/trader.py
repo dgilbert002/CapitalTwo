@@ -12,6 +12,7 @@ from bot.data_downloader import DataDownloader
 from bot.settings import TradingBotSettings
 from bot.market_time import MarketTimeManager
 from Brains.ai_system import HybridIntelligentSystem
+from capitalcom.client import ResolutionType
 import pandas as pd
 
 logger = logging.getLogger(__name__)
@@ -138,6 +139,7 @@ class TradingBot:
                     return result
                 else:
                     logger.warning(f"Attempt {attempt} failed - invalid response: {result}")
+                    
             except Exception as e:
                 logger.error(f"Attempt {attempt} failed with error: {e}")
                 
@@ -193,7 +195,7 @@ class TradingBot:
                                     else:
                                         logger.error(f"Failed to update SL after 3 attempts: {e}")
                         break
-                        
+                
         except Exception as e:
             logger.error(f"Error in trailing stop loss: {e}")
     
@@ -338,7 +340,7 @@ class TradingBot:
                 self.highest_threshold_acted = 0  # Reset trailing SL
                 logger.info("Market closed - flags reset for next session")
             return
-        
+
         # Log countdown when within 60 seconds
         if time_until_close <= 60 and time_until_close > 0:
             if int(time_until_close) % 10 == 0:  # Log every 10 seconds
@@ -363,8 +365,8 @@ class TradingBot:
             if not positions:
                 logger.info("No positions to close")
                 self.record_action({'event': 'close_positions', 'found': 0})
-                return
-            
+            return
+
             for position_data in positions:
                 position = position_data.get('position', {})
                 deal_id = position.get('dealId')
@@ -395,6 +397,17 @@ class TradingBot:
             
         except Exception as e:
             logger.error(f"Error closing positions: {e}")
+        
+        # Perform data maintenance after closing positions
+        try:
+            await self.maintain_data_at_market_close()
+        except Exception as e:
+            logger.error(f"Error during data maintenance: {e}")
+            self.record_action({
+                'event': 'data_maintenance_error',
+                'error': f'Data maintenance failed: {e}',
+                'epic': self.epic
+            })
     
     async def analyze_and_trade_timer(self) -> None:
         """Analyze market and create position using GOSPEL Brains"""
@@ -658,6 +671,183 @@ class TradingBot:
             except Exception as e:
                 logger.error(f"Keepalive error: {e}")
             await asyncio.sleep(30)
+    
+    async def maintain_data_at_market_close(self):
+        """Download latest 1000 candles and perform quality checks at market close"""
+        try:
+            self.record_action({
+                'event': 'data_maintenance_start',
+                'epic': self.epic,
+                'timestamp': datetime.now().isoformat()
+            })
+            
+            logger.info("Starting market close data maintenance...")
+            
+            # Download latest 1000 candles
+            price_data = await self.api.get_historical_prices(
+                self.epic, 
+                ResolutionType.MINUTE_5, 
+                1000
+            )
+            
+            if not price_data or "prices" not in price_data:
+                self.record_action({
+                    'event': 'data_maintenance_error',
+                    'error': 'No price data received from API',
+                    'epic': self.epic
+                })
+                logger.error("No price data received for maintenance")
+                return False
+            
+            candles = price_data["prices"]
+            logger.info(f"Downloaded {len(candles)} candles for maintenance")
+            
+            # Store candles (handles deduplication automatically)
+            stored_count = 0
+            for candle in candles:
+                try:
+                    candle_data = {
+                        "timestamp": candle["snapshotTimeUTC"],
+                        "open": float(candle["openPrice"]["bid"]),
+                        "high": float(candle["highPrice"]["bid"]),
+                        "low": float(candle["lowPrice"]["bid"]),
+                        "close": float(candle["closePrice"]["bid"]),
+                        "volume": float(candle.get("lastTradedVolume", 0))
+                    }
+                    
+                    self.db.store_candle(self.epic, candle_data)
+                    stored_count += 1
+                    
+                except Exception as e:
+                    logger.warning(f"Error processing candle during maintenance: {e}")
+                    continue
+            
+            # Perform quality checks
+            quality_result = await self._perform_data_quality_check()
+            
+            # Record maintenance results
+            maintenance_result = {
+                'event': 'data_maintenance_complete',
+                'epic': self.epic,
+                'candles_downloaded': len(candles),
+                'candles_stored': stored_count,
+                'quality_check': quality_result,
+                'timestamp': datetime.now().isoformat()
+            }
+            
+            self.record_action(maintenance_result)
+            
+            logger.info(f"Data maintenance complete: {stored_count} candles stored, quality: {quality_result}")
+            return True
+            
+        except Exception as e:
+            error_msg = f"Data maintenance error: {e}"
+            logger.error(error_msg)
+            self.record_action({
+                'event': 'data_maintenance_error',
+                'error': error_msg,
+                'epic': self.epic,
+                'timestamp': datetime.now().isoformat()
+            })
+            return False
+    
+    async def _perform_data_quality_check(self):
+        """Perform quality checks on the latest 1000 candles"""
+        try:
+            # Get the latest 1000 candles
+            latest_candles = self.db.get_candles(self.epic, limit=1000)
+            
+            if not latest_candles:
+                return {
+                    'status': 'ERROR',
+                    'message': 'No candles found for quality check',
+                    'total_candles': 0,
+                    'duplicates': 0,
+                    'gaps': 0,
+                    'coverage_pct': 0
+                }
+            
+            # Check for duplicates
+            timestamps = [candle[1] for candle in latest_candles]  # timestamp is at index 1
+            unique_timestamps = set(timestamps)
+            duplicates = len(timestamps) - len(unique_timestamps)
+            
+            # Check for gaps
+            sorted_candles = sorted(latest_candles, key=lambda x: x[1])
+            gaps = 0
+            missing_candles = 0
+            
+            for i in range(1, len(sorted_candles)):
+                prev_timestamp = sorted_candles[i-1][1]
+                curr_timestamp = sorted_candles[i][1]
+                
+                # Parse timestamps
+                if isinstance(prev_timestamp, str):
+                    prev_time = datetime.fromisoformat(prev_timestamp.replace('Z', '+00:00'))
+                else:
+                    prev_time = prev_timestamp
+                    
+                if isinstance(curr_timestamp, str):
+                    curr_time = datetime.fromisoformat(curr_timestamp.replace('Z', '+00:00'))
+                else:
+                    curr_time = curr_timestamp
+                
+                time_diff = (curr_time - prev_time).total_seconds()
+                if time_diff > 300:  # More than 5 minutes
+                    gaps += 1
+                    missing_candles += int(time_diff / 300) - 1
+            
+            # Calculate coverage
+            if len(sorted_candles) >= 2:
+                first_time = sorted_candles[0][1]
+                last_time = sorted_candles[-1][1]
+                
+                if isinstance(first_time, str):
+                    first_dt = datetime.fromisoformat(first_time.replace('Z', '+00:00'))
+                else:
+                    first_dt = first_time
+                    
+                if isinstance(last_time, str):
+                    last_dt = datetime.fromisoformat(last_time.replace('Z', '+00:00'))
+                else:
+                    last_dt = last_time
+                
+                total_hours = (last_dt - first_dt).total_seconds() / 3600
+                expected_candles = int(total_hours * 12)  # 12 candles per hour
+                coverage_pct = (len(latest_candles) / expected_candles) * 100 if expected_candles > 0 else 0
+            else:
+                coverage_pct = 100  # Single candle or no data
+            
+            # Determine status
+            if duplicates == 0 and gaps <= 5 and coverage_pct >= 15:  # Allow some gaps for market closures
+                status = 'EXCELLENT'
+            elif duplicates == 0 and gaps <= 20 and coverage_pct >= 10:
+                status = 'GOOD'
+            elif duplicates <= 5 and gaps <= 50:
+                status = 'FAIR'
+            else:
+                status = 'POOR'
+            
+            return {
+                'status': status,
+                'message': f'Quality check: {status} - {len(latest_candles)} candles, {duplicates} duplicates, {gaps} gaps, {coverage_pct:.1f}% coverage',
+                'total_candles': len(latest_candles),
+                'duplicates': duplicates,
+                'gaps': gaps,
+                'missing_candles': missing_candles,
+                'coverage_pct': round(coverage_pct, 1)
+            }
+            
+        except Exception as e:
+            logger.error(f"Error in quality check: {e}")
+            return {
+                'status': 'ERROR',
+                'message': f'Quality check failed: {e}',
+                'total_candles': 0,
+                'duplicates': 0,
+                'gaps': 0,
+                'coverage_pct': 0
+            }
 
     def stop(self):
         """Stop the trading bot"""

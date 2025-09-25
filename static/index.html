@@ -203,6 +203,7 @@
                                 <button class="btn btn-sm btn-success" id="btnStart"><i class="fas fa-play"></i> Start Bot</button>
                                 <button class="btn btn-sm btn-danger ms-2" id="btnStop" style="display:none;"><i class="fas fa-stop"></i> Stop Bot</button>
                                 <button class="btn btn-sm btn-warning ms-2" id="btnSimulate" title="Simulate Market Close"><i class="fas fa-vial"></i> Simulate</button>
+                                <button class="btn btn-sm btn-info ms-2" id="btnBrainPreview" title="Run Brains Preview"><i class="fas fa-brain"></i> Brain Preview</button>
                             </div>
                         </div>
                     </div>
@@ -344,6 +345,7 @@
                                         <th>Size Details</th>
                                         <th>Open Level</th>
                                         <th>Current Level</th>
+                                        <th>SL</th>
                                         <th>P&L (UPL)</th>
                                         <th>Actions</th>
                                     </tr>
@@ -458,6 +460,21 @@
         </div>
     </div>
 
+    <!-- Brains Preview Modal -->
+    <div class="modal fade" id="brainsModal" tabindex="-1">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content bg-dark text-light">
+                <div class="modal-header border-info">
+                    <h5 class="modal-title"><i class="fas fa-brain text-info"></i> Brains Preview</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="brainsBody">
+                    <div class="text-center py-4"><i class="fas fa-spinner fa-spin"></i> Running analysis...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         const elements = {
@@ -532,6 +549,8 @@
                         }
                         ws._debugLogged = true;
                     }
+                    // Keep latest payload for SL type access in positions table
+                    window.latestWsData = data;
                     updateDashboard(data);
                 } catch (error) {
                     console.error("Error parsing WebSocket data:", error);
@@ -838,11 +857,11 @@
         fetchConfig();
         // Don't call fetchAccounts separately - fetchConfig will do it if connected
 
-        function updatePositionsTable(positions) {
+            function updatePositionsTable(positions) {
             if (!positions || positions.length === 0) {
                 elements.positionsTable.innerHTML = `
                     <tr>
-                        <td colspan="8" class="text-center text-muted py-4">
+                        <td colspan="9" class="text-center text-muted py-4">
                             <i class="fas fa-chart-line fa-2x mb-2"></i><br>
                             No open positions or orders
                         </td>
@@ -893,6 +912,15 @@
                     dateDisplay = date.toLocaleDateString() + '<br>' + date.toLocaleTimeString();
                 }
                 
+                // Stop loss info (type from settings, level from position)
+                const slType = (window.latestWsData && window.latestWsData.stop_loss_type) ? window.latestWsData.stop_loss_type : 'normal';
+                const slLevel = parseFloat(stopLevel) || 0;
+                const slPct = (slLevel && level) ? ((direction === 'BUY' ? (level - slLevel) : (slLevel - level)) / level) * 100 : 0;
+                const capType = slType ? slType.charAt(0).toUpperCase() + slType.slice(1) : '-';
+                const slDisplay = slLevel 
+                    ? `<small>$${slLevel.toFixed(2)}<br>${slPct.toFixed(2)}%<br>${capType}</small>` 
+                    : '<small class="text-muted">-</small>';
+
                 html += `
                     <tr>
                         <td>
@@ -919,6 +947,7 @@
                         </td>
                         <td>$${level.toFixed(2)}</td>
                         <td>${currentPrice ? '$' + currentPrice.toFixed(2) : '-'}</td>
+                        <td>${slDisplay}</td>
                         <td class="${pnlClass}">${upl >= 0 ? '+' : ''}$${Math.abs(upl).toFixed(2)}</td>
                         <td>
                             <button class="btn btn-sm btn-outline-danger" onclick="closePosition('${dealId}')">
@@ -1049,6 +1078,13 @@
                     details = `${ref} ${a.error ? ('Err: ' + a.error) : ''}`;
                 } else if (a.event === 'close_positions') {
                     details = `Found: ${a.found}`;
+                } else if (a.event === 'data_maintenance_start') {
+                    details = `Starting data maintenance for ${a.epic}`;
+                } else if (a.event === 'data_maintenance_complete') {
+                    const quality = a.quality_check || {};
+                    details = `Downloaded: ${a.candles_downloaded}, Stored: ${a.candles_stored}, Quality: ${quality.status || 'Unknown'} (${quality.coverage_pct || 0}% coverage, ${quality.duplicates || 0} duplicates, ${quality.gaps || 0} gaps)`;
+                } else if (a.event === 'data_maintenance_error') {
+                    details = `Error: ${a.error}`;
                 } else {
                     details = JSON.stringify(a);
                 }
@@ -1334,6 +1370,53 @@
                     `<div class="alert alert-danger">Error: ${e.message}</div>`,
                     'error'
                 );
+            }
+        });
+
+        // Brain Preview
+        document.getElementById('btnBrainPreview').addEventListener('click', async () => {
+            const modal = new bootstrap.Modal(document.getElementById('brainsModal'));
+            const body = document.getElementById('brainsBody');
+            body.innerHTML = '<div class="text-center py-4"><i class="fas fa-spinner fa-spin"></i> Running analysis...</div>';
+            modal.show();
+            try {
+                const res = await fetch('/brains/preview', { method: 'POST' });
+                const data = await res.json();
+                if (!data.ok) {
+                    body.innerHTML = `<div class="alert alert-danger">Error: ${data.error || 'Unknown error'}</div>`;
+                    return;
+                }
+                const d = data.decision || {};
+                const s = data.sizing || {};
+                const mi = data.market_info || {};
+                const lc = data.last_candle || {};
+                const rows = [];
+                rows.push(`<tr><td>Signal</td><td><strong>${d.trade_signal || '-'}</strong></td></tr>`);
+                rows.push(`<tr><td>Confidence</td><td>${(d.confidence*100||0).toFixed ? (d.confidence*100).toFixed(2) : d.confidence}%</td></tr>`);
+                if (s.contracts) rows.push(`<tr><td>Contracts</td><td>${Number(s.contracts).toFixed(2)}</td></tr>`);
+                if (s.entry_price) rows.push(`<tr><td>Entry Price</td><td>$${Number(s.entry_price).toFixed(4)}</td></tr>`);
+                if (s.stop_level) rows.push(`<tr><td>Stop Level</td><td>$${Number(s.stop_level).toFixed(4)} (${s.sl_type || 'normal'})</td></tr>`);
+                if (s.min_size) rows.push(`<tr><td>Min Size</td><td>${s.min_size}</td></tr>`);
+                if (s.max_size) rows.push(`<tr><td>Max Size</td><td>${s.max_size}</td></tr>`);
+                if (mi.instrument && mi.instrument.name) rows.push(`<tr><td>Instrument</td><td>${mi.instrument.name}</td></tr>`);
+                body.innerHTML = `
+                    <div class="mb-3">
+                        <h6 class="text-muted">Latest 5m Candle</h6>
+                        <div><small><strong>Time:</strong> ${lc.timestamp ? new Date(lc.timestamp).toLocaleString() : '-'}</small></div>
+                        <div><small><strong>O</strong>: ${lc.open?.toFixed ? lc.open.toFixed(4) : lc.open || '-'}  
+                            <strong>H</strong>: ${lc.high?.toFixed ? lc.high.toFixed(4) : lc.high || '-'}  
+                            <strong>L</strong>: ${lc.low?.toFixed ? lc.low.toFixed(4) : lc.low || '-'}  
+                            <strong>C</strong>: ${lc.close?.toFixed ? lc.close.toFixed(4) : lc.close || '-'}</small></div>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-sm table-dark table-bordered">
+                            <tbody>${rows.join('')}</tbody>
+                        </table>
+                    </div>
+                    <div class="alert alert-secondary"><small>This preview does not place trades. It shows what the Brains would decide and the computed sizing based on current settings and dealing rules.</small></div>
+                `;
+            } catch (e) {
+                body.innerHTML = `<div class="alert alert-danger">Error: ${e.message}</div>`;
             }
         });
 
