@@ -20,7 +20,7 @@ class TradingBot:
     def __init__(self, settings: TradingBotSettings):
         """Initialize the trading bot with improved features"""
         self.settings = settings
-        self.api = CapitalComAPI(settings, settings.get('API_CONFIG', 'environment', 'demo'))
+        self.api = CapitalComAPI(settings, environment=settings.get('API_CONFIG', 'environment', 'demo'))
         self.db = DatabaseManager(settings.get('DATABASE', 'path', 'database.db'))
         self.downloader = DataDownloader(self.api, self.db)
         self.market_timer = MarketTimeManager(settings)
