@@ -20,10 +20,10 @@ class TradingBot:
     def __init__(self, settings: TradingBotSettings):
         """Initialize the trading bot with improved features"""
         self.settings = settings
-        self.api = CapitalComAPI(settings.get('API_CONFIG', 'environment', 'demo'))
+        self.api = CapitalComAPI(settings, settings.get('API_CONFIG', 'environment', 'demo'))
         self.db = DatabaseManager(settings.get('DATABASE', 'path', 'database.db'))
         self.downloader = DataDownloader(self.api, self.db)
-        self.market_timer = MarketTimeManager()
+        self.market_timer = MarketTimeManager(settings)
         self.ai_system = HybridIntelligentSystem()
         
         # Get timer settings
@@ -66,6 +66,7 @@ class TradingBot:
                 if not await self.api.authenticate():
                     return False
                 self.api_connected = True
+            
             accounts = await self.api.get_accounts()
             if not accounts:
                 logger.error("No accounts found")

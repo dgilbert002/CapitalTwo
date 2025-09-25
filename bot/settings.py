@@ -41,6 +41,11 @@ class TradingBotSettings:
         """Get integer setting value"""
         self.load_settings()
         return self.config.getint(section, key, fallback=fallback)
+    
+    def getboolean(self, section: str, key: str, fallback: bool = False) -> bool:
+        """Get boolean setting value"""
+        self.load_settings()
+        return self.config.getboolean(section, key, fallback=fallback)
 
     def set_value(self, section: str, key: str, value) -> None:
         """Set a setting value and persist to file."""
