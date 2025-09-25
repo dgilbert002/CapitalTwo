@@ -21,6 +21,12 @@ class DataDownloader:
         """Downloads the latest candles and stores them in the database."""
         try:
             logger.info(f"Downloading {num_candles} {resolution.value} candles for {epic}...")
+            
+            # Skip if API not ready
+            if not self.api or not hasattr(self.api, 'client') or not self.api.client:
+                logger.warning("API client not ready for historical data download")
+                return
+                
             price_data = await self.api.get_historical_prices(epic, resolution, num_candles)
 
             if price_data and "prices" in price_data:

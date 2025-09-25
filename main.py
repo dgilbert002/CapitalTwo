@@ -72,8 +72,12 @@ app_state = AppState()
 
 @app.get("/")
 async def get():
-    with open("static/index.html") as f:
-        return HTMLResponse(f.read())
+    try:
+        with open("static/index.html", "r", encoding="utf-8") as f:
+            return HTMLResponse(f.read())
+    except Exception as e:
+        logger.error(f"Error loading index.html: {e}")
+        return HTMLResponse(f"<h1>Error loading page: {e}</h1>", status_code=500)
 
 @app.get("/favicon.ico")
 async def favicon():
@@ -246,8 +250,9 @@ async def bot_start():
         # Create bot instance
         from bot.trader import TradingBot
         app_state.bot = TradingBot()
-        # Share the existing API connection
+        # Share the existing API connection completely
         app_state.bot.api = app_state.api
+        app_state.bot.api_connected = True  # Mark as already connected
         app_state.bot.current_account = app_state.current_account
     
     if not app_state.bot.is_running:
@@ -266,6 +271,49 @@ async def bot_stop():
         return {"ok": True, "status": "stopped"}
     return {"ok": True, "status": "stopped"}
 
+@app.post("/bot/simulate")
+async def bot_simulate():
+    """Simulate market close for testing - works with or without bot running"""
+    logger.info("Simulate market close requested")
+    
+    # If bot not initialized, create temporary instance for simulation
+    if not app_state.bot:
+        logger.info("Creating temporary bot instance for simulation")
+        from bot.trader import TradingBot
+        temp_bot = TradingBot()
+        
+        # Initialize with existing API connection
+        if app_state.api:
+            temp_bot.api = app_state.api
+            temp_bot.api_connected = True
+            temp_bot.current_account = app_state.current_account
+            
+            # Run simulation
+            success = await temp_bot.simulate_market_close()
+            
+            if success:
+                return {"ok": True, "message": "Simulation complete (temporary bot)"}
+            else:
+                return {"ok": False, "error": "simulation_failed"}
+        else:
+            return {"ok": False, "error": "no_api_connection", "message": "No API connection available"}
+    
+    # Use existing bot
+    if not app_state.bot.is_running:
+        logger.info("Bot exists but not running - starting temporarily for simulation")
+        # Temporarily mark as running for simulation
+        app_state.bot.is_running = True
+        success = await app_state.bot.simulate_market_close()
+        app_state.bot.is_running = False
+    else:
+        # Bot is running normally
+        success = await app_state.bot.simulate_market_close()
+    
+    if success:
+        return {"ok": True, "message": "Simulation complete"}
+    else:
+        return {"ok": False, "error": "simulation_failed"}
+
 @app.get("/config")
 async def get_config():
     env = app_state.api.environment if app_state.api else "demo"
@@ -275,6 +323,29 @@ async def get_config():
         "selected_account_id": selected,
         "is_connected": app_state.is_connected
     }
+
+@app.post("/config/stoploss")
+async def save_stoploss_settings(payload: dict = Body(...)):
+    """Save stop loss configuration"""
+    try:
+        # Update settings
+        app_state.settings.set_value('BOT_CONFIG', 'stop_loss_type', payload.get('stop_loss_type', 'normal'))
+        app_state.settings.set_value('BOT_CONFIG', 'stop_loss_pct', payload.get('stop_loss_pct', '2.0'))
+        app_state.settings.set_value('BOT_CONFIG', 'sl_thresholds', payload.get('sl_thresholds', '5,10,15'))
+        app_state.settings.set_value('BOT_CONFIG', 'sl_adjustments', payload.get('sl_adjustments', '2,5,8'))
+        app_state.settings.set_value('BOT_CONFIG', 'sl_when_at', payload.get('sl_when_at', '2,4,5,7,10,12,15'))
+        app_state.settings.set_value('BOT_CONFIG', 'sl_use', payload.get('sl_use', '0,1,2,4,6,8,10'))
+        
+        # Set use_trailing_sl based on type
+        app_state.settings.set_value('BOT_CONFIG', 'use_trailing_sl', 
+                                    str(payload.get('stop_loss_type') in ['trailing', 'staggered']))
+        
+        logger.info(f"Stop loss settings updated: {payload.get('stop_loss_type')}")
+        return {"ok": True}
+        
+    except Exception as e:
+        logger.error(f"Error saving stop loss settings: {e}")
+        return {"ok": False, "error": str(e)}
 
 @app.post("/config/environment")
 async def set_environment(payload: dict = Body(...)):
@@ -339,15 +410,17 @@ if __name__ == "__main__":
     settings = TradingBotSettings()
     port = settings.getint("DISPLAY_CONFIG", "port", 8011)
 
-    # Kill any process already using the port
-    try:
-        pid_str = os.popen(f"lsof -t -i:{port}").read().strip()
-        if pid_str:
-            for pid in pid_str.split('\n'):
-                if pid:
-                    os.kill(int(pid), signal.SIGKILL)
-                    logger.info(f"Killed process {pid} on port {port}")
-    except Exception as e:
-        logger.warning(f"Could not kill process on port {port}: {e}")
+    # Note: On Windows, we can't easily kill processes on a port
+    # If port is in use, uvicorn will fail and user needs to restart manually
+    if os.name == 'posix':  # Unix/Linux/Mac
+        try:
+            pid_str = os.popen(f"lsof -t -i:{port}").read().strip()
+            if pid_str:
+                for pid in pid_str.split('\n'):
+                    if pid:
+                        os.kill(int(pid), signal.SIGKILL)
+                        logger.info(f"Killed process {pid} on port {port}")
+        except Exception as e:
+            logger.warning(f"Could not kill process on port {port}: {e}")
 
     uvicorn.run(app, host="0.0.0.0", port=port)

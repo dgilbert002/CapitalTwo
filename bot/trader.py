@@ -1,322 +1,528 @@
+"""
+Trading Bot with Timer-Based Strategy and Legacy-Style Improvements
+"""
+
 import asyncio
 import logging
-import pandas as pd
-from datetime import time, datetime
-
+from datetime import datetime, time, timedelta
+from typing import Dict, List, Optional
 from bot.api import CapitalComAPI
-from bot.database import DatabaseManager
-from bot.market_time import MarketTimeManager
-from bot.settings import TradingBotSettings
-from bot.ai_system import HybridIntelligentSystem
+from bot.database import Database
 from bot.data_downloader import DataDownloader
-from capitalcom.client import ResolutionType
+from bot.settings import TradingBotSettings
+from bot.market_time import MarketTimeManager
+from Brains.ai_system import BrainsAI
+import pandas as pd
 
 logger = logging.getLogger(__name__)
 
 class TradingBot:
-    """Main trading bot class with complete Hybrid Intelligent System"""
-    
-    def __init__(self):
-        self.settings = TradingBotSettings()
-        self.api = CapitalComAPI(self.settings)
-        self.db_manager = DatabaseManager()
-        self.market_timer = MarketTimeManager(self.settings)
-        self.ai_system = HybridIntelligentSystem()
-        self.downloader = DataDownloader(self.api, self.db_manager)
+    def __init__(self, settings: TradingBotSettings):
+        """Initialize the trading bot with improved features"""
+        self.settings = settings
+        self.api = CapitalComAPI(settings.get('API_CONFIG', 'environment', 'demo'))
+        self.db = Database(settings.get('DATABASE', 'path', 'database.db'))
+        self.downloader = DataDownloader(self.api, self.db)
+        self.market_timer = MarketTimeManager()
+        self.ai_system = BrainsAI()
+        
+        # Get timer settings
+        self.use_timer_based_trading = True
+        self.seconds_before_close_to_exit = int(settings.get('BOT_CONFIG', 'seconds_before_close_to_exit', 30))
+        self.seconds_before_close_to_trade = int(settings.get('BOT_CONFIG', 'seconds_before_close_to_trade', 15))
+        
+        # Trailing SL settings
+        self.use_trailing_sl = settings.getboolean('BOT_CONFIG', 'use_trailing_sl', False)
+        self.sl_thresholds = [float(x.strip()) for x in settings.get('BOT_CONFIG', 'sl_thresholds', '5,10,15').split(',')]
+        self.sl_adjustments = [float(x.strip()) for x in settings.get('BOT_CONFIG', 'sl_adjustments', '2,5,8').split(',')]
+        self.highest_threshold_acted = 0
+        
+        # Trading state
         self.is_running = False
         self.api_connected = False
-        self.current_account = None
-        self.market_info = {}
-        self.positions = []
-        self.balance_info = {}
+        self.positions_closed_today = False
+        self.trade_analyzed_today = False
         self.last_trade_date = None
-        self.current_position = None
-        self.trade_history = []
-        self.winning_trades = 0
-        self.losing_trades = 0
-        self.total_fees = 0
+        
+        # Market data
+        self.epic = settings.get('BOT_CONFIG', 'epic', 'TECL')
+        self.market_info = None
+        self.current_account = None
+        
+        # Tasks
         self.keepalive_task = None
         self.downloader_task = None
         
+        logger.info(f"Trading bot initialized for {self.epic}")
+    
     async def initialize(self) -> bool:
         """Initialize the trading bot"""
         try:
-            if not await self.api.authenticate():
-                return False
-            self.api_connected = True
+            # Check if API is already connected (shared from main)
+            if not self.api_connected and hasattr(self.api, 'client') and self.api.client:
+                self.api_connected = True
+                logger.info("Using existing API connection")
+            elif not self.api_connected:
+                if not await self.api.authenticate():
+                    return False
+                self.api_connected = True
             
             accounts = await self.api.get_accounts()
             if not accounts:
                 logger.error("No accounts found")
                 return False
             
-            env = self.api.environment
-            account_id = self.settings.get("ENV_ACCOUNTS", env, "") or self.settings.get("CREDENTIALS", "account_id")
-            target_account = None
-
-            if account_id:
-                target_account = next((acc for acc in accounts if acc.get("accountId") == account_id), None)
-                if not target_account:
-                    logger.warning(f"Account {account_id} not found, using first available account.")
-
-            if not target_account:
-                target_account = accounts[0]
-
-            self.current_account = target_account
-            account_id_to_switch = self.current_account.get("accountId")
+            # Select account
+            env_account_id = self.settings.get_env_account(self.api.environment)
+            if env_account_id:
+                await self.api.switch_account(env_account_id)
+                for acc in accounts:
+                    if acc['accountId'] == env_account_id:
+                        self.current_account = acc
+                        logger.info(f"Using account: {acc['accountName']}")
+                        break
+            else:
+                self.current_account = accounts[0]
+                logger.info(f"Using first account: {self.current_account['accountName']}")
             
-            if not await self.api.switch_account(account_id_to_switch):
-                 return False
-
-            logger.info(f"Using account: {self.current_account.get('accountName', 'Unknown')}")
+            # Get initial market info
+            self.market_info = await self.api.get_market_info(self.epic)
             
-            epic = self.settings.get("BOT_CONFIG", "epic", "TECL")
-            self.market_info = await self.api.get_market_info(epic)
-
-            # Start continuous data download (cancel old if exists)
-            if self.downloader_task and not self.downloader_task.done():
-                self.downloader_task.cancel()
-            self.downloader_task = asyncio.create_task(
-                self.downloader.continuous_download(epic, ResolutionType.MINUTE_5, 300)
-            )
-            # Start keepalive pings every 4 minutes
-            self.keepalive_task = asyncio.create_task(self._keepalive_loop())
+            # Start continuous data download
+            self.downloader_task = asyncio.create_task(self.continuous_download())
+            
+            # Start keepalive
+            self.keepalive_task = asyncio.create_task(self.keepalive_loop())
             
             return True
             
         except Exception as e:
-            logger.error(f"Initialization error: {e}")
+            logger.error(f"Failed to initialize: {e}")
             return False
     
-    async def update_data(self):
-        """Update all bot data"""
-        try:
-            self.positions = await self.api.get_positions()
-            
-            if self.current_account:
-                accounts = await self.api.get_accounts()
-                current_account_id = self.current_account.get("accountId")
-                updated_account = next((acc for acc in accounts if acc.get("accountId") == current_account_id), None)
-                if updated_account:
-                    self.current_account = updated_account
-                    self.balance_info = updated_account.get("balance", {})
-            
-            epic = self.settings.get("BOT_CONFIG", "epic", "TECL")
-            market_data = await self.api.get_market_info(epic)
-            if market_data:
-                self.market_info = market_data
-                # Log minimal market info snapshot for troubleshooting
-                logger.debug(f"Market snapshot updated for {epic}")
-                
-        except Exception as e:
-            logger.error(f"Error updating data: {e}")
-
-    async def run(self):
-        """Main trading loop with complete Hybrid Intelligent Strategy"""
-        self.is_running = True
-        logger.info("Trading bot started with Hybrid Intelligent System")
-        
-        while self.is_running:
-            await self.update_data()
-            await self.execute_hybrid_intelligent_strategy()
-            await asyncio.sleep(5)
-
-    async def _keepalive_loop(self):
-        while True:
+    async def create_position_with_retry(self, epic: str, direction: str, size: float, stop_level: float, max_attempts: int = 3) -> Optional[Dict]:
+        """Create position with retry logic - validates API response"""
+        for attempt in range(1, max_attempts + 1):
             try:
-                await asyncio.sleep(240)
-                await self.api.keepalive()
-            except Exception as e:
-                logger.warning(f"Keepalive loop error: {e}")
-
-    async def execute_hybrid_intelligent_strategy(self):
-        """Execute the complete Hybrid Intelligent Trading Strategy"""
-        market_event = self.market_timer.get_next_market_event(self.market_info)
-        now = self.market_timer.get_current_time_market()
-        current_date = now.date()
-
-        if not market_event.get("is_open"):
-            return
-
-        epic = self.settings.get("BOT_CONFIG", "epic", "TECL")
-        
-        # Get day data (simulated as we don't have intraday data in real-time)
-        day_data = pd.DataFrame()  # This would be populated with real intraday data
-        
-        # Get historical data for AI analysis
-        candles = self.db_manager.get_candles(epic, limit=200)
-        if len(candles) < 50:
-            logger.warning("Not enough historical data for AI analysis")
-            return
-
-        df = pd.DataFrame(candles, columns=["epic", "timestamp", "open", "high", "low", "close", "volume"])
-        df["timestamp"] = pd.to_datetime(df["timestamp"])
-        df.set_index("timestamp", inplace=True)
-
-        # Calculate technical indicators
-        historical_data = self.ai_system.calculate_technical_indicators(df)
-
-        # Market times (matching the uploaded strategy exactly)
-        analysis_time = time(15, 30)
-        entry_time = time(15, 59, 45)
-        exit_time = time(15, 59, 30)
-
-        # Step 1: Close existing position if exists
-        if self.current_position is not None:
-            await self.close_current_position(day_data, exit_time, current_date)
-
-        # Step 2: AI Analysis for new position (only during analysis time window)
-        if now.time() >= analysis_time and now.date() != self.last_trade_date:
-            ai_analysis = self.ai_system.analyze_market_conditions(day_data, historical_data, current_date)
-            
-            logger.info(f"AI Analysis: {ai_analysis}")
-
-            # Step 3: Decision to trade based on AI analysis and confidence threshold
-            confidence_threshold = self.settings.getfloat("BOT_CONFIG", "ai_confidence_threshold", 30.0) / 100.0
-            
-            if (ai_analysis['trade_signal'] in ['buy', 'sell'] and 
-                ai_analysis['confidence'] > confidence_threshold and
-                now.time() >= entry_time):
+                logger.info(f"Position creation attempt {attempt}/{max_attempts}")
                 
-                await self.create_new_position(ai_analysis, current_date, entry_time)
-                self.last_trade_date = current_date
-
-    async def close_current_position(self, day_data, exit_time, current_date):
-        """Close existing position with stop-loss monitoring"""
-        try:
-            stop_loss_pct = self.settings.getfloat("BOT_CONFIG", "stop_loss_pct", 2.0)
-            
-            # Check if stopped out during the day (in real implementation, this would check intraday data)
-            stop_hit, stop_price, stop_time = self.ai_system.check_stop_loss_hit(
-                day_data, self.current_position['entry_price'], self.current_position['entry_time'], 
-                self.current_position['direction'], stop_loss_pct
-            )
-            
-            if stop_hit:
-                exit_price = stop_price
-                exit_reason = f'stop_loss_{stop_loss_pct}%'
-                logger.info(f"Position stopped out at {stop_price}")
-            else:
-                # Get current market price for exit
-                epic = self.settings.get("BOT_CONFIG", "epic", "TECL")
-                market_data = await self.api.get_market_info(epic)
-                if market_data and 'snapshot' in market_data:
-                    exit_price = market_data['snapshot']['bid']
+                # Check if in simulation mode
+                if self.settings.getboolean('BOT_CONFIG', 'simulation_mode', False):
+                    logger.info(f"SIMULATION MODE: Would create {direction} {size} @ stop {stop_level}")
+                    return {'simulated': True, 'dealReference': f'SIM-{datetime.now().timestamp()}'}
+                
+                # Real API call
+                result = await self.api.create_position(epic, direction, size, stop_level)
+                
+                if result and 'dealReference' in result:
+                    logger.info(f"Position created successfully on attempt {attempt}")
+                    return result
                 else:
-                    exit_price = self.current_position['entry_price']
-                exit_reason = 'scheduled_exit'
+                    logger.warning(f"Attempt {attempt} failed - invalid response: {result}")
+                    
+            except Exception as e:
+                logger.error(f"Attempt {attempt} failed with error: {e}")
+                
+            # Wait before retry (except on last attempt)
+            if attempt < max_attempts:
+                await asyncio.sleep(1)
+                
+        logger.error(f"Failed to create position after {max_attempts} attempts")
+        return None
+    
+    async def check_and_trail_stop_loss(self, positions: List[Dict]) -> None:
+        """Check and adjust stop loss based on profit thresholds - Legacy style"""
+        if not self.use_trailing_sl or not positions:
+            return
             
-            # Calculate P&L
-            if self.current_position['direction'] == 'long':
-                gross_return = (exit_price - self.current_position['entry_price']) / self.current_position['entry_price']
-            else:
-                gross_return = (self.current_position['entry_price'] - exit_price) / self.current_position['entry_price']
-            
-            gross_pnl = self.current_position['position_size'] * gross_return
-            trade_costs = self.ai_system.calculate_trading_costs(
-                self.current_position['position_size'], 
-                self.current_position['direction'], 
-                is_overnight=True
-            )
-            net_pnl = gross_pnl - trade_costs
-            
-            # Update balance (simulated)
-            self.total_fees += trade_costs
-            
-            if net_pnl > 0:
-                self.winning_trades += 1
-            else:
-                self.losing_trades += 1
-            
-            # Record trade
-            trade_record = {
-                'entry_date': self.current_position['entry_date'],
-                'exit_date': current_date,
-                'direction': self.current_position['direction'],
-                'entry_price': self.current_position['entry_price'],
-                'exit_price': exit_price,
-                'position_size': self.current_position['position_size'],
-                'gross_pnl': gross_pnl,
-                'net_pnl': net_pnl,
-                'trade_costs': trade_costs,
-                'exit_reason': exit_reason,
-                'ai_confidence': self.current_position.get('ai_confidence', 0)
-            }
-            self.trade_history.append(trade_record)
-            
-            logger.info(f"Position closed: {trade_record}")
-            
-            # Close position via API
-            for position in self.positions:
-                await self.api.close_position(position["position"]["dealId"])
-            
-            self.current_position = None
-            
-        except Exception as e:
-            logger.error(f"Error closing position: {e}")
-
-    async def create_new_position(self, ai_analysis, current_date, entry_time):
-        """Create new position based on AI analysis"""
         try:
-            epic = self.settings.get("BOT_CONFIG", "epic", "TECL")
+            for position_data in positions:
+                position = position_data.get('position', {})
+                market = position_data.get('market', {})
+                
+                deal_id = position.get('dealId')
+                entry_price = float(position.get('level', 0))
+                current_sl = float(position.get('stopLevel', 0))
+                current_price = float(market.get('bid', 0))
+                
+                if not all([deal_id, entry_price, current_price]):
+                    continue
+                
+                # Calculate percentage increase
+                pct_increase = ((current_price - entry_price) / entry_price) * 100
+                
+                # Check thresholds
+                for i, threshold in enumerate(self.sl_thresholds):
+                    if pct_increase >= threshold and threshold > self.highest_threshold_acted:
+                        # Calculate new stop loss
+                        adjustment = self.sl_adjustments[i]
+                        new_sl = round(entry_price * (1 + adjustment/100), 2)
+                        
+                        if new_sl > current_sl:
+                            logger.info(f"Trailing SL: {pct_increase:.2f}% profit, moving SL from {current_sl} to {new_sl}")
+                            
+                            # Update stop loss with retry
+                            for attempt in range(3):
+                                try:
+                                    result = await self.api.update_position(deal_id, stop_level=new_sl)
+                                    if result:
+                                        self.highest_threshold_acted = threshold
+                                        logger.info(f"Stop loss updated successfully")
+                                        break
+                                except Exception as e:
+                                    if attempt < 2:
+                                        await asyncio.sleep(1)
+                                    else:
+                                        logger.error(f"Failed to update SL after 3 attempts: {e}")
+                        break
+                        
+        except Exception as e:
+            logger.error(f"Error in trailing stop loss: {e}")
+    
+    async def simulate_market_close(self):
+        """Simulate market close - LEGACY STYLE: Just manipulate time!"""
+        try:
+            logger.info("="*60)
+            logger.info("SIMULATION: Legacy-style time manipulation")
+            logger.info("Setting market to T-35 seconds before close")
+            logger.info("="*60)
             
-            # Get current market price
-            market_data = await self.api.get_market_info(epic)
-            if not market_data or 'snapshot' not in market_data:
-                logger.warning("Could not get market data for entry")
-                return
+            # Check if we're in simulation mode
+            simulation_mode = self.settings.getboolean('BOT_CONFIG', 'simulation_mode', False)
+            if simulation_mode:
+                logger.info("SIMULATION MODE: API calls will be skipped")
             
-            entry_price = market_data['snapshot']['offer']  # Use offer price for entry
-            
-            # Calculate position size
-            leverage = self.settings.getfloat("BOT_CONFIG", "leverage", 4.0)
-            investment_pct = self.settings.getfloat("BOT_CONFIG", "investment_pct", 99.0) / 100.0
-            balance = self.balance_info.get("available", 0)
-            
-            if balance <= 0:
-                logger.warning("No available balance for trading")
-                return
-            
-            investment_amount = balance * investment_pct
-            position_size = investment_amount * leverage
-            
-            # Calculate stop loss
-            stop_loss_pct = self.settings.getfloat("BOT_CONFIG", "stop_loss_pct", 2.0)
-            stop_level = None
-            if ai_analysis['direction'] == 'long':
-                stop_level = entry_price * (1 - stop_loss_pct / 100)
-            else:
-                stop_level = entry_price * (1 + stop_loss_pct / 100)
-            
-            # Create position via API
-            position_result = await self.api.create_position(
-                epic, 
-                ai_analysis['direction'], 
-                position_size, 
-                stop_level
-            )
-            
-            if position_result:
-                # Store current position details
-                self.current_position = {
-                    'entry_date': current_date,
-                    'entry_time': entry_time,
-                    'direction': ai_analysis['direction'],
-                    'entry_price': entry_price,
-                    'position_size': position_size,
-                    'leverage': leverage,
-                    'ai_confidence': ai_analysis['confidence'],
-                    'ai_reasoning': ai_analysis['reasoning'],
-                    'stop_level': stop_level
+            # Run countdown from 35 to 0 seconds
+            for seconds in range(35, -1, -1):
+                # Create fake market event
+                fake_event = {
+                    'is_open': True,
+                    'time_until_close': seconds,
+                    'time_until_open': 0,
+                    'status': 'OPEN',
+                    'next_event': 'Market Close',
+                    'countdown': f"00:00:{seconds:02d}"
                 }
                 
-                logger.info(f"New position created: {self.current_position}")
+                # Log key moments
+                if seconds == 30:
+                    logger.info("="*40)
+                    logger.info("SIMULATION: T-30s - CLOSING POSITIONS")
+                    logger.info("="*40)
+                elif seconds == 15:
+                    logger.info("="*40)
+                    logger.info("SIMULATION: T-15s - ANALYZING & TRADING")
+                    logger.info("="*40)
+                elif seconds <= 5 and seconds > 0:
+                    logger.info(f"SIMULATION: T-{seconds}s - Final countdown")
+                elif seconds == 0:
+                    logger.info("="*40)
+                    logger.info("SIMULATION: MARKET CLOSED")
+                    logger.info("="*40)
+                
+                # Execute the normal timer strategy with fake time
+                await self.execute_timer_based_strategy(fake_event)
+                
+                # Speed up simulation (0.2 seconds per market second)
+                await asyncio.sleep(0.2)
+            
+            # Reset for next session
+            logger.info("SIMULATION: Resetting for next session")
+            self.positions_closed_today = False
+            self.trade_analyzed_today = False
+            
+            logger.info("="*60)
+            logger.info("SIMULATION COMPLETE!")
+            logger.info("The bot executed its normal timer logic:")
+            logger.info("  - Closed positions at T-30s")
+            logger.info("  - Analyzed & traded at T-15s")
+            logger.info("Check your positions tab for results")
+            logger.info("="*60)
+            
+            return True
+            
+        except Exception as e:
+            logger.error(f"SIMULATION ERROR: {e}")
+            return False
+    
+    async def execute_timer_based_strategy(self, market_event: Dict) -> None:
+        """Execute timer-based trading strategy"""
+        if not market_event:
+            return
+            
+        is_open = market_event.get('is_open', False)
+        time_until_close = market_event.get('time_until_close', float('inf'))
+        
+        # Reset flags when market is closed
+        if not is_open:
+            if self.positions_closed_today or self.trade_analyzed_today:
+                self.positions_closed_today = False
+                self.trade_analyzed_today = False
+                self.highest_threshold_acted = 0  # Reset trailing SL
+                logger.info("Market closed - flags reset for next session")
+            return
+        
+        # Log countdown when within 60 seconds
+        if time_until_close <= 60 and time_until_close > 0:
+            if int(time_until_close) % 10 == 0:  # Log every 10 seconds
+                logger.info(f"Market closing in {int(time_until_close)} seconds")
+        
+        # Close positions at T-30s
+        if time_until_close <= self.seconds_before_close_to_exit and not self.positions_closed_today:
+            logger.info(f"T-{self.seconds_before_close_to_exit}s: Closing all positions")
+            await self.close_all_positions_timer()
+            self.positions_closed_today = True
+        
+        # Analyze and trade at T-15s (only after positions are closed)
+        if time_until_close <= self.seconds_before_close_to_trade and not self.trade_analyzed_today and self.positions_closed_today:
+            logger.info(f"T-{self.seconds_before_close_to_trade}s: Analyzing market and creating position")
+            await self.analyze_and_trade_timer()
+            self.trade_analyzed_today = True
+    
+    async def close_all_positions_timer(self) -> None:
+        """Close all open positions with retry logic"""
+        try:
+            positions = await self.api.get_positions()
+            if not positions:
+                logger.info("No positions to close")
+                return
+            
+            for position_data in positions:
+                position = position_data.get('position', {})
+                deal_id = position.get('dealId')
+                
+                if deal_id:
+                    # Close with retry
+                    for attempt in range(1, 4):
+                        try:
+                            logger.info(f"Closing position {deal_id} - attempt {attempt}/3")
+                            
+                            if self.settings.getboolean('BOT_CONFIG', 'simulation_mode', False):
+                                logger.info(f"SIMULATION MODE: Would close {deal_id}")
+                                break
+                            
+                            result = await self.api.close_position(deal_id)
+                            if result:
+                                logger.info(f"Position {deal_id} closed successfully")
+                                break
+                        except Exception as e:
+                            if attempt < 3:
+                                await asyncio.sleep(1)
+                            else:
+                                logger.error(f"Failed to close {deal_id} after 3 attempts: {e}")
+                                
+        except Exception as e:
+            logger.error(f"Error closing positions: {e}")
+    
+    async def analyze_and_trade_timer(self) -> None:
+        """Analyze market and create position using GOSPEL Brains"""
+        try:
+            # Get market info
+            self.market_info = await self.api.get_market_info(self.epic)
+            if not self.market_info:
+                logger.error("Failed to get market info")
+                return
+            
+            dealing_rules = self.market_info.get('dealingRules', {})
+            
+            # Get historical data
+            candles = self.db.get_latest_candles(self.epic, 200)
+            if not candles or len(candles) < 100:
+                logger.warning("Insufficient historical data")
+                return
+            
+            # Convert to DataFrame
+            df = pd.DataFrame(candles)
+            df.columns = ['timestamp', 'openPrice', 'highPrice', 'lowPrice', 'closePrice', 'lastTradedVolume']
+            
+            # GOSPEL Brains analysis
+            df = self.ai_system.calculate_technical_indicators(df)
+            ai_analysis = self.ai_system.analyze_market_conditions(
+                df.iloc[-1].to_dict(),
+                df,
+                datetime.now()
+            )
+            
+            logger.info(f"Brains Decision: Signal={ai_analysis['trade_signal']}, "
+                       f"Confidence={ai_analysis['confidence']:.2%}, "
+                       f"Direction={ai_analysis.get('direction', 'N/A')}")
+            
+            # Check confidence threshold
+            min_confidence = self.settings.getfloat('BOT_CONFIG', 'ai_confidence_threshold', 30) / 100
+            if ai_analysis['confidence'] >= min_confidence and ai_analysis['trade_signal'] != 'hold':
+                await self.create_position_timer(ai_analysis, dealing_rules)
             else:
-                logger.error("Failed to create position via API")
+                logger.info("No trade - confidence below threshold or hold signal")
+                
+        except Exception as e:
+            logger.error(f"Error in analyze and trade: {e}")
+    
+    async def create_position_timer(self, ai_analysis: Dict, dealing_rules: Dict) -> bool:
+        """Create position based on AI analysis and dealing rules"""
+        try:
+            # Get market snapshot
+            snapshot = self.market_info.get('snapshot', {})
+            bid = float(snapshot.get('bid', 0))
+            offer = float(snapshot.get('offer', 0))
+            
+            # Determine direction
+            signal = ai_analysis.get('trade_signal', 'hold')
+            if signal == 'hold':
+                return False
+            
+            direction = 'long' if signal == 'buy' else 'short'
+            entry_price = offer if direction == 'long' else bid
+            
+            # Get dealing rules
+            min_size = float(dealing_rules.get('minDealSize', {}).get('value', 0.1))
+            max_size = float(dealing_rules.get('maxDealSize', {}).get('value', 3250))
+            increment = float(dealing_rules.get('minSizeIncrement', {}).get('value', 0.1))
+            
+            # Get account balance
+            accounts = await self.api.get_accounts()
+            available = 0
+            for acc in accounts:
+                if acc['accountId'] == self.current_account['accountId']:
+                    available = float(acc['balance']['available'])
+                    break
+            
+            # Calculate position size (GOSPEL formula from legacy)
+            investment_pct = self.settings.getfloat('BOT_CONFIG', 'investment_pct', 99) / 100
+            leverage = self.settings.getfloat('BOT_CONFIG', 'leverage', 1)
+            
+            trade_size = (available * investment_pct * leverage) / entry_price
+            
+            # Apply dealing rules
+            if trade_size < min_size:
+                trade_size = min_size
+            elif trade_size > max_size:
+                trade_size = max_size
+            
+            # Floor to increment
+            trade_size = (trade_size // increment) * increment
+            
+            # Calculate stop loss based on type
+            stop_loss_type = self.settings.get('BOT_CONFIG', 'stop_loss_type', 'normal')
+            
+            if stop_loss_type == 'normal':
+                # Simple percentage stop loss
+                stop_loss_pct = self.settings.getfloat('BOT_CONFIG', 'stop_loss_pct', 2) / 100
+                stop_level = entry_price * (1 - stop_loss_pct) if direction == 'long' else entry_price * (1 + stop_loss_pct)
+            elif stop_loss_type == 'trailing':
+                # Start with normal stop, will trail later
+                stop_loss_pct = self.settings.getfloat('BOT_CONFIG', 'stop_loss_pct', 2) / 100
+                stop_level = entry_price * (1 - stop_loss_pct) if direction == 'long' else entry_price * (1 + stop_loss_pct)
+            elif stop_loss_type == 'staggered':
+                # Start with first staggered level
+                sl_use = self.settings.get('BOT_CONFIG', 'sl_use', '0,1,2,4,6,8,10').split(',')
+                
+                # Use first level
+                if sl_use and sl_use[0] != '0':
+                    first_stop = float(sl_use[0]) / 100
+                else:
+                    first_stop = 0.02  # Default 2%
+                    
+                stop_level = entry_price * (1 - first_stop) if direction == 'long' else entry_price * (1 + first_stop)
+            else:
+                # Fallback to normal
+                stop_loss_pct = self.settings.getfloat('BOT_CONFIG', 'stop_loss_pct', 2) / 100
+                stop_level = entry_price * (1 - stop_loss_pct) if direction == 'long' else entry_price * (1 + stop_loss_pct)
+            
+            logger.info(f"Creating position: {direction.upper()} {trade_size} @ {entry_price}, SL: {stop_level}")
+            
+            # Create position with retry logic
+            result = await self.create_position_with_retry(
+                self.epic,
+                direction,
+                trade_size,
+                stop_level,
+                max_attempts=3
+            )
+            
+            if result:
+                logger.info(f"Trade executed: {result}")
+                self.trade_analyzed_today = True
+                self.last_trade_date = datetime.now().date()
+                return True
+            else:
+                logger.error("Trade execution failed after all retries")
+                return False
                 
         except Exception as e:
             logger.error(f"Error creating position: {e}")
-
+            return False
+    
+    async def run(self):
+        """Main trading loop"""
+        self.is_running = True
+        
+        logger.info("="*60)
+        logger.info("BOT STARTED - Timer-Based Trading Active")
+        logger.info(f"Epic: {self.epic}")
+        logger.info(f"Close positions: {self.seconds_before_close_to_exit}s before close")
+        logger.info(f"Analyze & trade: {self.seconds_before_close_to_trade}s before close")
+        logger.info(f"Trailing SL: {'Enabled' if self.use_trailing_sl else 'Disabled'}")
+        logger.info(f"Simulation Mode: {'ON' if self.settings.getboolean('BOT_CONFIG', 'simulation_mode', False) else 'OFF'}")
+        logger.info("="*60)
+        
+        status_counter = 0
+        
+        while self.is_running:
+            await self.update_data()
+            
+            # Get market event
+            market_event = self.market_timer.get_next_market_event(self.market_info)
+            
+            # Periodic status update
+            status_counter += 1
+            if status_counter >= 30:
+                if market_event and market_event.get('is_open'):
+                    time_until = int(market_event.get('time_until_close', 0))
+                    logger.info(f"Market OPEN - {time_until}s until close")
+                elif market_event:
+                    hours = market_event.get('time_until_open', 0) / 3600
+                    logger.info(f"Market CLOSED - Opens in {hours:.1f} hours")
+                status_counter = 0
+            
+            # Check trailing stop loss
+            if self.use_trailing_sl:
+                positions = await self.api.get_positions()
+                await self.check_and_trail_stop_loss(positions)
+            
+            # Execute strategy
+            await self.execute_timer_based_strategy(market_event)
+            
+            await asyncio.sleep(1)
+    
+    async def update_data(self):
+        """Update market data"""
+        try:
+            self.market_info = await self.api.get_market_info(self.epic)
+        except Exception as e:
+            logger.error(f"Error updating data: {e}")
+    
+    async def continuous_download(self):
+        """Continuously download candle data"""
+        while self.is_running:
+            try:
+                await self.downloader.download_and_store_candles(
+                    self.epic,
+                    self.api.ResolutionType.MINUTE_5,
+                    100
+                )
+            except Exception as e:
+                logger.error(f"Download error: {e}")
+            await asyncio.sleep(300)  # Every 5 minutes
+    
+    async def keepalive_loop(self):
+        """Keep API connection alive"""
+        while self.is_running:
+            try:
+                await self.api.keepalive()
+            except Exception as e:
+                logger.error(f"Keepalive error: {e}")
+            await asyncio.sleep(30)
+    
     def stop(self):
         """Stop the trading bot"""
         self.is_running = False
@@ -325,9 +531,4 @@ class TradingBot:
             self.keepalive_task.cancel()
         if self.downloader_task:
             self.downloader_task.cancel()
-        
-        # Log final statistics
-        total_trades = self.winning_trades + self.losing_trades
-        if total_trades > 0:
-            win_rate = self.winning_trades / total_trades * 100
-            logger.info(f"Final Stats - Total Trades: {total_trades}, Win Rate: {win_rate:.1f}%, Total Fees: ${self.total_fees:.2f}")
+        self.db.close()

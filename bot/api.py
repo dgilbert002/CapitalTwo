@@ -122,6 +122,9 @@ class CapitalComAPI:
     async def get_historical_prices(self, epic: str, resolution, num_candles: int) -> Optional[Dict]:
         """Get historical price data."""
         try:
+            if not self.client:
+                logger.error(f"Client not initialized for historical prices")
+                return None
             return await self._run_sync(self.client.historical_price, epic, resolution, num_candles)
         except Exception as e:
             logger.error(f"Error getting historical prices for {epic}: {e}")
@@ -130,8 +133,23 @@ class CapitalComAPI:
     async def create_position(self, epic: str, direction: str, size: float, stop_level: Optional[float] = None) -> Optional[Dict]:
         """Create a new position"""
         try:
-            trade_direction = "BUY" if direction.lower() == "long" else "SELL"
-            position = await self._run_sync(self.client.place_the_position, epic=epic, direction=trade_direction, size=size, stop_level=stop_level)
+            # Import DirectionType from the appropriate module
+            if self.environment == "demo":
+                from capitalcom.client_demo import DirectionType
+            else:
+                from capitalcom.client import DirectionType
+            
+            # Convert string direction to DirectionType enum
+            trade_direction = DirectionType.BUY if direction.lower() == "long" else DirectionType.SELL
+            
+            # Create position with proper parameters
+            position = await self._run_sync(
+                self.client.place_the_position, 
+                direction=trade_direction,
+                epic=epic, 
+                size=size, 
+                stop_level=stop_level if stop_level else None  # Use stop_level with underscore
+            )
             logger.info(f"Position creation response: {position}")
             return position
         except Exception as e:

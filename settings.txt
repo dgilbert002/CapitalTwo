@@ -11,7 +11,17 @@ leverage = 4.0
 stop_loss_pct = 2.0
 investment_pct = 99.0
 ai_confidence_threshold = 30.0
+seconds_before_close_to_exit = 30
+seconds_before_close_to_trade = 15
 direction = long
+simulation_mode = false
+stop_loss_type = normal
+stop_loss_pct = 2.0
+use_trailing_sl = false
+sl_thresholds = 5,10,15
+sl_adjustments = 2,5,8
+sl_when_at = 2,4,5,7,10,12,15
+sl_use = 0,1,2,4,6,8,10
 
 [TRADING_HOURS]
 timezone = Asia/Dubai
@@ -19,7 +29,7 @@ market_timezone = US/Eastern
 
 [API_CONFIG]
 base_url = https://demo-api-capital.backend-capital.com/api/v1
-environment = live
+environment = demo
 
 [DISPLAY_CONFIG]
 refresh_interval = 1
