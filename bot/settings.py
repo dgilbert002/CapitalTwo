@@ -69,6 +69,11 @@ class TradingBotSettings:
         except Exception as e:
             logger.error(f"Error saving env account: {e}")
 
+    def get_env_account(self, environment: str) -> str:
+        """Get account ID for environment"""
+        self.load_settings()
+        return self.config.get("ENV_ACCOUNTS", environment.lower(), "")
+
     def save(self) -> None:
         """Persist current config to settings file."""
         try:

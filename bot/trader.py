@@ -49,6 +49,9 @@ class TradingBot:
         self.market_info = None
         self.current_account = None
         
+        # Trading data
+        self.trade_history = []
+        
         # Tasks
         self.keepalive_task = None
         self.downloader_task = None
