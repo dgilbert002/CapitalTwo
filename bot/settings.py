@@ -72,7 +72,10 @@ class TradingBotSettings:
     def get_env_account(self, environment: str) -> str:
         """Get account ID for environment"""
         self.load_settings()
-        return self.config.get("ENV_ACCOUNTS", environment.lower(), "")
+        try:
+            return self.config.get("ENV_ACCOUNTS", environment.lower())
+        except (configparser.NoSectionError, configparser.NoOptionError):
+            return ""
 
     def save(self) -> None:
         """Persist current config to settings file."""
