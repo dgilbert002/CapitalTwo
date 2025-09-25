@@ -249,7 +249,7 @@ async def bot_start():
     if not app_state.bot:
         # Create bot instance
         from bot.trader import TradingBot
-        app_state.bot = TradingBot()
+        app_state.bot = TradingBot(app_state.settings)
         # Share the existing API connection completely
         app_state.bot.api = app_state.api
         app_state.bot.api_connected = True  # Mark as already connected
@@ -280,7 +280,7 @@ async def bot_simulate():
     if not app_state.bot:
         logger.info("Creating temporary bot instance for simulation")
         from bot.trader import TradingBot
-        temp_bot = TradingBot()
+        temp_bot = TradingBot(app_state.settings)
         
         # Initialize with existing API connection
         if app_state.api:
