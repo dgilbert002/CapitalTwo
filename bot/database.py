@@ -86,6 +86,10 @@ class DatabaseManager:
             logger.error(f"Error getting candles: {e}")
             return []
 
+    def get_latest_candles(self, epic: str, limit: int = 100) -> list:
+        """Get the latest N candles for an epic (alias for get_candles)"""
+        return self.get_candles(epic, limit)
+
     def close(self):
         """Close the database connection"""
         if self.conn:
