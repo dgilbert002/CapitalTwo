@@ -7,11 +7,11 @@ import logging
 from datetime import datetime, time, timedelta
 from typing import Dict, List, Optional
 from bot.api import CapitalComAPI
-from bot.database import Database
+from bot.database import DatabaseManager
 from bot.data_downloader import DataDownloader
 from bot.settings import TradingBotSettings
 from bot.market_time import MarketTimeManager
-from Brains.ai_system import BrainsAI
+from Brains.ai_system import HybridIntelligentSystem
 import pandas as pd
 
 logger = logging.getLogger(__name__)
@@ -21,10 +21,10 @@ class TradingBot:
         """Initialize the trading bot with improved features"""
         self.settings = settings
         self.api = CapitalComAPI(settings.get('API_CONFIG', 'environment', 'demo'))
-        self.db = Database(settings.get('DATABASE', 'path', 'database.db'))
+        self.db = DatabaseManager(settings.get('DATABASE', 'path', 'database.db'))
         self.downloader = DataDownloader(self.api, self.db)
         self.market_timer = MarketTimeManager()
-        self.ai_system = BrainsAI()
+        self.ai_system = HybridIntelligentSystem()
         
         # Get timer settings
         self.use_timer_based_trading = True
@@ -54,7 +54,7 @@ class TradingBot:
         self.downloader_task = None
         
         logger.info(f"Trading bot initialized for {self.epic}")
-    
+        
     async def initialize(self) -> bool:
         """Initialize the trading bot"""
         try:
@@ -66,7 +66,6 @@ class TradingBot:
                 if not await self.api.authenticate():
                     return False
                 self.api_connected = True
-            
             accounts = await self.api.get_accounts()
             if not accounts:
                 logger.error("No accounts found")
@@ -87,7 +86,7 @@ class TradingBot:
             
             # Get initial market info
             self.market_info = await self.api.get_market_info(self.epic)
-            
+
             # Start continuous data download
             self.downloader_task = asyncio.create_task(self.continuous_download())
             
@@ -134,7 +133,7 @@ class TradingBot:
         """Check and adjust stop loss based on profit thresholds - Legacy style"""
         if not self.use_trailing_sl or not positions:
             return
-            
+
         try:
             for position_data in positions:
                 position = position_data.get('position', {})
@@ -310,7 +309,7 @@ class TradingBot:
                                 await asyncio.sleep(1)
                             else:
                                 logger.error(f"Failed to close {deal_id} after 3 attempts: {e}")
-                                
+            
         except Exception as e:
             logger.error(f"Error closing positions: {e}")
     
@@ -522,7 +521,7 @@ class TradingBot:
             except Exception as e:
                 logger.error(f"Keepalive error: {e}")
             await asyncio.sleep(30)
-    
+
     def stop(self):
         """Stop the trading bot"""
         self.is_running = False
