@@ -22,6 +22,8 @@ class TradingBot:
         self.settings = settings
         self.api = CapitalComAPI(settings, environment=settings.get('API_CONFIG', 'environment', 'demo'))
         self.db = DatabaseManager(settings.get('DATABASE', 'path', 'database.db'))
+        # Provide alias for compatibility with shutdown paths expecting db_manager
+        self.db_manager = self.db
         self.downloader = DataDownloader(self.api, self.db)
         self.market_timer = MarketTimeManager(settings)
         self.ai_system = HybridIntelligentSystem()
@@ -223,6 +225,21 @@ class TradingBot:
                     logger.info("SIMULATION: MARKET CLOSED")
                     logger.info("="*40)
                 
+                # At T-15s, proactively trigger trade analysis/creation to mirror legacy sim
+                if seconds == 15:
+                    try:
+                        # Ensure we have fresh market info and dealing rules
+                        self.market_info = await self.api.get_market_info(self.epic)
+                        dealing_rules = (self.market_info or {}).get('dealingRules', {})
+                        # Assume conditions true in simulation: use direction from settings
+                        direction_setting = self.settings.get('BOT_CONFIG', 'direction', 'long').lower()
+                        forced_signal = 'buy' if direction_setting == 'long' else 'sell'
+                        ai_analysis = {'trade_signal': forced_signal, 'confidence': 1.0}
+                        await self.create_position_timer(ai_analysis, dealing_rules)
+                        self.trade_analyzed_today = True
+                    except Exception as e:
+                        logger.error(f"SIMULATION force trade failed: {e}")
+
                 # Execute the normal timer strategy with fake time
                 await self.execute_timer_based_strategy(fake_event)
                 
@@ -334,9 +351,24 @@ class TradingBot:
                 logger.warning("Insufficient historical data")
                 return
             
-            # Convert to DataFrame
-            df = pd.DataFrame(candles)
-            df.columns = ['timestamp', 'openPrice', 'highPrice', 'lowPrice', 'closePrice', 'lastTradedVolume']
+            # Convert DB rows -> DataFrame with correct schema
+            # DB returns: (epic, timestamp, open, high, low, close, volume)
+            df = pd.DataFrame(
+                candles,
+                columns=['epic', 'timestamp', 'open', 'high', 'low', 'close', 'volume']
+            )
+            # Drop epic and rename for Brains
+            if 'epic' in df.columns:
+                df = df.drop(columns=['epic'])
+            df = df.rename(columns={
+                'open': 'openPrice',
+                'high': 'highPrice',
+                'low': 'lowPrice',
+                'close': 'closePrice',
+                'volume': 'lastTradedVolume'
+            })
+            df['timestamp'] = pd.to_datetime(df['timestamp'])
+            df = df.sort_values('timestamp').reset_index(drop=True)
             
             # GOSPEL Brains analysis
             df = self.ai_system.calculate_technical_indicators(df)
