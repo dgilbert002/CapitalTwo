@@ -195,7 +195,7 @@
                                 <p class="mb-0">
                                     <span class="status-indicator" id="statusIndicator"></span>
                                     <span id="status">Initializing...</span>
-                                    <span class="ms-3 text-muted">|</span>
+                                    <span class="ms-3 text-muted" id="connectionSeparator">|</span>
                                     <span class="ms-3" id="connectionStatus">Connecting...</span>
                                 </p>
                             </div>
@@ -382,6 +382,28 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Action Log -->
+            <div class="row mt-3">
+                <div class="col-12">
+                    <div class="metric-card">
+                        <h5 class="mb-3"><i class="fas fa-stream"></i> Action Log</h5>
+                        <div class="table-responsive">
+                            <table class="table table-sm" id="actionLogTable">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 120px;">Time</th>
+                                        <th style="width: 160px;">Event</th>
+                                        <th>Details</th>
+                                        <th style="width: 100px;">Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -426,10 +448,9 @@
                     </div>
                     <div id="simulationSteps" class="mt-3">
                         <ul class="list-unstyled">
-                            <li id="step1" class="text-muted"><i class="fas fa-circle-notch fa-spin"></i> Creating test position...</li>
-                            <li id="step2" class="text-muted"><i class="fas fa-circle"></i> Running market simulation (5s)...</li>
-                            <li id="step3" class="text-muted"><i class="fas fa-circle"></i> Closing all positions...</li>
-                            <li id="step4" class="text-muted"><i class="fas fa-circle"></i> Creating next session position...</li>
+                            <li id="step1" class="text-muted"><i class="fas fa-circle"></i> T-30s: Closing all positions...</li>
+                            <li id="step2" class="text-muted"><i class="fas fa-circle"></i> T-15s: Analyze & create trade...</li>
+                            <li id="step3" class="text-muted"><i class="fas fa-circle"></i> Final countdown...</li>
                         </ul>
                     </div>
                 </div>
@@ -486,8 +507,13 @@
             ws = new WebSocket(wsUrl);
 
             ws.onopen = function() {
-                elements.connectionStatus.textContent = "Connected";
-                elements.connectionStatus.className = "connection-status connected";
+                // Only show connection status if bot is not running
+                if (elements.status.textContent !== "Bot Running - Monitoring Market") {
+                    elements.connectionStatus.textContent = "Connected";
+                    elements.connectionStatus.className = "connection-status connected";
+                    elements.connectionStatus.style.display = 'inline';
+                    document.getElementById('connectionSeparator').style.display = 'inline';
+                }
                 if (reconnectInterval) {
                     clearInterval(reconnectInterval);
                     reconnectInterval = null;
@@ -513,8 +539,13 @@
             };
 
             ws.onclose = function() {
-                elements.connectionStatus.textContent = "Connecting...";
-                elements.connectionStatus.className = "connection-status disconnected";
+                // Only show connection status if bot is not running
+                if (elements.status.textContent !== "Bot Running - Monitoring Market") {
+                    elements.connectionStatus.textContent = "Connecting...";
+                    elements.connectionStatus.className = "connection-status disconnected";
+                    elements.connectionStatus.style.display = 'inline';
+                    document.getElementById('connectionSeparator').style.display = 'inline';
+                }
                 
                 if (!reconnectInterval) {
                     reconnectInterval = setInterval(connectWebSocket, 5000);
@@ -544,7 +575,10 @@
                 // Update button states
                 elements.btnStart.style.display = 'none';
                 elements.btnStop.style.display = 'inline-block';
-                elements.btnSimulate.style.display = 'none';
+                elements.btnSimulate.style.display = 'inline-block';
+                // Hide connection status and separator when bot is running
+                elements.connectionStatus.style.display = 'none';
+                document.getElementById('connectionSeparator').style.display = 'none';
             } else {
                 elements.status.textContent = "Bot Stopped";
                 elements.statusIndicator.className = "status-indicator status-stopped";
@@ -552,14 +586,19 @@
                 elements.btnStart.style.display = 'inline-block';
                 elements.btnStop.style.display = 'none';
                 elements.btnSimulate.style.display = 'inline-block';
+                // Show connection status and separator when bot is stopped
+                elements.connectionStatus.style.display = 'inline';
+                document.getElementById('connectionSeparator').style.display = 'inline';
             }
 
             // Badges removed - no longer needed
 
-            // Update connection status
-            const connStatus = data.is_connected ? 'Connected' : 'Connecting...';
-            const statusElem = document.getElementById('connectionStatus');
-            if (statusElem) statusElem.textContent = connStatus;
+            // Update connection status (only when bot is not running)
+            if (!data.is_running) {
+                const connStatus = data.is_connected ? 'Connected' : 'Connecting...';
+                const statusElem = document.getElementById('connectionStatus');
+                if (statusElem) statusElem.textContent = connStatus;
+            }
             
             // Update account information
             if (data.account) {
@@ -703,6 +742,9 @@
             // Update history - combine bot trades and historic trades
             const allTrades = [...(data.historic_trades || []), ...(data.trade_history || [])];
             updateHistoryTable(allTrades);
+
+            // Update action log
+        updateActionLogTable(data.action_log || []);
 
             // Update last update time - removed as element doesn't exist
             // elements.lastUpdate.textContent = new Date().toLocaleTimeString();
@@ -984,6 +1026,42 @@
             }
         }
 
+        function updateActionLogTable(actions) {
+            const tbody = document.querySelector('#actionLogTable tbody');
+            if (!tbody) return;
+            if (!actions || actions.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" class="text-center text-muted py-3">No actions yet</td></tr>';
+                return;
+            }
+            // Most recent first
+            const rows = actions.slice().reverse().map(a => {
+                const status = a.success === true ? 'success' : (a.success === false ? 'danger' : 'secondary');
+                const statusText = a.success === true ? 'OK' : (a.success === false ? 'FAIL' : '');
+                let details = '';
+                if (a.event === 'brains_decision') {
+                    details = `Signal: ${a.signal}, Conf: ${(a.confidence*100||0).toFixed ? (a.confidence*100).toFixed(1) : a.confidence}%` + (a.simulation_override ? ' (simulation override)' : '');
+                } else if (a.event === 'create_position_calculation') {
+                    details = `Dir: ${a.direction}, Entry: $${Number(a.entry_price).toFixed(4)}, Notional: $${Number(a.notional).toFixed(2)}, Ctrts: ${Number(a.contracts).toFixed(2)}, SL: $${Number(a.stop_level).toFixed(4)}`;
+                } else if (a.event?.startsWith('close_position')) {
+                    details = `Deal: ${a.deal_id || ''} ${a.attempt ? 'Attempt ' + a.attempt : ''} ${a.error ? ('Err: ' + a.error) : ''}`;
+                } else if (a.event === 'api_execution') {
+                    const ref = a.dealReference ? ('Ref: ' + a.dealReference) : '';
+                    details = `${ref} ${a.error ? ('Err: ' + a.error) : ''}`;
+                } else if (a.event === 'close_positions') {
+                    details = `Found: ${a.found}`;
+                } else {
+                    details = JSON.stringify(a);
+                }
+                return `<tr>
+                    <td><small>${a.ts || '-'}</small></td>
+                    <td><small>${a.event || '-'}</small></td>
+                    <td><small>${details}</small></td>
+                    <td>${statusText ? `<span class="badge bg-${status}">${statusText}</span>` : ''}</td>
+                </tr>`;
+            }).join('');
+            tbody.innerHTML = rows;
+        }
+
         // Add notification helper function
         function showNotification(message, type = 'info') {
             const alertDiv = document.createElement('div');
@@ -1028,7 +1106,7 @@
                     // Update button states
                     elements.btnStart.style.display = 'none';
                     elements.btnStop.style.display = 'inline-block';
-                    elements.btnSimulate.style.display = 'none';
+                    elements.btnSimulate.style.display = 'inline-block';
                     
                     // Update status
                     elements.status.textContent = 'Bot Running - Monitoring Market';
@@ -1152,7 +1230,7 @@
             }
         });
         
-        // Simulate button with progress modal
+            // Simulate button with progress modal
         document.getElementById('btnSimulate').addEventListener('click', async () => {
             // Show simulation modal
             const simulationModal = new bootstrap.Modal(document.getElementById('simulationModal'));
@@ -1176,9 +1254,9 @@
             
             try {
                 // Start simulation
-                updateStep(1, 'active');
-                document.getElementById('simulationProgress').style.width = '25%';
-                document.getElementById('simulationProgress').textContent = '25%';
+                updateStep(1, 'active'); // T-30s close
+                document.getElementById('simulationProgress').style.width = '33%';
+                document.getElementById('simulationProgress').textContent = '33%';
                 
                 const response = await fetch('/bot/simulate', { method: 'POST' });
                 const result = await response.json();
@@ -1186,67 +1264,62 @@
                 // Simulate progress
                 setTimeout(() => {
                     updateStep(1, 'done');
-                    updateStep(2, 'active');
-                    document.getElementById('simulationProgress').style.width = '50%';
-                    document.getElementById('simulationProgress').textContent = '50%';
-                }, 1000);
+                    updateStep(2, 'active'); // T-15s trade
+                    document.getElementById('simulationProgress').style.width = '66%';
+                    document.getElementById('simulationProgress').textContent = '66%';
+                }, 1500);
                 
                 setTimeout(() => {
                     updateStep(2, 'done');
-                    updateStep(3, 'active');
-                    document.getElementById('simulationProgress').style.width = '75%';
-                    document.getElementById('simulationProgress').textContent = '75%';
-                }, 3000);
+                    updateStep(3, 'active'); // Final countdown
+                    document.getElementById('simulationProgress').style.width = '90%';
+                    document.getElementById('simulationProgress').textContent = '90%';
+                }, 3500);
                 
                 setTimeout(() => {
                     updateStep(3, 'done');
-                    updateStep(4, 'active');
-                    document.getElementById('simulationProgress').style.width = '90%';
-                    document.getElementById('simulationProgress').textContent = '90%';
-                }, 4000);
-                
-                setTimeout(() => {
-                    updateStep(4, 'done');
                     document.getElementById('simulationProgress').style.width = '100%';
                     document.getElementById('simulationProgress').textContent = '100%';
                     
                     // Hide simulation modal and show result
                     simulationModal.hide();
                     
-                    if (result.ok) {
+                    const steps = result.steps || {};
+                    const closeOK = steps.close_positions !== undefined ? steps.close_positions : result.ok;
+                    const createOK = steps.create_trade !== undefined ? steps.create_trade : result.ok;
+                    
+                    if (result.ok && closeOK && createOK) {
                         showModal(
                             '<i class="fas fa-check-circle text-success"></i> Simulation Complete',
                             `
                             <div class="alert alert-success">
                                 <strong>Market simulation completed successfully!</strong>
                             </div>
-                            <p>The simulation has:</p>
-                            <ul>
-                                <li>✅ Created a test position</li>
-                                <li>✅ Simulated market run time (5 seconds)</li>
-                                <li>✅ Closed all positions at market close</li>
-                                <li>✅ Created next session's position</li>
+                            <ul class="mb-2">
+                                <li>${closeOK ? '✅' : '❌'} Closed all positions at T-30s</li>
+                                <li>${createOK ? '✅' : '❌'} Analyzed & placed a trade at T-15s</li>
+                                <li>✅ Final countdown completed</li>
                             </ul>
                             <div class="alert alert-info mt-3">
-                                <i class="fas fa-info-circle"></i> Check your positions and history tabs to see the simulated trades.
+                                <i class="fas fa-info-circle"></i> Positions and history will refresh automatically.
                             </div>
                             `,
                             'success'
                         );
                     } else {
-                        const errorMsg = result.error === 'bot_not_initialized' 
-                            ? 'Bot must be started first before running simulation.'
-                            : result.message || 'Simulation failed. Check logs for details.';
-                            
+                        const errorMsg = result.error || 'Simulation failed. Check logs for details.';
                         showModal(
-                            '<i class="fas fa-exclamation-triangle text-danger"></i> Simulation Failed',
+                            '<i class="fas fa-exclamation-triangle text-danger"></i> Simulation Result',
                             `
-                            <div class="alert alert-danger">
-                                <strong>Error:</strong> ${errorMsg}
+                            <div class="alert alert-warning">
+                                <strong>Completed with warnings.</strong>
                             </div>
-                            ${result.error === 'bot_not_initialized' ? 
-                                '<p>Please start the bot first, then try the simulation again.</p>' : 
-                                '<p>This may be because the market is closed and positions cannot be created in demo mode.</p>'}
+                            <ul class="mb-2">
+                                <li>${closeOK ? '✅' : '❌'} Closed all positions at T-30s</li>
+                                <li>${createOK ? '✅' : '❌'} Analyzed & placed a trade at T-15s</li>
+                                <li>✅ Final countdown completed</li>
+                            </ul>
+                            <div class="alert alert-secondary mt-2"><small>${errorMsg}</small></div>
                             `,
                             'error'
                         );

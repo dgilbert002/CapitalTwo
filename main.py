@@ -118,6 +118,7 @@ async def websocket_endpoint(websocket: WebSocket):
                 "market_info": app_state.market_info,
             "positions": app_state.positions,
             "trade_history": app_state.bot.trade_history if app_state.bot else [],
+            "action_log": getattr(app_state.bot, 'action_log', []) if app_state.bot else [],
             "historic_trades": app_state.historic_trades,
                 "environment": app_state.api.environment if app_state.api else "demo",
                 "is_connected": app_state.is_connected
@@ -289,12 +290,10 @@ async def bot_simulate():
             temp_bot.current_account = app_state.current_account
             
             # Run simulation
-            success = await temp_bot.simulate_market_close()
-            
-            if success:
-                return {"ok": True, "message": "Simulation complete (temporary bot)"}
-            else:
-                return {"ok": False, "error": "simulation_failed"}
+            result = await temp_bot.simulate_market_close()
+            if isinstance(result, dict):
+                return result
+            return {"ok": bool(result), "error": None if result else "simulation_failed"}
         else:
             return {"ok": False, "error": "no_api_connection", "message": "No API connection available"}
     
@@ -303,16 +302,15 @@ async def bot_simulate():
         logger.info("Bot exists but not running - starting temporarily for simulation")
         # Temporarily mark as running for simulation
         app_state.bot.is_running = True
-        success = await app_state.bot.simulate_market_close()
+        result = await app_state.bot.simulate_market_close()
         app_state.bot.is_running = False
     else:
         # Bot is running normally
-        success = await app_state.bot.simulate_market_close()
+        result = await app_state.bot.simulate_market_close()
     
-    if success:
-        return {"ok": True, "message": "Simulation complete"}
-    else:
-        return {"ok": False, "error": "simulation_failed"}
+    if isinstance(result, dict):
+        return result
+    return {"ok": bool(result), "message": "Simulation complete" if result else None, "error": None if result else "simulation_failed"}
 
 @app.get("/config")
 async def get_config():

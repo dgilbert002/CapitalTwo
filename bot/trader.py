@@ -53,12 +53,26 @@ class TradingBot:
         
         # Trading data
         self.trade_history = []
+        self.action_log = []
         
         # Tasks
         self.keepalive_task = None
         self.downloader_task = None
         
         logger.info(f"Trading bot initialized for {self.epic}")
+
+    def record_action(self, action: Dict) -> None:
+        """Record a structured action to in-memory list and Trades.log"""
+        try:
+            entry = {**action, 'ts': datetime.now().isoformat(timespec='seconds')}
+            self.action_log.append(entry)
+            if len(self.action_log) > 200:
+                self.action_log = self.action_log[-200:]
+            import json as _json
+            with open('Trades.log', 'a', encoding='utf-8') as f:
+                f.write(_json.dumps(entry) + "\n")
+        except Exception:
+            pass
         
     async def initialize(self) -> bool:
         """Initialize the trading bot"""
@@ -124,7 +138,6 @@ class TradingBot:
                     return result
                 else:
                     logger.warning(f"Attempt {attempt} failed - invalid response: {result}")
-                    
             except Exception as e:
                 logger.error(f"Attempt {attempt} failed with error: {e}")
                 
@@ -185,7 +198,7 @@ class TradingBot:
             logger.error(f"Error in trailing stop loss: {e}")
     
     async def simulate_market_close(self):
-        """Simulate market close - LEGACY STYLE: Just manipulate time!"""
+        """Simulate market close - LEGACY STYLE: Just manipulate time! Returns step results."""
         try:
             logger.info("="*60)
             logger.info("SIMULATION: Legacy-style time manipulation")
@@ -196,6 +209,10 @@ class TradingBot:
             simulation_mode = self.settings.getboolean('BOT_CONFIG', 'simulation_mode', False)
             if simulation_mode:
                 logger.info("SIMULATION MODE: API calls will be skipped")
+            
+            # Track step results
+            closed_positions_success = None
+            created_trade_success = None
             
             # Run countdown from 35 to 0 seconds
             for seconds in range(35, -1, -1):
@@ -214,6 +231,20 @@ class TradingBot:
                     logger.info("="*40)
                     logger.info("SIMULATION: T-30s - CLOSING POSITIONS")
                     logger.info("="*40)
+                    # Check before/after counts to mark success
+                    try:
+                        before_positions = await self.api.get_positions()
+                        before_count = len(before_positions or [])
+                    except Exception:
+                        before_count = 0
+                    await self.close_all_positions_timer()
+                    try:
+                        after_positions = await self.api.get_positions()
+                        after_count = len(after_positions or [])
+                    except Exception:
+                        after_count = 0
+                    closed_positions_success = (after_count == 0) or (after_count < before_count)
+                    self.record_action({'event': 'close_positions_summary', 'success': bool(closed_positions_success), 'before': before_count, 'after': after_count})
                 elif seconds == 15:
                     logger.info("="*40)
                     logger.info("SIMULATION: T-15s - ANALYZING & TRADING")
@@ -235,10 +266,30 @@ class TradingBot:
                         direction_setting = self.settings.get('BOT_CONFIG', 'direction', 'long').lower()
                         forced_signal = 'buy' if direction_setting == 'long' else 'sell'
                         ai_analysis = {'trade_signal': forced_signal, 'confidence': 1.0}
-                        await self.create_position_timer(ai_analysis, dealing_rules)
+                        self.record_action({
+                            'event': 'brains_decision',
+                            'simulation_override': True,
+                            'signal': ai_analysis['trade_signal'],
+                            'confidence': ai_analysis['confidence'],
+                            'epic': self.epic
+                        })
+                        try:
+                            before_positions = await self.api.get_positions()
+                            before_count = len(before_positions or [])
+                        except Exception:
+                            before_count = 0
+                        created_ok = await self.create_position_timer(ai_analysis, dealing_rules)
+                        try:
+                            after_positions = await self.api.get_positions()
+                            after_count = len(after_positions or [])
+                        except Exception:
+                            after_count = before_count
+                        created_trade_success = bool(created_ok) or (after_count > before_count)
                         self.trade_analyzed_today = True
+                        self.record_action({'event': 'create_trade_summary', 'success': bool(created_trade_success), 'before': before_count, 'after': after_count})
                     except Exception as e:
                         logger.error(f"SIMULATION force trade failed: {e}")
+                        self.record_action({'event': 'api_execution', 'success': False, 'error': str(e), 'epic': self.epic})
 
                 # Execute the normal timer strategy with fake time
                 await self.execute_timer_based_strategy(fake_event)
@@ -259,11 +310,17 @@ class TradingBot:
             logger.info("Check your positions tab for results")
             logger.info("="*60)
             
-            return True
+            return {
+                'ok': True,
+                'steps': {
+                    'close_positions': bool(closed_positions_success) if closed_positions_success is not None else True,
+                    'create_trade': bool(created_trade_success) if created_trade_success is not None else True
+                }
+            }
             
         except Exception as e:
             logger.error(f"SIMULATION ERROR: {e}")
-            return False
+            return {'ok': False, 'error': str(e)}
     
     async def execute_timer_based_strategy(self, market_event: Dict) -> None:
         """Execute timer-based trading strategy"""
@@ -305,6 +362,7 @@ class TradingBot:
             positions = await self.api.get_positions()
             if not positions:
                 logger.info("No positions to close")
+                self.record_action({'event': 'close_positions', 'found': 0})
                 return
             
             for position_data in positions:
@@ -316,20 +374,24 @@ class TradingBot:
                     for attempt in range(1, 4):
                         try:
                             logger.info(f"Closing position {deal_id} - attempt {attempt}/3")
+                            self.record_action({'event': 'close_position_attempt', 'deal_id': deal_id, 'attempt': attempt})
                             
                             if self.settings.getboolean('BOT_CONFIG', 'simulation_mode', False):
                                 logger.info(f"SIMULATION MODE: Would close {deal_id}")
+                                self.record_action({'event': 'close_position_result', 'deal_id': deal_id, 'success': True, 'simulation': True})
                                 break
                             
                             result = await self.api.close_position(deal_id)
                             if result:
                                 logger.info(f"Position {deal_id} closed successfully")
+                                self.record_action({'event': 'close_position_result', 'deal_id': deal_id, 'success': True})
                                 break
                         except Exception as e:
                             if attempt < 3:
                                 await asyncio.sleep(1)
                             else:
                                 logger.error(f"Failed to close {deal_id} after 3 attempts: {e}")
+                                self.record_action({'event': 'close_position_result', 'deal_id': deal_id, 'success': False, 'error': str(e)})
             
         except Exception as e:
             logger.error(f"Error closing positions: {e}")
@@ -377,6 +439,14 @@ class TradingBot:
                 df,
                 datetime.now()
             )
+            # Record brains decision
+            self.record_action({
+                'event': 'brains_decision',
+                'simulation_override': False,
+                'signal': ai_analysis.get('trade_signal'),
+                'confidence': ai_analysis.get('confidence'),
+                'epic': self.epic
+            })
             
             logger.info(f"Brains Decision: Signal={ai_analysis['trade_signal']}, "
                        f"Confidence={ai_analysis['confidence']:.2%}, "
@@ -451,12 +521,12 @@ class TradingBot:
                 # Start with first staggered level
                 sl_use = self.settings.get('BOT_CONFIG', 'sl_use', '0,1,2,4,6,8,10').split(',')
                 
-                # Use first level
+                # Use first level or default
                 if sl_use and sl_use[0] != '0':
                     first_stop = float(sl_use[0]) / 100
                 else:
                     first_stop = 0.02  # Default 2%
-                    
+                
                 stop_level = entry_price * (1 - first_stop) if direction == 'long' else entry_price * (1 + first_stop)
             else:
                 # Fallback to normal
@@ -464,6 +534,23 @@ class TradingBot:
                 stop_level = entry_price * (1 - stop_loss_pct) if direction == 'long' else entry_price * (1 + stop_loss_pct)
             
             logger.info(f"Creating position: {direction.upper()} {trade_size} @ {entry_price}, SL: {stop_level}")
+            # Record sizing/calculation
+            self.record_action({
+                'event': 'create_position_calculation',
+                'simulation_override': False,
+                'direction': direction,
+                    'entry_price': entry_price,
+                'available': available,
+                'investment_pct': investment_pct,
+                    'leverage': leverage,
+                'notional': available * investment_pct * leverage,
+                'contracts': trade_size,
+                'min_size': min_size,
+                'max_size': max_size,
+                'increment': increment,
+                'stop_level': stop_level,
+                'epic': self.epic
+            })
             
             # Create position with retry logic
             result = await self.create_position_with_retry(
@@ -476,15 +563,29 @@ class TradingBot:
             
             if result:
                 logger.info(f"Trade executed: {result}")
+                self.record_action({
+                    'event': 'api_execution',
+                    'success': True,
+                    'response': result,
+                    'dealReference': result.get('dealReference') if isinstance(result, dict) else None,
+                    'epic': self.epic
+                })
                 self.trade_analyzed_today = True
                 self.last_trade_date = datetime.now().date()
                 return True
             else:
                 logger.error("Trade execution failed after all retries")
+                self.record_action({
+                    'event': 'api_execution',
+                    'success': False,
+                    'response': None,
+                    'epic': self.epic
+                })
                 return False
                 
         except Exception as e:
             logger.error(f"Error creating position: {e}")
+            self.record_action({'event': 'api_execution', 'success': False, 'error': str(e), 'epic': self.epic})
             return False
     
     async def run(self):

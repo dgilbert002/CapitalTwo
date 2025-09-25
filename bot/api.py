@@ -143,13 +143,17 @@ class CapitalComAPI:
             trade_direction = DirectionType.BUY if direction.lower() == "long" else DirectionType.SELL
             
             # Create position with proper parameters
-            position = await self._run_sync(
-                self.client.place_the_position, 
-                direction=trade_direction,
-                epic=epic, 
-                size=size, 
-                stop_level=stop_level if stop_level else None  # Use stop_level with underscore
-            )
+            # capitalcom client expects Python kw 'stopLevel' (maps to JSON stopLevel)
+            kwargs = {
+                'direction': trade_direction,
+                'epic': epic,
+                'size': size,
+            }
+            if stop_level:
+                # capitalcom-python expects snake_case stop_level
+                kwargs['stop_level'] = float(stop_level)
+
+            position = await self._run_sync(self.client.place_the_position, **kwargs)
             logger.info(f"Position creation response: {position}")
             return position
         except Exception as e:
