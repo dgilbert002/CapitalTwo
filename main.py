@@ -327,6 +327,42 @@ async def bot_simulate():
         return result
     return {"ok": bool(result), "message": "Simulation complete" if result else None, "error": None if result else "simulation_failed"}
 
+@app.post("/bot/speedtest")
+async def bot_speed_test(days: int = 5):
+    """Run speed test simulation with accelerated time for multiple days"""
+    logger.info(f"Speed test requested for {days} days")
+    
+    # If bot not initialized, create temporary instance for speed test
+    if not app_state.bot:
+        logger.info("Creating temporary bot instance for speed test")
+        from bot.trader import TradingBot
+        temp_bot = TradingBot(app_state.settings)
+        
+        # Initialize with existing API connection
+        if app_state.api:
+            temp_bot.api = app_state.api
+            temp_bot.api_connected = True
+            temp_bot.current_account = app_state.current_account
+            
+            # Run speed test
+            result = await temp_bot.simulate_speed_test(days)
+            return result
+        else:
+            return {"ok": False, "error": "no_api_connection", "message": "No API connection available"}
+    
+    # Use existing bot
+    if not app_state.bot.is_running:
+        logger.info("Bot exists but not running - starting temporarily for speed test")
+        # Temporarily mark as running for speed test
+        app_state.bot.is_running = True
+        result = await app_state.bot.simulate_speed_test(days)
+        app_state.bot.is_running = False
+    else:
+        # Bot is running normally
+        result = await app_state.bot.simulate_speed_test(days)
+    
+    return result
+
 @app.post("/brains/preview")
 async def brains_preview():
     """Run Brains analysis without trading and return the decision details."""

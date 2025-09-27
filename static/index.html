@@ -203,6 +203,7 @@
                                 <button class="btn btn-sm btn-success" id="btnStart"><i class="fas fa-play"></i> Start Bot</button>
                                 <button class="btn btn-sm btn-danger ms-2" id="btnStop" style="display:none;"><i class="fas fa-stop"></i> Stop Bot</button>
                                 <button class="btn btn-sm btn-warning ms-2" id="btnSimulate" title="Simulate Market Close"><i class="fas fa-vial"></i> Simulate</button>
+                                <button class="btn btn-sm btn-info ms-2" id="btnSpeedTest" title="Speed Test Multiple Days"><i class="fas fa-tachometer-alt"></i> Speed Test</button>
                                 <button class="btn btn-sm btn-info ms-2" id="btnBrainPreview" title="Run Brains Preview"><i class="fas fa-brain"></i> Brain Preview</button>
                             </div>
                         </div>
@@ -411,7 +412,7 @@
 
     <!-- Bot Status Modal -->
     <div class="modal fade" id="botStatusModal" tabindex="-1">
-        <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
             <div class="modal-content bg-dark text-light">
                 <div class="modal-header border-secondary">
                     <h5 class="modal-title" id="modalTitle">Bot Status</h5>
@@ -454,6 +455,104 @@
                             <li id="step2" class="text-muted"><i class="fas fa-circle"></i> T-15s: Analyze & create trade...</li>
                             <li id="step3" class="text-muted"><i class="fas fa-circle"></i> Final countdown...</li>
                         </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Speed Test Modal -->
+    <div class="modal fade" id="speedTestModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
+        <div class="modal-dialog modal-xl modal-dialog-centered">
+            <div class="modal-content bg-dark text-light">
+                <div class="modal-header border-info">
+                    <h5 class="modal-title"><i class="fas fa-tachometer-alt text-info"></i> Speed Test - Accelerated Trading</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label for="speedTestDays" class="form-label">Days to simulate:</label>
+                                <select id="speedTestDays" class="form-select bg-dark text-light border-secondary">
+                                    <option value="3">3 days</option>
+                                    <option value="5" selected>5 days</option>
+                                    <option value="10">10 days</option>
+                                    <option value="20">20 days</option>
+                                </select>
+                            </div>
+                            <button class="btn btn-info w-100 mb-3" id="btnStartSpeedTest">
+                                <i class="fas fa-play"></i> Start Speed Test
+                            </button>
+                            <div class="alert alert-warning">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                <strong>REAL TRADES</strong><br>
+                                <small>Market must be OPEN</small>
+                            </div>
+                        </div>
+                        <div class="col-md-8">
+                            <!-- Time Display -->
+                            <div class="text-center mb-3">
+                                <div class="d-flex justify-content-around align-items-center">
+                                    <div>
+                                        <small class="text-muted">Day</small>
+                                        <h2 id="speedTestDay" class="text-info mb-0">1/5</h2>
+                                    </div>
+                                    <div>
+                                        <small class="text-muted">Simulated Time</small>
+                                        <h1 id="speedTestTime" class="text-warning mb-0" style="font-family: monospace;">09:30:00</h1>
+                                    </div>
+                                    <div>
+                                        <small class="text-muted">Speed</small>
+                                        <h3 id="speedTestSpeed" class="text-success mb-0">⚡ 2880x</h3>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Market Timeline -->
+                            <div class="mb-3">
+                                <div class="position-relative" style="height: 60px; background: linear-gradient(90deg, #28a745 0%, #ffc107 95%, #dc3545 100%); border-radius: 10px;">
+                                    <div id="speedTestTimeMarker" class="position-absolute" style="left: 0%; top: -10px; transition: left 0.5s;">
+                                        <div style="width: 2px; height: 80px; background: white;"></div>
+                                        <div class="text-white text-center" style="margin-left: -20px; margin-top: -5px;">
+                                            <i class="fas fa-caret-down"></i>
+                                        </div>
+                                    </div>
+                                    <div class="d-flex justify-content-between position-absolute w-100" style="bottom: -25px;">
+                                        <small>09:30</small>
+                                        <small>12:00</small>
+                                        <small>14:00</small>
+                                        <small>15:30</small>
+                                        <small>15:59:30</small>
+                                        <small>16:00</small>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Progress Bar -->
+                            <div class="progress mt-5 mb-3" style="height: 30px;">
+                                <div id="speedTestProgress" class="progress-bar progress-bar-striped progress-bar-animated bg-info" 
+                                     role="progressbar" style="width: 0%">0%</div>
+                            </div>
+                            
+                            <!-- Status Display -->
+                            <div id="speedTestStatus" class="text-center mb-3">
+                                <h5 class="text-info">Ready to Start</h5>
+                                <p class="mb-0">Click "Start Speed Test" to begin</p>
+                            </div>
+                            
+                            <!-- Live Events -->
+                            <div class="card bg-secondary">
+                                <div class="card-header">
+                                    <i class="fas fa-stream"></i> Live Events
+                                </div>
+                                <div class="card-body" style="max-height: 200px; overflow-y: auto;">
+                                    <div id="speedTestEvents">
+                                        <div class="text-muted">No events yet...</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -511,7 +610,8 @@
             historyTable: document.getElementById("historyTable"),
             btnStart: document.getElementById("btnStart"),
             btnStop: document.getElementById("btnStop"),
-            btnSimulate: document.getElementById("btnSimulate")
+            btnSimulate: document.getElementById("btnSimulate"),
+            btnSpeedTest: document.getElementById("btnSpeedTest")
         };
 
         let ws;
@@ -595,6 +695,7 @@
                 elements.btnStart.style.display = 'none';
                 elements.btnStop.style.display = 'inline-block';
                 elements.btnSimulate.style.display = 'inline-block';
+                elements.btnSpeedTest.style.display = 'inline-block';
                 // Hide connection status and separator when bot is running
                 elements.connectionStatus.style.display = 'none';
                 document.getElementById('connectionSeparator').style.display = 'none';
@@ -605,6 +706,7 @@
                 elements.btnStart.style.display = 'inline-block';
                 elements.btnStop.style.display = 'none';
                 elements.btnSimulate.style.display = 'inline-block';
+                elements.btnSpeedTest.style.display = 'inline-block';
                 // Show connection status and separator when bot is stopped
                 elements.connectionStatus.style.display = 'inline';
                 document.getElementById('connectionSeparator').style.display = 'inline';
@@ -1370,6 +1472,218 @@
                     `<div class="alert alert-danger">Error: ${e.message}</div>`,
                     'error'
                 );
+            }
+        });
+
+        // Speed Test button - open modal
+        document.getElementById('btnSpeedTest').addEventListener('click', () => {
+            // Show speed test modal
+            const speedTestModal = new bootstrap.Modal(document.getElementById('speedTestModal'));
+            speedTestModal.show();
+            
+            // Reset UI
+            document.getElementById('speedTestDay').textContent = '0/0';
+            document.getElementById('speedTestTime').textContent = '09:30:00';
+            document.getElementById('speedTestSpeed').textContent = '⚡ Ready';
+            document.getElementById('speedTestProgress').style.width = '0%';
+            document.getElementById('speedTestProgress').textContent = '0%';
+            document.getElementById('speedTestTimeMarker').style.left = '0%';
+            document.getElementById('speedTestEvents').innerHTML = '<div class="text-muted">Click "Start Speed Test" to begin...</div>';
+            document.getElementById('speedTestStatus').innerHTML = '<h5 class="text-info">Ready to Start</h5><p class="mb-0">Click "Start Speed Test" to begin</p>';
+        });
+        
+        // Start Speed Test button
+        document.getElementById('btnStartSpeedTest').addEventListener('click', async () => {
+            const speedTestModal = bootstrap.Modal.getInstance(document.getElementById('speedTestModal'));
+            
+            // Get number of days from input
+            const days = parseInt(document.getElementById('speedTestDays').value) || 5;
+            
+            // Disable start button
+            document.getElementById('btnStartSpeedTest').disabled = true;
+            document.getElementById('btnStartSpeedTest').innerHTML = '<i class="fas fa-spinner fa-spin"></i> Running...';
+            
+            // Clear events
+            document.getElementById('speedTestEvents').innerHTML = '';
+            
+            // Add event to log
+            const addEvent = (message, type = 'info') => {
+                const eventDiv = document.createElement('div');
+                eventDiv.className = `small mb-1 text-${type}`;
+                eventDiv.innerHTML = `<i class="fas fa-chevron-right"></i> ${new Date().toLocaleTimeString()} - ${message}`;
+                document.getElementById('speedTestEvents').prepend(eventDiv);
+                
+                // Keep only last 10 events
+                const events = document.getElementById('speedTestEvents').children;
+                while (events.length > 10) {
+                    events[events.length - 1].remove();
+                }
+            };
+            
+            // Update time display
+            const updateTimeDisplay = (day, time, speed) => {
+                document.getElementById('speedTestDay').textContent = `${day}/${days}`;
+                document.getElementById('speedTestTime').textContent = time;
+                document.getElementById('speedTestSpeed').textContent = speed;
+                
+                // Calculate marker position (9:30 = 0%, 16:00 = 100%)
+                const [hours, minutes] = time.split(':').map(Number);
+                const totalMinutes = hours * 60 + minutes;
+                const marketStart = 9 * 60 + 30; // 9:30
+                const marketEnd = 16 * 60; // 16:00
+                const position = Math.min(100, Math.max(0, ((totalMinutes - marketStart) / (marketEnd - marketStart)) * 100));
+                document.getElementById('speedTestTimeMarker').style.left = position + '%';
+            };
+            
+            try {
+                addEvent('Starting speed test...', 'warning');
+                document.getElementById('speedTestStatus').innerHTML = '<h5 class="text-warning">Initializing...</h5>';
+                
+                // Start the speed test
+                const response = await fetch(`/bot/speedtest?days=${days}`, { method: 'POST' });
+                const result = await response.json();
+                
+                if (result.ok) {
+                    const results = result.results;
+                    
+                    // Simulate each day with time animation
+                    for (let day = 1; day <= days; day++) {
+                        addEvent(`Day ${day} starting`, 'info');
+                        updateTimeDisplay(day, '09:30:00', '⚡ 2880x');
+                        
+                        // Fast forward animation (5 seconds per day)
+                        const startTime = Date.now();
+                        const animateDuration = 5000; // 5 seconds
+                        
+                        const animateTime = async () => {
+                            const elapsed = Date.now() - startTime;
+                            const progress = Math.min(elapsed / animateDuration, 1);
+                            
+                            // Calculate simulated time
+                            const marketMinutes = 390; // 6.5 hours
+                            const currentMinutes = Math.floor(progress * marketMinutes);
+                            const hours = Math.floor(currentMinutes / 60) + 9;
+                            const minutes = (currentMinutes % 60) + 30;
+                            const timeStr = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:00`;
+                            
+                            // Update displays
+                            updateTimeDisplay(day, timeStr, progress > 0.95 ? '🐌 1x' : '⚡ 2880x');
+                            document.getElementById('speedTestProgress').style.width = (day - 1 + progress) * (100 / days) + '%';
+                            document.getElementById('speedTestProgress').textContent = Math.round((day - 1 + progress) * (100 / days)) + '%';
+                            
+                            // Add critical events
+                            if (progress > 0.94 && progress < 0.95) {
+                                addEvent(`Day ${day}: T-30s - Closing positions`, 'warning');
+                                document.getElementById('speedTestStatus').innerHTML = '<h5 class="text-danger">Closing Positions</h5>';
+                            } else if (progress > 0.97 && progress < 0.98) {
+                                addEvent(`Day ${day}: T-15s - Creating trade`, 'success');
+                                document.getElementById('speedTestStatus').innerHTML = '<h5 class="text-success">Creating Trade</h5>';
+                            }
+                            
+                            if (progress < 1) {
+                                requestAnimationFrame(animateTime);
+                            }
+                        };
+                        
+                        await animateTime();
+                        await new Promise(resolve => setTimeout(resolve, 1000)); // Pause between days
+                    }
+                    
+                    // Final update
+                    document.getElementById('speedTestProgress').style.width = '100%';
+                    document.getElementById('speedTestProgress').textContent = '100%';
+                    document.getElementById('speedTestStatus').innerHTML = '<h5 class="text-success">Complete!</h5>';
+                    addEvent('Speed test completed!', 'success');
+                    
+                    // Hide modal and show results
+                    setTimeout(() => {
+                        speedTestModal.hide();
+                        
+                        const dailyResults = results.daily_results.map(day => 
+                            `<tr>
+                                <td>Day ${day.day}</td>
+                                <td>${day.trades_created}</td>
+                                <td>${day.positions_closed}</td>
+                                <td>${day.errors.length > 0 ? '<span class="text-danger">' + day.errors.length + ' errors</span>' : '<span class="text-success">OK</span>'}</td>
+                            </tr>`
+                        ).join('');
+                        
+                        showModal(
+                            '<i class="fas fa-tachometer-alt text-info"></i> Speed Test Complete',
+                            `
+                            <div class="alert alert-success">
+                                <strong>Speed test completed successfully!</strong>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h6>Summary</h6>
+                                    <ul>
+                                        <li><strong>Days simulated:</strong> ${results.days_simulated}</li>
+                                        <li><strong>Total trades created:</strong> ${results.trades_created}</li>
+                                        <li><strong>Total positions closed:</strong> ${results.positions_closed}</li>
+                                        <li><strong>Errors:</strong> ${results.errors.length}</li>
+                                    </ul>
+                                </div>
+                                <div class="col-md-6">
+                                    <h6>Daily Results</h6>
+                                    <div class="table-responsive">
+                                        <table class="table table-sm">
+                                            <thead>
+                                                <tr>
+                                                    <th>Day</th>
+                                                    <th>Trades</th>
+                                                    <th>Closed</th>
+                                                    <th>Status</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                ${dailyResults}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="alert alert-info mt-3">
+                                <i class="fas fa-info-circle"></i> Positions and history will refresh automatically.
+                            </div>
+                            `,
+                            'success'
+                        );
+                    }, 1000);
+                } else {
+                    speedTestModal.hide();
+                    const errorMsg = result.error || 'Speed test failed';
+                    const isMarketClosed = errorMsg.includes('market_closed') || errorMsg.includes('Market is');
+                    
+                    showModal(
+                        '<i class="fas fa-exclamation-triangle text-danger"></i> Speed Test Error',
+                        `
+                        <div class="alert alert-danger">
+                            <strong>Speed Test Failed</strong>
+                        </div>
+                        <div class="alert ${isMarketClosed ? 'alert-warning' : 'alert-danger'}">
+                            ${isMarketClosed ? 
+                                '<i class="fas fa-clock"></i> <strong>Market is CLOSED!</strong><br>Speed test requires market to be OPEN for real trading.' :
+                                `Error: ${errorMsg}`
+                            }
+                        </div>
+                        ${isMarketClosed ? 
+                            '<div class="alert alert-info mt-2"><i class="fas fa-info-circle"></i> Use the regular "Simulate" button for testing when market is closed.</div>' : 
+                            ''
+                        }
+                        `,
+                        'error'
+                    );
+                }
+                
+            } catch (e) {
+                console.error(e);
+                addEvent(`Error: ${e.message}`, 'danger');
+                document.getElementById('speedTestStatus').innerHTML = '<h5 class="text-danger">Error!</h5>';
+            } finally {
+                // Re-enable start button
+                document.getElementById('btnStartSpeedTest').disabled = false;
+                document.getElementById('btnStartSpeedTest').innerHTML = '<i class="fas fa-play"></i> Start Speed Test';
             }
         });
 

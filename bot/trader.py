@@ -6,6 +6,7 @@ import asyncio
 import logging
 from datetime import datetime, time, timedelta
 from typing import Dict, List, Optional
+import pytz
 from bot.api import CapitalComAPI
 from bot.database import DatabaseManager
 from bot.data_downloader import DataDownloader
@@ -324,6 +325,176 @@ class TradingBot:
             logger.error(f"SIMULATION ERROR: {e}")
             return {'ok': False, 'error': str(e)}
     
+    async def simulate_speed_test_old(self, days: int = 5):
+        """Speed test with REAL trades and accelerated time - requires market to be open"""
+        try:
+            logger.info("="*60)
+            logger.info(f"SPEED TEST: Starting {days} day REAL trading test")
+            logger.info("30 seconds real time = 24 hours market time")
+            logger.info("REAL TRADES - Market must be open!")
+            logger.info("="*60)
+            
+            # Check if market is open for real trading
+            market_info = await self.api.get_market_info(self.epic)
+            if not market_info:
+                return {"ok": False, "error": "no_market_info", "message": "Cannot get market information"}
+            
+            # Use market timer to determine if market is open (same as dashboard uses)
+            market_event = self.market_timer.get_next_market_event(market_info)
+            is_market_open = market_event.get('is_open', False) if market_event else False
+            
+            if not is_market_open:
+                return {"ok": False, "error": "market_closed", "message": "Market is CLOSED. Speed test requires market to be OPEN for real trading."}
+            
+            # Disable simulation mode temporarily for real trading
+            original_simulation_mode = self.settings.getboolean('BOT_CONFIG', 'simulation_mode', False)
+            if original_simulation_mode:
+                logger.warning("SPEED TEST: Temporarily disabling simulation mode for real trading")
+            
+            results = {
+                'days_simulated': 0,
+                'trades_created': 0,
+                'positions_closed': 0,
+                'errors': [],
+                'daily_results': []
+            }
+            
+            for day in range(days):
+                logger.info(f"SPEED TEST: Day {day + 1}/{days} starting - REAL TRADING")
+                day_result = {
+                    'day': day + 1,
+                    'trades_created': 0,
+                    'positions_closed': 0,
+                    'errors': []
+                }
+                
+                try:
+                    # Get market hours from market info
+                    opening_hours = market_info.get('instrument', {}).get('openingHours', {})
+                    current_time = self.market_timer.get_current_time_market()
+                    day_name = current_time.strftime('%a').lower()
+                    
+                    # Parse market hours for today
+                    market_times = self.market_timer.parse_market_hours(opening_hours, day_name)
+                    if not market_times:
+                        logger.warning(f"No market hours for {day_name}")
+                        continue
+                    
+                    open_time, close_time = market_times
+                    
+                    # Create datetime objects for today's market open and close
+                    market_open = datetime.combine(current_time.date(), open_time).replace(tzinfo=pytz.timezone('UTC'))
+                    market_close = datetime.combine(current_time.date(), close_time).replace(tzinfo=pytz.timezone('UTC'))
+                    
+                    # Calculate market duration
+                    market_duration = market_close - market_open
+                    total_market_minutes = market_duration.total_seconds() / 60
+                    
+                    # Fast forward through most of the day (30 minutes = 0.625 seconds real time)
+                    fast_portion_minutes = total_market_minutes - 1  # Leave 1 minute for critical moments
+                    fast_real_time = (fast_portion_minutes / 30) * 0.625  # 0.625s per 30min
+                    
+                    if fast_real_time > 0:
+                        logger.info(f"SPEED TEST Day {day + 1}: Fast forwarding {fast_real_time:.1f}s real time")
+                        
+                        # Move time forward in 30-minute chunks
+                        chunk_size = timedelta(minutes=30)
+                        chunks = max(1, int(fast_portion_minutes / 30))
+                        
+                        simulated_time = current_time
+                        for chunk in range(chunks):
+                            simulated_time += chunk_size
+                            
+                            # Check if we're approaching critical moment
+                            time_until_close = (market_close - simulated_time).total_seconds()
+                            if time_until_close <= 30:
+                                break
+                            
+                            # Small delay to show progress
+                            await asyncio.sleep(fast_real_time / chunks)
+                    
+                    # Critical moment: T-30s to T+15s (normal speed with REAL TRADES)
+                    logger.info(f"SPEED TEST Day {day + 1}: Critical moment - T-30s to T+15s - REAL TRADING")
+                    
+                    # T-30s: Close positions (REAL)
+                    logger.info(f"SPEED TEST Day {day + 1}: T-30s - Closing REAL positions")
+                    
+                    # Count positions before closing
+                    positions_before = await self.api.get_positions()
+                    positions_count_before = len(positions_before or [])
+                    
+                    await self.close_all_positions_timer()
+                    
+                    # Count positions after closing
+                    positions_after = await self.api.get_positions()
+                    positions_count_after = len(positions_after or [])
+                    
+                    day_result['positions_closed'] = positions_count_before - positions_count_after
+                    await asyncio.sleep(2)  # Wait for positions to close
+                    
+                    # T-15s: Create new trade (REAL)
+                    await asyncio.sleep(0.5)
+                    
+                    logger.info(f"SPEED TEST Day {day + 1}: T-15s - Creating REAL trade")
+                    
+                    # Count positions before creating trade
+                    positions_before = await self.api.get_positions()
+                    positions_count_before = len(positions_before or [])
+                    
+                    # Get fresh market info and dealing rules for real trading
+                    self.market_info = await self.api.get_market_info(self.epic)
+                    dealing_rules = (self.market_info or {}).get('dealingRules', {})
+                    
+                    # Run real Brains analysis
+                    await self.analyze_and_trade_timer()
+                    
+                    # Count positions after creating trade
+                    positions_after = await self.api.get_positions()
+                    positions_count_after = len(positions_after or [])
+                    
+                    day_result['trades_created'] = positions_count_after - positions_count_before
+                    await asyncio.sleep(2)  # Wait for trade to be created
+                    
+                    # T+15s: Complete this day's cycle
+                    await asyncio.sleep(0.5)
+                    
+                    logger.info(f"SPEED TEST Day {day + 1}: Complete - {day_result['trades_created']} trades created, {day_result['positions_closed']} positions closed")
+                    
+                except Exception as e:
+                    error_msg = f"Day {day + 1} error: {e}"
+                    logger.error(error_msg)
+                    day_result['errors'].append(error_msg)
+                    results['errors'].append(error_msg)
+                
+                results['daily_results'].append(day_result)
+                results['days_simulated'] += 1
+                results['trades_created'] += day_result['trades_created']
+                results['positions_closed'] += day_result['positions_closed']
+            
+            # Restore original simulation mode
+            if original_simulation_mode:
+                logger.info("SPEED TEST: Restoring original simulation mode")
+            
+            logger.info("="*60)
+            logger.info("SPEED TEST COMPLETE - REAL TRADING!")
+            logger.info(f"Days simulated: {results['days_simulated']}")
+            logger.info(f"REAL trades created: {results['trades_created']}")
+            logger.info(f"REAL positions closed: {results['positions_closed']}")
+            logger.info(f"Errors: {len(results['errors'])}")
+            logger.info("="*60)
+            
+            return {"ok": True, "results": results}
+            
+        except Exception as e:
+            logger.error(f"SPEED TEST ERROR: {e}")
+            return {"ok": False, "error": str(e)}
+    
+    async def simulate_speed_test(self, days: int = 5):
+        """New speed test using dedicated handler"""
+        from bot.speed_test_handler import SpeedTestHandler
+        handler = SpeedTestHandler(self)
+        return await handler.run_speed_test(days)
+    
     async def execute_timer_based_strategy(self, market_event: Dict) -> None:
         """Execute timer-based trading strategy"""
         if not market_event:
@@ -339,8 +510,8 @@ class TradingBot:
                 self.trade_analyzed_today = False
                 self.highest_threshold_acted = 0  # Reset trailing SL
                 logger.info("Market closed - flags reset for next session")
-            return
-
+                return
+            
         # Log countdown when within 60 seconds
         if time_until_close <= 60 and time_until_close > 0:
             if int(time_until_close) % 10 == 0:  # Log every 10 seconds
@@ -365,8 +536,8 @@ class TradingBot:
             if not positions:
                 logger.info("No positions to close")
                 self.record_action({'event': 'close_positions', 'found': 0})
-            return
-
+                return
+            
             for position_data in positions:
                 position = position_data.get('position', {})
                 deal_id = position.get('dealId')
@@ -391,7 +562,7 @@ class TradingBot:
                         except Exception as e:
                             if attempt < 3:
                                 await asyncio.sleep(1)
-                            else:
+            else:
                                 logger.error(f"Failed to close {deal_id} after 3 attempts: {e}")
                                 self.record_action({'event': 'close_position_result', 'deal_id': deal_id, 'success': False, 'error': str(e)})
             
@@ -423,18 +594,25 @@ class TradingBot:
             # Get historical data
             candles = self.db.get_latest_candles(self.epic, 200)
             if not candles or len(candles) < 100:
-                logger.warning("Insufficient historical data")
+                logger.warning(f"Insufficient historical data: {len(candles) if candles else 0} candles")
+                self.record_action({
+                    'event': 'brains_decision',
+                    'error': f'Insufficient data: {len(candles) if candles else 0} candles',
+                    'epic': self.epic
+                })
                 return
             
             # Convert DB rows -> DataFrame with correct schema
-            # DB returns: (epic, timestamp, open, high, low, close, volume)
+            # DB returns tuples: (epic, timestamp, open, high, low, close, volume)
             df = pd.DataFrame(
                 candles,
                 columns=['epic', 'timestamp', 'open', 'high', 'low', 'close', 'volume']
             )
-            # Drop epic and rename for Brains
-            if 'epic' in df.columns:
-                df = df.drop(columns=['epic'])
+            
+            # Drop epic column
+            df = df.drop(columns=['epic'])
+            
+            # Rename columns for Brains compatibility
             df = df.rename(columns={
                 'open': 'openPrice',
                 'high': 'highPrice',
@@ -442,8 +620,20 @@ class TradingBot:
                 'close': 'closePrice',
                 'volume': 'lastTradedVolume'
             })
+            
+            # Convert timestamp and sort
             df['timestamp'] = pd.to_datetime(df['timestamp'])
             df = df.sort_values('timestamp').reset_index(drop=True)
+            
+            # Ensure we have a DataFrame, not empty
+            if df.empty:
+                logger.error("DataFrame is empty after conversion")
+                self.record_action({
+                    'event': 'brains_decision',
+                    'error': 'Empty DataFrame after conversion',
+                    'epic': self.epic
+                })
+                return
             
             # GOSPEL Brains analysis
             df = self.ai_system.calculate_technical_indicators(df)
