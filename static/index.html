@@ -195,13 +195,16 @@
                                 <p class="mb-0">
                                     <span class="status-indicator" id="statusIndicator"></span>
                                     <span id="status">Initializing...</span>
-                                    <span class="ms-3 text-muted">|</span>
+                                    <span class="ms-3 text-muted" id="connectionSeparator">|</span>
                                     <span class="ms-3" id="connectionStatus">Connecting...</span>
                                 </p>
                             </div>
                             <div class="col-md-6 text-end">
-                                <button class="btn btn-sm btn-outline-light" id="btnStart"><i class="fas fa-play"></i> Start</button>
-                                <button class="btn btn-sm btn-outline-warning ms-2" id="btnStop"><i class="fas fa-stop"></i> Stop</button>
+                                <button class="btn btn-sm btn-success" id="btnStart"><i class="fas fa-play"></i> Start Bot</button>
+                                <button class="btn btn-sm btn-danger ms-2" id="btnStop" style="display:none;"><i class="fas fa-stop"></i> Stop Bot</button>
+                                <button class="btn btn-sm btn-warning ms-2" id="btnSimulate" title="Simulate Market Close"><i class="fas fa-vial"></i> Simulate</button>
+                                <button class="btn btn-sm btn-info ms-2" id="btnSpeedTest" title="Speed Test Multiple Days"><i class="fas fa-tachometer-alt"></i> Speed Test</button>
+                                <button class="btn btn-sm btn-info ms-2" id="btnBrainPreview" title="Run Brains Preview"><i class="fas fa-brain"></i> Brain Preview</button>
                             </div>
                         </div>
                     </div>
@@ -244,6 +247,40 @@
                                 <div class="metric-value" id="pnl">$0.00</div>
                             </div>
                         </div>
+                    </div>
+                    
+                    <!-- Stop Loss Configuration -->
+                    <div class="metric-card">
+                        <h6 class="text-muted mb-3"><i class="fas fa-shield-alt"></i> Stop Loss Configuration</h6>
+                        <div class="form-check mb-2">
+                            <input class="form-check-input" type="radio" name="stopLossType" id="slNormal" value="normal" checked>
+                            <label class="form-check-label" for="slNormal">Normal SL (%)</label>
+                            <input type="number" class="form-control form-control-sm mt-1" id="slNormalValue" 
+                                   placeholder="2.0" step="0.1" style="width: 100px;">
+                        </div>
+                        <div class="form-check mb-2">
+                            <input class="form-check-input" type="radio" name="stopLossType" id="slTrailing" value="trailing">
+                            <label class="form-check-label" for="slTrailing">Trailing SL</label>
+                            <div class="d-flex gap-2 mt-1">
+                                <input type="text" class="form-control form-control-sm" id="slThresholds" 
+                                       placeholder="Thresholds: 5,10,15" disabled style="width: 140px;">
+                                <input type="text" class="form-control form-control-sm" id="slAdjustments" 
+                                       placeholder="Adjust: 2,5,8" disabled style="width: 120px;">
+                            </div>
+                        </div>
+                        <div class="form-check mb-2">
+                            <input class="form-check-input" type="radio" name="stopLossType" id="slStaggered" value="staggered">
+                            <label class="form-check-label" for="slStaggered">Staggered SL</label>
+                            <div class="d-flex gap-2 mt-1">
+                                <input type="text" class="form-control form-control-sm" id="slWhenAt" 
+                                       placeholder="When: 2,4,5,7,10" disabled style="width: 140px;">
+                                <input type="text" class="form-control form-control-sm" id="slUse" 
+                                       placeholder="Use: 0,1,2,4,6" disabled style="width: 120px;">
+                            </div>
+                        </div>
+                        <button class="btn btn-sm btn-primary mt-2" id="btnSaveStopLoss">
+                            <i class="fas fa-save"></i> Save SL Settings
+                        </button>
                     </div>
                 </div>
                 <div class="col-lg-6">
@@ -309,6 +346,7 @@
                                         <th>Size Details</th>
                                         <th>Open Level</th>
                                         <th>Current Level</th>
+                                        <th>SL</th>
                                         <th>P&L (UPL)</th>
                                         <th>Actions</th>
                                     </tr>
@@ -345,6 +383,198 @@
                             </table>
                         </div>
                     </div>
+                </div>
+            </div>
+
+            <!-- Action Log -->
+            <div class="row mt-3">
+                <div class="col-12">
+                    <div class="metric-card">
+                        <h5 class="mb-3"><i class="fas fa-stream"></i> Action Log</h5>
+                        <div class="table-responsive">
+                            <table class="table table-sm" id="actionLogTable">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 120px;">Time</th>
+                                        <th style="width: 160px;">Event</th>
+                                        <th>Details</th>
+                                        <th style="width: 100px;">Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bot Status Modal -->
+    <div class="modal fade" id="botStatusModal" tabindex="-1">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content bg-dark text-light">
+                <div class="modal-header border-secondary">
+                    <h5 class="modal-title" id="modalTitle">Bot Status</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="modalBody">
+                    <!-- Dynamic content -->
+                </div>
+                <div class="modal-footer border-secondary" id="modalFooter">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Simulation Progress Modal -->
+    <div class="modal fade" id="simulationModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content bg-dark text-light">
+                <div class="modal-header border-warning">
+                    <h5 class="modal-title"><i class="fas fa-vial text-warning"></i> Market Simulation</h5>
+                </div>
+                <div class="modal-body">
+                    <div class="text-center mb-3">
+                        <div class="spinner-border text-warning" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    </div>
+                    <div id="simulationStatus" class="text-center">
+                        <p class="mb-2">Initializing simulation...</p>
+                        <small class="text-muted">This will simulate a complete market cycle</small>
+                    </div>
+                    <div class="progress mt-3" style="height: 25px;">
+                        <div id="simulationProgress" class="progress-bar progress-bar-striped progress-bar-animated bg-warning" 
+                             role="progressbar" style="width: 0%">0%</div>
+                    </div>
+                    <div id="simulationSteps" class="mt-3">
+                        <ul class="list-unstyled">
+                            <li id="step1" class="text-muted"><i class="fas fa-circle"></i> T-30s: Closing all positions...</li>
+                            <li id="step2" class="text-muted"><i class="fas fa-circle"></i> T-15s: Analyze & create trade...</li>
+                            <li id="step3" class="text-muted"><i class="fas fa-circle"></i> Final countdown...</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Speed Test Modal -->
+    <div class="modal fade" id="speedTestModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
+        <div class="modal-dialog modal-xl modal-dialog-centered">
+            <div class="modal-content bg-dark text-light">
+                <div class="modal-header border-info">
+                    <h5 class="modal-title"><i class="fas fa-tachometer-alt text-info"></i> Speed Test - Accelerated Trading</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label for="speedTestDays" class="form-label">Days to simulate:</label>
+                                <select id="speedTestDays" class="form-select bg-dark text-light border-secondary">
+                                    <option value="3">3 days</option>
+                                    <option value="5" selected>5 days</option>
+                                    <option value="10">10 days</option>
+                                    <option value="20">20 days</option>
+                                </select>
+                            </div>
+                            <button class="btn btn-info w-100 mb-3" id="btnStartSpeedTest">
+                                <i class="fas fa-play"></i> Start Speed Test
+                            </button>
+                            <div class="alert alert-warning">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                <strong>REAL TRADES</strong><br>
+                                <small>Market must be OPEN</small>
+                            </div>
+                        </div>
+                        <div class="col-md-8">
+                            <!-- Time Display -->
+                            <div class="text-center mb-3">
+                                <div class="d-flex justify-content-around align-items-center">
+                                    <div>
+                                        <small class="text-muted">Day</small>
+                                        <h2 id="speedTestDay" class="text-info mb-0">1/5</h2>
+                                    </div>
+                                    <div>
+                                        <small class="text-muted">Simulated Time</small>
+                                        <h1 id="speedTestTime" class="text-warning mb-0" style="font-family: monospace;">09:30:00</h1>
+                                    </div>
+                                    <div>
+                                        <small class="text-muted">Speed</small>
+                                        <h3 id="speedTestSpeed" class="text-success mb-0">⚡ 2880x</h3>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Market Timeline -->
+                            <div class="mb-3">
+                                <div class="position-relative" style="height: 60px; background: linear-gradient(90deg, #28a745 0%, #ffc107 95%, #dc3545 100%); border-radius: 10px;">
+                                    <div id="speedTestTimeMarker" class="position-absolute" style="left: 0%; top: -10px; transition: left 0.5s;">
+                                        <div style="width: 2px; height: 80px; background: white;"></div>
+                                        <div class="text-white text-center" style="margin-left: -20px; margin-top: -5px;">
+                                            <i class="fas fa-caret-down"></i>
+                                        </div>
+                                    </div>
+                                    <div class="d-flex justify-content-between position-absolute w-100" style="bottom: -25px;">
+                                        <small>09:30</small>
+                                        <small>12:00</small>
+                                        <small>14:00</small>
+                                        <small>15:30</small>
+                                        <small>15:59:30</small>
+                                        <small>16:00</small>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Progress Bar -->
+                            <div class="progress mt-5 mb-3" style="height: 30px;">
+                                <div id="speedTestProgress" class="progress-bar progress-bar-striped progress-bar-animated bg-info" 
+                                     role="progressbar" style="width: 0%">0%</div>
+                            </div>
+                            
+                            <!-- Status Display -->
+                            <div id="speedTestStatus" class="text-center mb-3">
+                                <h5 class="text-info">Ready to Start</h5>
+                                <p class="mb-0">Click "Start Speed Test" to begin</p>
+                            </div>
+                            
+                            <!-- Live Events (moved to full-width below) -->
+                        </div>
+                    </div>
+                    <!-- Full-width Live Events under timeline/progress -->
+                    <div class="row mt-3">
+                        <div class="col-12">
+                            <div class="card bg-secondary">
+                                <div class="card-header d-flex justify-content-between align-items-center">
+                                    <span><i class="fas fa-stream"></i> Live Events</span>
+                                    <small class="text-dark">Market must be OPEN</small>
+                                </div>
+                                <div class="card-body" style="max-height: 420px; overflow-y: auto;">
+                                    <div id="speedTestEvents">
+                                        <div class="text-muted">No events yet...</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Brains Preview Modal -->
+    <div class="modal fade" id="brainsModal" tabindex="-1">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content bg-dark text-light">
+                <div class="modal-header border-info">
+                    <h5 class="modal-title"><i class="fas fa-brain text-info"></i> Brains Preview</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="brainsBody">
+                    <div class="text-center py-4"><i class="fas fa-spinner fa-spin"></i> Running analysis...</div>
                 </div>
             </div>
         </div>
@@ -385,11 +615,17 @@
             historyPanel: document.getElementById("historyPanel"),
             historyTable: document.getElementById("historyTable"),
             btnStart: document.getElementById("btnStart"),
-            btnStop: document.getElementById("btnStop")
+            btnStop: document.getElementById("btnStop"),
+            btnSimulate: document.getElementById("btnSimulate"),
+            btnSpeedTest: document.getElementById("btnSpeedTest")
         };
 
         let ws;
         let reconnectInterval;
+        // Speed Test live sync state
+        let speedTestLive = false;
+        let stDaysTotal = 0;
+        let stLastTs = '';
 
         function connectWebSocket() {
             const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
@@ -398,8 +634,13 @@
             ws = new WebSocket(wsUrl);
 
             ws.onopen = function() {
-                elements.connectionStatus.textContent = "Connected";
-                elements.connectionStatus.className = "connection-status connected";
+                // Only show connection status if bot is not running
+                if (elements.status.textContent !== "Bot Running - Monitoring Market") {
+                    elements.connectionStatus.textContent = "Connected";
+                    elements.connectionStatus.className = "connection-status connected";
+                    elements.connectionStatus.style.display = 'inline';
+                    document.getElementById('connectionSeparator').style.display = 'inline';
+                }
                 if (reconnectInterval) {
                     clearInterval(reconnectInterval);
                     reconnectInterval = null;
@@ -418,15 +659,26 @@
                         }
                         ws._debugLogged = true;
                     }
+                    // Keep latest payload for SL type access in positions table
+                    window.latestWsData = data;
                     updateDashboard(data);
+                    // Live-sync Speed Test from action log
+                    if (speedTestLive) {
+                        syncSpeedTestFromActionLog(data.action_log || []);
+                    }
                 } catch (error) {
                     console.error("Error parsing WebSocket data:", error);
                 }
             };
 
             ws.onclose = function() {
-                elements.connectionStatus.textContent = "Connecting...";
-                elements.connectionStatus.className = "connection-status disconnected";
+                // Only show connection status if bot is not running
+                if (elements.status.textContent !== "Bot Running - Monitoring Market") {
+                    elements.connectionStatus.textContent = "Connecting...";
+                    elements.connectionStatus.className = "connection-status disconnected";
+                    elements.connectionStatus.style.display = 'inline';
+                    document.getElementById('connectionSeparator').style.display = 'inline';
+                }
                 
                 if (!reconnectInterval) {
                     reconnectInterval = setInterval(connectWebSocket, 5000);
@@ -449,20 +701,39 @@
                 elements.envSelect.value = data.environment;
             }
             
+            // Update bot status and button visibility
             if (data.is_running) {
-                elements.status.textContent = "Running";
+                elements.status.textContent = "Bot Running - Monitoring Market";
                 elements.statusIndicator.className = "status-indicator status-running";
+                // Update button states
+                elements.btnStart.style.display = 'none';
+                elements.btnStop.style.display = 'inline-block';
+                elements.btnSimulate.style.display = 'inline-block';
+                elements.btnSpeedTest.style.display = 'inline-block';
+                // Hide connection status and separator when bot is running
+                elements.connectionStatus.style.display = 'none';
+                document.getElementById('connectionSeparator').style.display = 'none';
             } else {
-                elements.status.textContent = "Stopped";
+                elements.status.textContent = "Bot Stopped";
                 elements.statusIndicator.className = "status-indicator status-stopped";
+                // Update button states
+                elements.btnStart.style.display = 'inline-block';
+                elements.btnStop.style.display = 'none';
+                elements.btnSimulate.style.display = 'inline-block';
+                elements.btnSpeedTest.style.display = 'inline-block';
+                // Show connection status and separator when bot is stopped
+                elements.connectionStatus.style.display = 'inline';
+                document.getElementById('connectionSeparator').style.display = 'inline';
             }
 
             // Badges removed - no longer needed
 
-            // Update connection status
-            const connStatus = data.is_connected ? 'Connected' : 'Connecting...';
-            const statusElem = document.getElementById('connectionStatus');
-            if (statusElem) statusElem.textContent = connStatus;
+            // Update connection status (only when bot is not running)
+            if (!data.is_running) {
+                const connStatus = data.is_connected ? 'Connected' : 'Connecting...';
+                const statusElem = document.getElementById('connectionStatus');
+                if (statusElem) statusElem.textContent = connStatus;
+            }
             
             // Update account information
             if (data.account) {
@@ -607,8 +878,94 @@
             const allTrades = [...(data.historic_trades || []), ...(data.trade_history || [])];
             updateHistoryTable(allTrades);
 
+            // Update action log
+        updateActionLogTable(data.action_log || []);
+
             // Update last update time - removed as element doesn't exist
             // elements.lastUpdate.textContent = new Date().toLocaleTimeString();
+        }
+
+        // ===== Speed Test Live Sync Helpers =====
+        function stAddEvent(message, type = 'info') {
+            const container = document.getElementById('speedTestEvents');
+            if (!container) return;
+            const div = document.createElement('div');
+            div.className = `small mb-1 text-${type}`;
+            div.innerHTML = `<i class="fas fa-chevron-right"></i> ${new Date().toLocaleTimeString()} - ${message}`;
+            container.prepend(div);
+            while (container.children.length > 200) container.lastElementChild.remove();
+        }
+
+        function stUpdateTimeDisplay(day, timeStr, speedLabel, overallProgressPct) {
+            const dayEl = document.getElementById('speedTestDay');
+            const timeEl = document.getElementById('speedTestTime');
+            const speedEl = document.getElementById('speedTestSpeed');
+            const bar = document.getElementById('speedTestProgress');
+            const marker = document.getElementById('speedTestTimeMarker');
+            if (dayEl) dayEl.textContent = `${day}/${stDaysTotal || day}`;
+            if (timeEl) timeEl.textContent = timeStr || '09:30:00';
+            if (speedEl) speedEl.textContent = speedLabel || '⚡ 2880x';
+            if (bar && overallProgressPct !== undefined) {
+                const pct = Math.max(0, Math.min(100, overallProgressPct));
+                bar.style.width = pct + '%';
+                bar.textContent = Math.round(pct) + '%';
+            }
+            // Move marker according to 09:30 -> 16:00
+            const [hh, mm, ss] = (timeStr || '09:30:00').split(':').map(Number);
+            let totalMinutes = (hh * 60 + mm);
+            const marketStart = 9 * 60 + 30;
+            const marketEnd = 16 * 60;
+            const position = Math.min(100, Math.max(0, ((totalMinutes - marketStart) / (marketEnd - marketStart)) * 100));
+            if (marker) marker.style.left = position + '%';
+        }
+
+        function syncSpeedTestFromActionLog(actionLog) {
+            if (!Array.isArray(actionLog) || !actionLog.length) return;
+            // Process newer than stLastTs
+            const newer = actionLog.filter(a => a.ts && a.ts > (stLastTs || ''));
+            if (!newer.length) return;
+            // Sort chronologically
+            newer.sort((a, b) => (a.ts > b.ts ? 1 : -1));
+            newer.forEach(a => {
+                stLastTs = a.ts;
+                const ev = a.event || '';
+                if (ev === 'speedtest_start') {
+                    stDaysTotal = a.days || stDaysTotal || 0;
+                    stAddEvent(`Speed Test started for ${stDaysTotal} days`, 'warning');
+                    document.getElementById('speedTestStatus').innerHTML = '<h5 class="text-warning">Initializing...</h5>';
+                } else if (ev === 'speedtest_progress') {
+                    const day = a.day || 1;
+                    const simTime = a.sim_time || '09:30:00';
+                    const speed = a.speed || '⚡ 2880x';
+                    const progress = a.progress || 0;
+                    stUpdateTimeDisplay(day, simTime, speed, progress);
+                } else if (ev === 'speedtest_phase') {
+                    const phase = a.phase;
+                    if (phase === 't_minus_30') {
+                        document.getElementById('speedTestStatus').innerHTML = '<h5 class="text-danger">Closing Positions</h5>';
+                        stAddEvent(`Day ${a.day}: T-30s - Closing positions`, 'warning');
+                    } else if (phase === 't_minus_15') {
+                        document.getElementById('speedTestStatus').innerHTML = '<h5 class="text-success">Creating Trade</h5>';
+                        stAddEvent(`Day ${a.day}: T-15s - Creating trade`, 'success');
+                    } else if (phase === 'positions_closed') {
+                        stAddEvent(`Day ${a.day}: Closed ${a.count || 0} positions`, 'info');
+                    }
+                } else if (ev === 'speedtest_trade') {
+                    if (a.status === 'created') {
+                        stAddEvent(`Day ${a.day}: Trade created`, 'success');
+                    } else {
+                        stAddEvent(`Day ${a.day}: Trade failed`, 'danger');
+                    }
+                } else if (ev === 'speedtest_day_complete') {
+                    stAddEvent(`Day ${a.day} complete`, 'info');
+                } else if (ev === 'speedtest_complete') {
+                    stAddEvent('Speed Test complete', 'success');
+                    document.getElementById('speedTestStatus').innerHTML = '<h5 class="text-success">Complete!</h5>';
+                    speedTestLive = false;
+                    document.getElementById('btnStartSpeedTest').disabled = false;
+                    document.getElementById('btnStartSpeedTest').innerHTML = '<i class="fas fa-play"></i> Start Speed Test';
+                }
+            });
         }
 
         async function fetchConfig() {
@@ -699,11 +1056,11 @@
         fetchConfig();
         // Don't call fetchAccounts separately - fetchConfig will do it if connected
 
-        function updatePositionsTable(positions) {
+            function updatePositionsTable(positions) {
             if (!positions || positions.length === 0) {
                 elements.positionsTable.innerHTML = `
                     <tr>
-                        <td colspan="8" class="text-center text-muted py-4">
+                        <td colspan="9" class="text-center text-muted py-4">
                             <i class="fas fa-chart-line fa-2x mb-2"></i><br>
                             No open positions or orders
                         </td>
@@ -754,6 +1111,15 @@
                     dateDisplay = date.toLocaleDateString() + '<br>' + date.toLocaleTimeString();
                 }
                 
+                // Stop loss info (type from settings, level from position)
+                const slType = (window.latestWsData && window.latestWsData.stop_loss_type) ? window.latestWsData.stop_loss_type : 'normal';
+                const slLevel = parseFloat(stopLevel) || 0;
+                const slPct = (slLevel && level) ? ((direction === 'BUY' ? (level - slLevel) : (slLevel - level)) / level) * 100 : 0;
+                const capType = slType ? slType.charAt(0).toUpperCase() + slType.slice(1) : '-';
+                const slDisplay = slLevel 
+                    ? `<small>$${slLevel.toFixed(2)}<br>${slPct.toFixed(2)}%<br>${capType}</small>` 
+                    : '<small class="text-muted">-</small>';
+
                 html += `
                     <tr>
                         <td>
@@ -780,6 +1146,7 @@
                         </td>
                         <td>$${level.toFixed(2)}</td>
                         <td>${currentPrice ? '$' + currentPrice.toFixed(2) : '-'}</td>
+                        <td>${slDisplay}</td>
                         <td class="${pnlClass}">${upl >= 0 ? '+' : ''}$${Math.abs(upl).toFixed(2)}</td>
                         <td>
                             <button class="btn btn-sm btn-outline-danger" onclick="closePosition('${dealId}')">
@@ -887,14 +1254,500 @@
             }
         }
 
-        // Start/Stop controls
+        function updateActionLogTable(actions) {
+            const tbody = document.querySelector('#actionLogTable tbody');
+            if (!tbody) return;
+            if (!actions || actions.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" class="text-center text-muted py-3">No actions yet</td></tr>';
+                return;
+            }
+            // Most recent first
+            const rows = actions.slice().reverse().map(a => {
+                const status = a.success === true ? 'success' : (a.success === false ? 'danger' : 'secondary');
+                const statusText = a.success === true ? 'OK' : (a.success === false ? 'FAIL' : '');
+                let details = '';
+                if (a.event === 'brains_decision') {
+                    details = `Signal: ${a.signal}, Conf: ${(a.confidence*100||0).toFixed ? (a.confidence*100).toFixed(1) : a.confidence}%` + (a.simulation_override ? ' (simulation override)' : '');
+                } else if (a.event === 'create_position_calculation') {
+                    details = `Dir: ${a.direction}, Entry: $${Number(a.entry_price).toFixed(4)}, Notional: $${Number(a.notional).toFixed(2)}, Ctrts: ${Number(a.contracts).toFixed(2)}, SL: $${Number(a.stop_level).toFixed(4)}`;
+                } else if (a.event?.startsWith('close_position')) {
+                    details = `Deal: ${a.deal_id || ''} ${a.attempt ? 'Attempt ' + a.attempt : ''} ${a.error ? ('Err: ' + a.error) : ''}`;
+                } else if (a.event === 'api_execution') {
+                    const ref = a.dealReference ? ('Ref: ' + a.dealReference) : '';
+                    details = `${ref} ${a.error ? ('Err: ' + a.error) : ''}`;
+                } else if (a.event === 'close_positions') {
+                    details = `Found: ${a.found}`;
+                } else if (a.event === 'data_maintenance_start') {
+                    details = `Starting data maintenance for ${a.epic}`;
+                } else if (a.event === 'data_maintenance_complete') {
+                    const quality = a.quality_check || {};
+                    details = `Downloaded: ${a.candles_downloaded}, Stored: ${a.candles_stored}, Quality: ${quality.status || 'Unknown'} (${quality.coverage_pct || 0}% coverage, ${quality.duplicates || 0} duplicates, ${quality.gaps || 0} gaps)`;
+                } else if (a.event === 'data_maintenance_error') {
+                    details = `Error: ${a.error}`;
+                } else {
+                    details = JSON.stringify(a);
+                }
+                return `<tr>
+                    <td><small>${a.ts || '-'}</small></td>
+                    <td><small>${a.event || '-'}</small></td>
+                    <td><small>${details}</small></td>
+                    <td>${statusText ? `<span class="badge bg-${status}">${statusText}</span>` : ''}</td>
+                </tr>`;
+            }).join('');
+            tbody.innerHTML = rows;
+        }
+
+        // Add notification helper function
+        function showNotification(message, type = 'info') {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type === 'error' ? 'danger' : type} alert-dismissible fade show position-fixed`;
+            alertDiv.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+            alertDiv.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            document.body.appendChild(alertDiv);
+            
+            // Auto-dismiss after 5 seconds
+            setTimeout(() => {
+                alertDiv.remove();
+            }, 5000);
+        }
+        
+        // Modal helper function
+        function showModal(title, body, type = 'info') {
+            const modal = new bootstrap.Modal(document.getElementById('botStatusModal'));
+            document.getElementById('modalTitle').innerHTML = title;
+            document.getElementById('modalBody').innerHTML = body;
+            
+            // Set modal color based on type
+            const modalHeader = document.querySelector('#botStatusModal .modal-header');
+            modalHeader.className = 'modal-header border-' + 
+                (type === 'success' ? 'success' : type === 'error' ? 'danger' : 'secondary');
+            
+            modal.show();
+        }
+        
+        // Start/Stop controls with modal feedback
         elements.btnStart.addEventListener('click', async () => {
-            try { await fetch('/bot/start', { method: 'POST' }); } catch (e) { console.error(e); }
+            try {
+                elements.btnStart.disabled = true;
+                elements.btnStart.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Starting...';
+                
+                const response = await fetch('/bot/start', { method: 'POST' });
+                const result = await response.json();
+                
+                if (result.ok) {
+                    // Update button states
+                    elements.btnStart.style.display = 'none';
+                    elements.btnStop.style.display = 'inline-block';
+                    elements.btnSimulate.style.display = 'inline-block';
+                    
+                    // Update status
+                    elements.status.textContent = 'Bot Running - Monitoring Market';
+                    elements.statusIndicator.className = 'status-indicator status-running';
+                    
+                    // Show modal with bot status
+                    showModal(
+                        '<i class="fas fa-check-circle text-success"></i> Bot Started Successfully',
+                        `
+                        <div class="alert alert-success">
+                            <strong>Bot is now active and monitoring the market!</strong>
+                        </div>
+                        <h6>Current Configuration:</h6>
+                        <ul>
+                            <li><strong>Epic:</strong> TECL</li>
+                            <li><strong>Mode:</strong> Timer-Based Trading</li>
+                            <li><strong>Close Positions:</strong> 30 seconds before market close</li>
+                            <li><strong>Analyze & Trade:</strong> 15 seconds before market close</li>
+                            <li><strong>Investment:</strong> 99% of available balance</li>
+                            <li><strong>Leverage:</strong> 4.0x</li>
+                        </ul>
+                        <div class="alert alert-info mt-3">
+                            <i class="fas fa-info-circle"></i> The bot will wait for the market to open, then monitor for trading opportunities.
+                            Market is currently <strong>${document.getElementById('marketStatus').textContent}</strong>.
+                        </div>
+                        `,
+                        'success'
+                    );
+                } else {
+                    showModal(
+                        '<i class="fas fa-exclamation-triangle text-danger"></i> Failed to Start Bot',
+                        `
+                        <div class="alert alert-danger">
+                            <strong>Error:</strong> ${result.error || 'Unknown error occurred'}
+                        </div>
+                        <p>Please check the logs for more details.</p>
+                        `,
+                        'error'
+                    );
+                    elements.btnStart.disabled = false;
+                    elements.btnStart.innerHTML = '<i class="fas fa-play"></i> Start Bot';
+                }
+            } catch (e) {
+                console.error(e);
+                showModal(
+                    '<i class="fas fa-exclamation-triangle text-danger"></i> Connection Error',
+                    `
+                    <div class="alert alert-danger">
+                        <strong>Failed to communicate with the server.</strong>
+                    </div>
+                    <p>Error: ${e.message}</p>
+                    `,
+                    'error'
+                );
+                elements.btnStart.disabled = false;
+                elements.btnStart.innerHTML = '<i class="fas fa-play"></i> Start Bot';
+            }
         });
+        
         elements.btnStop.addEventListener('click', async () => {
-            try { await fetch('/bot/stop', { method: 'POST' }); } catch (e) { console.error(e); }
+            // Confirm stop action
+            if (!confirm('Are you sure you want to stop the bot? Any pending trades will be cancelled.')) {
+                return;
+            }
+            
+            try {
+                elements.btnStop.disabled = true;
+                elements.btnStop.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Stopping...';
+                
+                const response = await fetch('/bot/stop', { method: 'POST' });
+                const result = await response.json();
+                
+                if (result.ok) {
+                    // Update button states
+                    elements.btnStart.style.display = 'inline-block';
+                    elements.btnStop.style.display = 'none';
+                    elements.btnSimulate.style.display = 'inline-block';
+                    
+                    // Update status
+                    elements.status.textContent = 'Bot Stopped';
+                    elements.statusIndicator.className = 'status-indicator status-stopped';
+                    
+                    // Show modal
+                    showModal(
+                        '<i class="fas fa-stop-circle text-warning"></i> Bot Stopped',
+                        `
+                        <div class="alert alert-warning">
+                            <strong>Bot has been stopped successfully.</strong>
+                        </div>
+                        <p>The bot is no longer monitoring the market or executing trades.</p>
+                        <div class="mt-3">
+                            <p>You can:</p>
+                            <ul>
+                                <li>Start the bot again to resume monitoring</li>
+                                <li>Run a simulation to test the trading logic</li>
+                                <li>Review your positions and history</li>
+                            </ul>
+                        </div>
+                        `,
+                        'warning'
+                    );
+                } else {
+                    showModal(
+                        '<i class="fas fa-exclamation-triangle text-danger"></i> Failed to Stop Bot',
+                        `<div class="alert alert-danger">Error stopping bot: ${result.error || 'Unknown error'}</div>`,
+                        'error'
+                    );
+                }
+                
+                elements.btnStop.disabled = false;
+                elements.btnStop.innerHTML = '<i class="fas fa-stop"></i> Stop Bot';
+            } catch (e) {
+                console.error(e);
+                showModal(
+                    '<i class="fas fa-exclamation-triangle text-danger"></i> Error',
+                    `<div class="alert alert-danger">Error stopping bot: ${e.message}</div>`,
+                    'error'
+                );
+                elements.btnStop.disabled = false;
+                elements.btnStop.innerHTML = '<i class="fas fa-stop"></i> Stop Bot';
+            }
+        });
+        
+            // Simulate button with progress modal
+        document.getElementById('btnSimulate').addEventListener('click', async () => {
+            // Show simulation modal
+            const simulationModal = new bootstrap.Modal(document.getElementById('simulationModal'));
+            simulationModal.show();
+            
+            // Reset progress
+            document.getElementById('simulationProgress').style.width = '0%';
+            document.getElementById('simulationProgress').textContent = '0%';
+            
+            // Update steps
+            const updateStep = (step, status) => {
+                const stepElement = document.getElementById(`step${step}`);
+                if (status === 'active') {
+                    stepElement.className = 'text-warning';
+                    stepElement.innerHTML = stepElement.textContent.replace(/^.*?(\s)/, '<i class="fas fa-circle-notch fa-spin"></i>$1');
+                } else if (status === 'done') {
+                    stepElement.className = 'text-success';
+                    stepElement.innerHTML = stepElement.textContent.replace(/^.*?(\s)/, '<i class="fas fa-check-circle"></i>$1');
+                }
+            };
+            
+            try {
+                // Start simulation
+                updateStep(1, 'active'); // T-30s close
+                document.getElementById('simulationProgress').style.width = '33%';
+                document.getElementById('simulationProgress').textContent = '33%';
+                
+                const response = await fetch('/bot/simulate', { method: 'POST' });
+                const result = await response.json();
+                
+                // Simulate progress
+                setTimeout(() => {
+                    updateStep(1, 'done');
+                    updateStep(2, 'active'); // T-15s trade
+                    document.getElementById('simulationProgress').style.width = '66%';
+                    document.getElementById('simulationProgress').textContent = '66%';
+                }, 1500);
+                
+                setTimeout(() => {
+                    updateStep(2, 'done');
+                    updateStep(3, 'active'); // Final countdown
+                    document.getElementById('simulationProgress').style.width = '90%';
+                    document.getElementById('simulationProgress').textContent = '90%';
+                }, 3500);
+                
+                setTimeout(() => {
+                    updateStep(3, 'done');
+                    document.getElementById('simulationProgress').style.width = '100%';
+                    document.getElementById('simulationProgress').textContent = '100%';
+                    
+                    // Hide simulation modal and show result
+                    simulationModal.hide();
+                    
+                    const steps = result.steps || {};
+                    const closeOK = steps.close_positions !== undefined ? steps.close_positions : result.ok;
+                    const createOK = steps.create_trade !== undefined ? steps.create_trade : result.ok;
+                    
+                    if (result.ok && closeOK && createOK) {
+                        showModal(
+                            '<i class="fas fa-check-circle text-success"></i> Simulation Complete',
+                            `
+                            <div class="alert alert-success">
+                                <strong>Market simulation completed successfully!</strong>
+                            </div>
+                            <ul class="mb-2">
+                                <li>${closeOK ? '✅' : '❌'} Closed all positions at T-30s</li>
+                                <li>${createOK ? '✅' : '❌'} Analyzed & placed a trade at T-15s</li>
+                                <li>✅ Final countdown completed</li>
+                            </ul>
+                            <div class="alert alert-info mt-3">
+                                <i class="fas fa-info-circle"></i> Positions and history will refresh automatically.
+                            </div>
+                            `,
+                            'success'
+                        );
+                    } else {
+                        const errorMsg = result.error || 'Simulation failed. Check logs for details.';
+                        showModal(
+                            '<i class="fas fa-exclamation-triangle text-danger"></i> Simulation Result',
+                            `
+                            <div class="alert alert-warning">
+                                <strong>Completed with warnings.</strong>
+                            </div>
+                            <ul class="mb-2">
+                                <li>${closeOK ? '✅' : '❌'} Closed all positions at T-30s</li>
+                                <li>${createOK ? '✅' : '❌'} Analyzed & placed a trade at T-15s</li>
+                                <li>✅ Final countdown completed</li>
+                            </ul>
+                            <div class="alert alert-secondary mt-2"><small>${errorMsg}</small></div>
+                            `,
+                            'error'
+                        );
+                    }
+                }, 5000);
+                
+            } catch (e) {
+                console.error(e);
+                simulationModal.hide();
+                showModal(
+                    '<i class="fas fa-exclamation-triangle text-danger"></i> Simulation Error',
+                    `<div class="alert alert-danger">Error: ${e.message}</div>`,
+                    'error'
+                );
+            }
         });
 
+        // Speed Test button - open modal
+        document.getElementById('btnSpeedTest').addEventListener('click', () => {
+            // Show speed test modal
+            const speedTestModal = new bootstrap.Modal(document.getElementById('speedTestModal'));
+            speedTestModal.show();
+            
+            // Reset UI
+            document.getElementById('speedTestDay').textContent = '0/0';
+            document.getElementById('speedTestTime').textContent = '09:30:00';
+            document.getElementById('speedTestSpeed').textContent = '⚡ Ready';
+            document.getElementById('speedTestProgress').style.width = '0%';
+            document.getElementById('speedTestProgress').textContent = '0%';
+            document.getElementById('speedTestTimeMarker').style.left = '0%';
+            document.getElementById('speedTestEvents').innerHTML = '<div class="text-muted">Click "Start Speed Test" to begin...</div>';
+            document.getElementById('speedTestStatus').innerHTML = '<h5 class="text-info">Ready to Start</h5><p class="mb-0">Click "Start Speed Test" to begin</p>';
+            speedTestLive = false; stDaysTotal = 0; stLastTs = '';
+        });
+        
+        // Start Speed Test button
+        document.getElementById('btnStartSpeedTest').addEventListener('click', async () => {
+            const speedTestModal = bootstrap.Modal.getInstance(document.getElementById('speedTestModal'));
+            const days = parseInt(document.getElementById('speedTestDays').value) || 5;
+            const btn = document.getElementById('btnStartSpeedTest');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Running...';
+            document.getElementById('speedTestEvents').innerHTML = '';
+            document.getElementById('speedTestStatus').innerHTML = '<h5 class="text-warning">Initializing...</h5>';
+            document.getElementById('speedTestProgress').style.width = '0%';
+            document.getElementById('speedTestProgress').textContent = '0%';
+            stDaysTotal = days;
+            stLastTs = '';
+            speedTestLive = true;
+
+            try {
+                stAddEvent('Starting speed test...', 'warning');
+                // Fire and forget; progress will stream via websocket action_log
+                const resp = await fetch(`/bot/speedtest?days=${days}`, { method: 'POST' });
+                const json = await resp.json();
+                if (!json.ok) {
+                    speedTestLive = false;
+                    const errorMsg = json.error || 'Speed test failed';
+                    const isMarketClosed = errorMsg.includes('market_closed') || errorMsg.includes('Market is');
+                    speedTestModal.hide();
+                    showModal(
+                        '<i class="fas fa-exclamation-triangle text-danger"></i> Speed Test Error',
+                        `
+                        <div class="alert alert-danger"><strong>Speed Test Failed</strong></div>
+                        <div class="alert ${isMarketClosed ? 'alert-warning' : 'alert-danger'}">${isMarketClosed ? '<i class="fas fa-clock"></i> <strong>Market is CLOSED!</strong><br>Speed test requires market to be OPEN for real trading.' : 'Error: ' + errorMsg}</div>
+                        ${isMarketClosed ? '<div class="alert alert-info mt-2"><i class="fas fa-info-circle"></i> Use the regular "Simulate" button when market is closed.</div>' : ''}
+                        `,
+                        'error'
+                    );
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="fas fa-play"></i> Start Speed Test';
+                }
+            } catch (e) {
+                speedTestLive = false;
+                console.error(e);
+                speedTestModal.hide();
+                showModal(
+                    '<i class="fas fa-exclamation-triangle text-danger"></i> Speed Test Error',
+                    `<div class="alert alert-danger">Error: ${e.message}</div>`,
+                    'error'
+                );
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-play"></i> Start Speed Test';
+            }
+        });
+
+        // Brain Preview
+        document.getElementById('btnBrainPreview').addEventListener('click', async () => {
+            const modal = new bootstrap.Modal(document.getElementById('brainsModal'));
+            const body = document.getElementById('brainsBody');
+            body.innerHTML = '<div class="text-center py-4"><i class="fas fa-spinner fa-spin"></i> Running analysis...</div>';
+            modal.show();
+            try {
+                const res = await fetch('/brains/preview', { method: 'POST' });
+                const data = await res.json();
+                if (!data.ok) {
+                    body.innerHTML = `<div class="alert alert-danger">Error: ${data.error || 'Unknown error'}</div>`;
+                    return;
+                }
+                const d = data.decision || {};
+                const s = data.sizing || {};
+                const mi = data.market_info || {};
+                const lc = data.last_candle || {};
+                const rows = [];
+                rows.push(`<tr><td>Signal</td><td><strong>${d.trade_signal || '-'}</strong></td></tr>`);
+                rows.push(`<tr><td>Confidence</td><td>${(d.confidence*100||0).toFixed ? (d.confidence*100).toFixed(2) : d.confidence}%</td></tr>`);
+                if (s.contracts) rows.push(`<tr><td>Contracts</td><td>${Number(s.contracts).toFixed(2)}</td></tr>`);
+                if (s.entry_price) rows.push(`<tr><td>Entry Price</td><td>$${Number(s.entry_price).toFixed(4)}</td></tr>`);
+                if (s.stop_level) rows.push(`<tr><td>Stop Level</td><td>$${Number(s.stop_level).toFixed(4)} (${s.sl_type || 'normal'})</td></tr>`);
+                if (s.min_size) rows.push(`<tr><td>Min Size</td><td>${s.min_size}</td></tr>`);
+                if (s.max_size) rows.push(`<tr><td>Max Size</td><td>${s.max_size}</td></tr>`);
+                if (mi.instrument && mi.instrument.name) rows.push(`<tr><td>Instrument</td><td>${mi.instrument.name}</td></tr>`);
+                body.innerHTML = `
+                    <div class="mb-3">
+                        <h6 class="text-muted">Latest 5m Candle</h6>
+                        <div><small><strong>Time:</strong> ${lc.timestamp ? new Date(lc.timestamp).toLocaleString() : '-'}</small></div>
+                        <div><small><strong>O</strong>: ${lc.open?.toFixed ? lc.open.toFixed(4) : lc.open || '-'}  
+                            <strong>H</strong>: ${lc.high?.toFixed ? lc.high.toFixed(4) : lc.high || '-'}  
+                            <strong>L</strong>: ${lc.low?.toFixed ? lc.low.toFixed(4) : lc.low || '-'}  
+                            <strong>C</strong>: ${lc.close?.toFixed ? lc.close.toFixed(4) : lc.close || '-'}</small></div>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-sm table-dark table-bordered">
+                            <tbody>${rows.join('')}</tbody>
+                        </table>
+                    </div>
+                    <div class="alert alert-secondary"><small>This preview does not place trades. It shows what the Brains would decide and the computed sizing based on current settings and dealing rules.</small></div>
+                `;
+            } catch (e) {
+                body.innerHTML = `<div class="alert alert-danger">Error: ${e.message}</div>`;
+            }
+        });
+
+        // Stop Loss Configuration Handlers
+        const stopLossRadios = document.querySelectorAll('input[name="stopLossType"]');
+        const slNormalValue = document.getElementById('slNormalValue');
+        const slThresholds = document.getElementById('slThresholds');
+        const slAdjustments = document.getElementById('slAdjustments');
+        const slWhenAt = document.getElementById('slWhenAt');
+        const slUse = document.getElementById('slUse');
+        
+        // Handle radio button changes
+        stopLossRadios.forEach(radio => {
+            radio.addEventListener('change', () => {
+                // Disable all inputs first
+                slNormalValue.disabled = true;
+                slThresholds.disabled = true;
+                slAdjustments.disabled = true;
+                slWhenAt.disabled = true;
+                slUse.disabled = true;
+                
+                // Enable the selected one
+                if (radio.value === 'normal') {
+                    slNormalValue.disabled = false;
+                } else if (radio.value === 'trailing') {
+                    slThresholds.disabled = false;
+                    slAdjustments.disabled = false;
+                } else if (radio.value === 'staggered') {
+                    slWhenAt.disabled = false;
+                    slUse.disabled = false;
+                }
+            });
+        });
+        
+        // Save Stop Loss Settings
+        document.getElementById('btnSaveStopLoss').addEventListener('click', async () => {
+            const selectedType = document.querySelector('input[name="stopLossType"]:checked').value;
+            const settings = {
+                stop_loss_type: selectedType,
+                stop_loss_pct: slNormalValue.value || '2.0',
+                sl_thresholds: slThresholds.value || '5,10,15',
+                sl_adjustments: slAdjustments.value || '2,5,8',
+                sl_when_at: slWhenAt.value || '2,4,5,7,10,12,15',
+                sl_use: slUse.value || '0,1,2,4,6,8,10'
+            };
+            
+            try {
+                const response = await fetch('/config/stoploss', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(settings)
+                });
+                
+                if (response.ok) {
+                    showNotification('Stop loss settings saved successfully!', 'success');
+                } else {
+                    showNotification('Failed to save stop loss settings', 'error');
+                }
+            } catch (e) {
+                showNotification('Error saving settings: ' + e.message, 'error');
+            }
+        });
+        
         // Initialize WebSocket connection
         connectWebSocket();
     </script>

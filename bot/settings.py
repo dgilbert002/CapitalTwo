@@ -41,6 +41,11 @@ class TradingBotSettings:
         """Get integer setting value"""
         self.load_settings()
         return self.config.getint(section, key, fallback=fallback)
+    
+    def getboolean(self, section: str, key: str, fallback: bool = False) -> bool:
+        """Get boolean setting value"""
+        self.load_settings()
+        return self.config.getboolean(section, key, fallback=fallback)
 
     def set_value(self, section: str, key: str, value) -> None:
         """Set a setting value and persist to file."""
@@ -63,6 +68,14 @@ class TradingBotSettings:
             logger.info(f"Saved environment account map: {environment} -> {account_id}")
         except Exception as e:
             logger.error(f"Error saving env account: {e}")
+
+    def get_env_account(self, environment: str) -> str:
+        """Get account ID for environment"""
+        self.load_settings()
+        try:
+            return self.config.get("ENV_ACCOUNTS", environment.lower())
+        except (configparser.NoSectionError, configparser.NoOptionError):
+            return ""
 
     def save(self) -> None:
         """Persist current config to settings file."""
