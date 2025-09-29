@@ -20,6 +20,10 @@ class SpeedTestHandler:
     async def run_speed_test(self, days: int = 5):
         """Execute graceful speed test with smooth transitions"""
         try:
+            # expose total days for UI progress
+            self.total_days = days
+            if hasattr(self.bot, 'record_action'):
+                self.bot.record_action({'event': 'speedtest_start', 'days': days})
             logger.info("="*60)
             logger.info(f"SPEED TEST: Starting {days} day REAL trading test")
             logger.info("Fast forward until T-30s, then REAL TIME for critical moments")
@@ -79,6 +83,8 @@ class SpeedTestHandler:
             logger.info(f"Positions Closed: {results['positions_closed']}")
             logger.info("="*60)
             
+            if hasattr(self.bot, 'record_action'):
+                self.bot.record_action({'event': 'speedtest_complete', 'days': results['days_simulated']})
             return {"ok": True, "results": results}
             
         except Exception as e:
@@ -184,6 +190,17 @@ class SpeedTestHandler:
                     'time': f'{hours:02d}:{minutes:02d}:00',
                     'progress': (i + 1) * 10
                 })
+                if hasattr(self.bot, 'record_action'):
+                    overall = ((day_num - 1) + ((i + 1)/10)) / float(getattr(self, 'total_days', 1))
+                    self.bot.record_action({
+                        'event': 'speedtest_progress',
+                        'day': day_num,
+                        'days_total': getattr(self, 'total_days', 1),
+                        'phase': 'fast_forward',
+                        'sim_time': f'{hours:02d}:{minutes:02d}:00',
+                        'speed': '⚡ 2880x',
+                        'progress': round(overall*100, 1)
+                    })
             
             # PHASE 2: T-30s - Slow down to REAL TIME
             logger.info(f"Day {day_num}: T-30s - Entering critical period (REAL TIME)")
@@ -195,6 +212,8 @@ class SpeedTestHandler:
                 'time': '15:59:30',
                 'message': 'T-30s: Closing positions'
             })
+            if hasattr(self.bot, 'record_action'):
+                self.bot.record_action({'event': 'speedtest_phase', 'day': day_num, 'phase': 't_minus_30', 'message': 'Closing positions'})
             
             # Close positions (if any)
             positions_before = await self.api.get_positions()
@@ -216,6 +235,8 @@ class SpeedTestHandler:
                     'day': day_num,
                     'count': day_result['positions_closed']
                 })
+                if hasattr(self.bot, 'record_action'):
+                    self.bot.record_action({'event': 'speedtest_phase', 'day': day_num, 'phase': 'positions_closed', 'count': day_result['positions_closed']})
             
             # REAL TIME countdown from T-30s to T-15s (15 seconds real time)
             logger.info(f"Day {day_num}: Counting down to T-15s...")
@@ -228,25 +249,48 @@ class SpeedTestHandler:
                     'seconds_to_close': seconds_left,
                     'time': f'15:59:{60-seconds_left:02d}'
                 })
+                if hasattr(self.bot, 'record_action'):
+                    overall = ((day_num - 1) + 0.95 - ((seconds_left-15)/15)*0.01) / float(getattr(self, 'total_days', 1))
+                    self.bot.record_action({
+                        'event': 'speedtest_progress',
+                        'day': day_num,
+                        'days_total': getattr(self, 'total_days', 1),
+                        'phase': 't30_countdown',
+                        'sim_time': f'15:59:{60-seconds_left:02d}',
+                        'speed': '🐌 1x',
+                        'progress': round(overall*100, 1)
+                    })
             
-            # PHASE 3: T-15s - Analyze and create trade
-            logger.info(f"Day {day_num}: T-15s - Running Brains analysis...")
+            # PHASE 3: T-15s - Force trade creation (bypass Brains)
+            logger.info(f"Day {day_num}: T-15s - FORCING trade creation (bypass Brains)")
             
             results['events'].append({
                 'type': 'analysis_start',
                 'day': day_num,
                 'time': '15:59:45',
-                'message': 'T-15s: Analyzing market'
+                'message': 'T-15s: Forcing trade creation'
             })
+            if hasattr(self.bot, 'record_action'):
+                self.bot.record_action({'event': 'speedtest_phase', 'day': day_num, 'phase': 't_minus_15', 'message': 'Creating trade'})
             
             # Get fresh market info
             self.bot.market_info = await self.api.get_market_info(self.epic)
+            dealing_rules = (self.bot.market_info or {}).get('dealingRules', {})
             
-            # Run Brains analysis and create trade
+            # Count before creating trade
             positions_before_trade = await self.api.get_positions()
             positions_count_before_trade = len(positions_before_trade or [])
             
-            await self.bot.analyze_and_trade_timer()
+            # Build a forced AI analysis using settings direction
+            try:
+                direction_setting = self.settings.get('BOT_CONFIG', 'direction', 'long').lower()
+            except Exception:
+                direction_setting = 'long'
+            forced_signal = 'buy' if direction_setting == 'long' else 'sell'
+            ai_analysis = {'trade_signal': forced_signal, 'confidence': 1.0}
+            
+            # Create trade directly via timer path (uses dealing rules & sizing)
+            created_ok = await self.bot.create_position_timer(ai_analysis, dealing_rules)
             
             # Wait for trade creation
             await asyncio.sleep(2)
@@ -254,23 +298,27 @@ class SpeedTestHandler:
             positions_after_trade = await self.api.get_positions()
             positions_count_after_trade = len(positions_after_trade or [])
             
-            if positions_count_after_trade > positions_count_before_trade:
-                day_result['trades_created'] = positions_count_after_trade - positions_count_before_trade
-                logger.info(f"Day {day_num}: Created {day_result['trades_created']} trades")
+            if created_ok or (positions_count_after_trade > positions_count_before_trade):
+                day_result['trades_created'] = max(1, positions_count_after_trade - positions_count_before_trade)
+                logger.info(f"Day {day_num}: Created {day_result['trades_created']} trades (forced)")
                 
                 results['events'].append({
                     'type': 'trade_created',
                     'day': day_num,
                     'count': day_result['trades_created']
                 })
+                if hasattr(self.bot, 'record_action'):
+                    self.bot.record_action({'event': 'speedtest_trade', 'day': day_num, 'status': 'created', 'count': day_result['trades_created']})
             else:
-                logger.info(f"Day {day_num}: No trade created (Brains decision)")
+                logger.info(f"Day {day_num}: Failed to create trade during forced phase")
                 
                 results['events'].append({
                     'type': 'no_trade',
                     'day': day_num,
-                    'reason': 'Brains analysis - no trade signal'
+                    'reason': 'Forced trade failed'
                 })
+                if hasattr(self.bot, 'record_action'):
+                    self.bot.record_action({'event': 'speedtest_trade', 'day': day_num, 'status': 'failed'})
             
             # REAL TIME countdown from T-15s to market close (15 seconds real time)
             logger.info(f"Day {day_num}: Final countdown to market close...")
@@ -283,6 +331,17 @@ class SpeedTestHandler:
                     'seconds_to_close': seconds_left,
                     'time': f'16:00:{seconds_left:02d}' if seconds_left > 0 else '16:00:00'
                 })
+                if hasattr(self.bot, 'record_action'):
+                    overall = ((day_num - 1) + 0.99 + ((14-seconds_left)/15)*0.01) / float(getattr(self, 'total_days', 1))
+                    self.bot.record_action({
+                        'event': 'speedtest_progress',
+                        'day': day_num,
+                        'days_total': getattr(self, 'total_days', 1),
+                        'phase': 'final_countdown',
+                        'sim_time': f"16:00:{seconds_left:02d}" if seconds_left > 0 else '16:00:00',
+                        'speed': '🐌 1x',
+                        'progress': round(min(100.0, overall*100), 1)
+                    })
             
             # Market closes
             logger.info(f"Day {day_num}: Market CLOSED")
@@ -297,6 +356,8 @@ class SpeedTestHandler:
                     'trades_created': day_result['trades_created']
                 }
             })
+            if hasattr(self.bot, 'record_action'):
+                self.bot.record_action({'event': 'speedtest_day_complete', 'day': day_num, 'positions_closed': day_result['positions_closed'], 'trades_created': day_result['trades_created']})
             
         except Exception as e:
             error_msg = f"Day {day_num} error: {e}"

@@ -544,6 +544,7 @@ class TradingBot:
                 
                 if deal_id:
                     # Close with retry
+                    success = False
                     for attempt in range(1, 4):
                         try:
                             logger.info(f"Closing position {deal_id} - attempt {attempt}/3")
@@ -552,19 +553,23 @@ class TradingBot:
                             if self.settings.getboolean('BOT_CONFIG', 'simulation_mode', False):
                                 logger.info(f"SIMULATION MODE: Would close {deal_id}")
                                 self.record_action({'event': 'close_position_result', 'deal_id': deal_id, 'success': True, 'simulation': True})
+                                success = True
                                 break
                             
                             result = await self.api.close_position(deal_id)
                             if result:
                                 logger.info(f"Position {deal_id} closed successfully")
                                 self.record_action({'event': 'close_position_result', 'deal_id': deal_id, 'success': True})
+                                success = True
                                 break
                         except Exception as e:
                             if attempt < 3:
                                 await asyncio.sleep(1)
-            else:
+                            else:
                                 logger.error(f"Failed to close {deal_id} after 3 attempts: {e}")
                                 self.record_action({'event': 'close_position_result', 'deal_id': deal_id, 'success': False, 'error': str(e)})
+                    if not success:
+                        logger.warning(f"Position {deal_id} may still be open after retries")
             
         except Exception as e:
             logger.error(f"Error closing positions: {e}")
