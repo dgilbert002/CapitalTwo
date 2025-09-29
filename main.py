@@ -486,6 +486,33 @@ async def brains_preview():
         logger.error(f"Brains preview error: {e}")
         return {"ok": False, "error": str(e)}
 
+@app.get("/account/preferences")
+async def get_account_preferences():
+    try:
+        if not app_state.api:
+            return {"ok": False, "error": "no_api_connection"}
+        prefs = await app_state.api.get_account_preferences()
+        return {"ok": prefs is not None, "preferences": prefs}
+    except Exception as e:
+        logger.error(f"Error fetching account preferences: {e}")
+        return {"ok": False, "error": str(e)}
+
+@app.post("/account/leverage")
+async def set_account_leverage(payload: dict = Body(...)):
+    try:
+        if not app_state.api:
+            return {"ok": False, "error": "no_api_connection"}
+        category = (payload or {}).get("category", "")
+        leverage_val = int((payload or {}).get("leverage", 0))
+        hedging = (payload or {}).get("hedgingMode", None)
+        if not category or leverage_val <= 0:
+            return {"ok": False, "error": "invalid_params"}
+        result = await app_state.api.update_account_leverage(category, leverage_val, hedging)
+        return result
+    except Exception as e:
+        logger.error(f"Error updating account leverage: {e}")
+        return {"ok": False, "error": str(e)}
+
 @app.get("/config")
 async def get_config():
     env = app_state.api.environment if app_state.api else "demo"

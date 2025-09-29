@@ -691,6 +691,42 @@ class TradingBot:
             max_size = float(dealing_rules.get('maxDealSize', {}).get('value', 3250))
             increment = float(dealing_rules.get('minSizeIncrement', {}).get('value', 0.1))
             
+            # Determine instrument category for leverage preferences
+            instrument = self.market_info.get('instrument', {})
+            instrument_category = str(instrument.get('type', 'SHARES')).upper() or 'SHARES'
+
+            # Ensure leverage is set as desired in account preferences before sizing
+            desired_leverage = int(self.settings.getfloat('BOT_CONFIG', 'leverage', 1))
+            leverage_to_use = desired_leverage
+            try:
+                prefs = await self.api.get_account_preferences()
+                current_leverage = desired_leverage
+                if prefs and isinstance(prefs.get('leverages'), dict):
+                    cat = prefs['leverages'].get(instrument_category) or {}
+                    current_leverage = int(cat.get('current') or desired_leverage)
+                    available = cat.get('available') or []
+                    # Attempt update if different and available
+                    if desired_leverage != current_leverage and (not available or desired_leverage in available):
+                        self.record_action({'event': 'leverage_update', 'phase': 'request', 'category': instrument_category, 'from': current_leverage, 'to': desired_leverage})
+                        upd = await self.api.update_account_leverage(instrument_category, desired_leverage)
+                        ok = bool(upd.get('ok')) if isinstance(upd, dict) else False
+                        if ok:
+                            leverage_to_use = desired_leverage
+                            self.record_action({'event': 'leverage_update', 'phase': 'applied', 'category': instrument_category, 'from': current_leverage, 'to': desired_leverage})
+                        else:
+                            # Fall back to current if update rejected (possibly due to open positions)
+                            leverage_to_use = current_leverage
+                            self.record_action({'event': 'leverage_update', 'phase': 'rejected', 'category': instrument_category, 'from': current_leverage, 'to': desired_leverage, 'reason': upd.get('error') or upd.get('errorCode') if isinstance(upd, dict) else 'unknown'})
+                    else:
+                        leverage_to_use = current_leverage
+                else:
+                    # If preferences unavailable, still proceed with desired from settings
+                    leverage_to_use = desired_leverage
+            except Exception as e:
+                # Non-fatal: continue with desired setting
+                leverage_to_use = desired_leverage
+                self.record_action({'event': 'leverage_update', 'phase': 'error', 'category': instrument_category, 'error': str(e)})
+
             # Get account balance
             accounts = await self.api.get_accounts()
             available = 0
@@ -701,7 +737,7 @@ class TradingBot:
             
             # Calculate position size (GOSPEL formula from legacy)
             investment_pct = self.settings.getfloat('BOT_CONFIG', 'investment_pct', 99) / 100
-            leverage = self.settings.getfloat('BOT_CONFIG', 'leverage', 1)
+            leverage = float(leverage_to_use)
             
             trade_size = (available * investment_pct * leverage) / entry_price
             

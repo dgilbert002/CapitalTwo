@@ -238,3 +238,49 @@ class CapitalComAPI:
             logger.error(f"Error getting trade history: {e}", exc_info=True)
             return []
 
+    # ===== Account preferences (hedging/leverage) =====
+    async def get_account_preferences(self) -> Optional[Dict]:
+        """Fetch account preferences including leverages per asset class."""
+        try:
+            if not hasattr(self.client, 'account_preferences'):
+                logger.error("Client does not support account_preferences")
+                return None
+            prefs = await self._run_sync(self.client.account_preferences)
+            return prefs
+        except Exception as e:
+            logger.error(f"Error getting account preferences: {e}")
+            return None
+
+    async def update_account_leverage(self, instrument_category: str, leverage_value: int, hedging_mode: Optional[bool] = None) -> Dict:
+        """Update leverage for a specific instrument category.
+
+        instrument_category should be one of: SHARES, CURRENCIES, INDICES, CRYPTOCURRENCIES, COMMODITIES
+        """
+        try:
+            # Get current preferences to preserve other categories
+            current = await self.get_account_preferences() or {}
+            leverages = (current.get('leverages') or {}).copy()
+            # Normalize key
+            key = (instrument_category or '').upper()
+            if not key:
+                return {"ok": False, "error": "missing_instrument_category"}
+            # Validate available values if provided by server
+            available = []
+            if key in leverages and isinstance(leverages[key], dict):
+                available = leverages[key].get('available') or []
+            # Build leverages payload as expected by API: { CATEGORY: value }
+            leverages_payload = {k: (v.get('current') if isinstance(v, dict) else v) for k, v in leverages.items()}
+            leverages_payload[key] = leverage_value
+
+            mode = bool(current.get('hedgingMode')) if hedging_mode is None else bool(hedging_mode)
+
+            if not hasattr(self.client, 'update_account_preferences'):
+                return {"ok": False, "error": "client_missing_update_account_preferences"}
+
+            result = await self._run_sync(self.client.update_account_preferences, mode, leverages_payload)
+            logger.info(f"Update account leverage result: {result}")
+            return {"ok": (result or {}).get('status') == 'SUCCESS', **(result or {})}
+        except Exception as e:
+            logger.error(f"Error updating account leverage: {e}")
+            return {"ok": False, "error": str(e)}
+
