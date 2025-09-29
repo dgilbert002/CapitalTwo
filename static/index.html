@@ -9,24 +9,24 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
         
-        body { 
+        body {
             background: #050506;
             background-image: 
                 radial-gradient(ellipse at top left, rgba(120, 119, 198, 0.15) 0%, transparent 50%),
                 radial-gradient(ellipse at bottom right, rgba(255, 119, 198, 0.1) 0%, transparent 50%);
             color: #e8e9ef; 
-            min-height: 100vh; 
+            min-height: 100vh;
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
         }
         
-        .dashboard-container { 
+        .dashboard-container {
             background: rgba(10, 11, 13, 0.95);
             border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 20px; 
+            border-radius: 20px;
             box-shadow: 
                 0 20px 40px rgba(0, 0, 0, 0.4),
                 inset 0 1px 0 rgba(255, 255, 255, 0.05);
-            margin: 20px; 
+            margin: 20px;
             padding: 28px;
             backdrop-filter: blur(20px);
         }
@@ -38,27 +38,27 @@
             font-weight: 700;
         }
         
-        .status-card { 
+        .status-card {
             background: linear-gradient(135deg, rgba(120, 119, 198, 0.1) 0%, rgba(255, 119, 198, 0.05) 100%);
             color: #e8e9ef; 
             border-radius: 16px; 
             padding: 20px; 
-            margin-bottom: 20px; 
+            margin-bottom: 20px;
             border: 1px solid rgba(255, 255, 255, 0.08);
             backdrop-filter: blur(10px);
         }
         
-        .metric-card { 
+        .metric-card {
             background: rgba(15, 16, 20, 0.6);
             border-radius: 16px; 
-            padding: 20px; 
-            margin-bottom: 20px; 
+            padding: 20px;
+            margin-bottom: 20px;
             border: 1px solid rgba(255, 255, 255, 0.08);
             backdrop-filter: blur(10px);
             transition: all 0.3s ease;
         }
         
-        .metric-card:hover { 
+        .metric-card:hover {
             border-color: rgba(120, 119, 198, 0.3);
             transform: translateY(-2px);
             box-shadow: 0 10px 30px rgba(120, 119, 198, 0.1);
@@ -81,17 +81,17 @@
             color: #9ca3af;
             font-size: 0.875rem;
         }
-        .metric-value { 
+        .metric-value {
             font-size: 1.8rem; 
             font-weight: 700; 
             background: linear-gradient(135deg, #7877c6 0%, #ff77c6 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
-        .metric-label { 
+        .metric-label {
             color: #6b7280; 
             font-size: 0.75rem; 
-            letter-spacing: 1px; 
+            letter-spacing: 1px;
             text-transform: uppercase; 
             font-weight: 600;
         }
@@ -103,12 +103,12 @@
             margin-right: 8px;
             box-shadow: 0 0 10px currentColor;
         }
-        .status-running { 
+        .status-running {
             background-color: #10b981; 
             animation: pulse 2s infinite;
             box-shadow: 0 0 20px #10b981;
         }
-        .status-stopped { 
+        .status-stopped {
             background-color: #ef4444;
             box-shadow: 0 0 20px #ef4444;
         }
@@ -117,20 +117,20 @@
             50% { opacity: 0.8; transform: scale(1.1); }
             100% { opacity: 1; transform: scale(1); }
         }
-        .positions-table { 
+        .positions-table {
             background: rgba(15, 16, 20, 0.6);
             border-radius: 16px; 
-            overflow: hidden; 
+            overflow: hidden;
             border: 1px solid rgba(255, 255, 255, 0.08);
         }
         .table { 
             color: #e5e7eb;
             margin-bottom: 0;
         }
-        .table th { 
+        .table th {
             background: rgba(120, 119, 198, 0.1);
             color: #d1d5db; 
-            border: none; 
+            border: none;
             font-weight: 600;
             font-size: 0.875rem;
             text-transform: uppercase;
@@ -206,10 +206,10 @@
                                 <button class="btn btn-sm btn-info ms-2" id="btnSpeedTest" title="Speed Test Multiple Days"><i class="fas fa-tachometer-alt"></i> Speed Test</button>
                                 <button class="btn btn-sm btn-info ms-2" id="btnBrainPreview" title="Run Brains Preview"><i class="fas fa-brain"></i> Brain Preview</button>
                             </div>
+                            </div>
+                            </div>
                         </div>
                     </div>
-                </div>
-            </div>
 
             <div class="row">
                 <div class="col-lg-6">
@@ -221,7 +221,7 @@
                                     <option value="demo">Demo</option>
                                     <option value="live">Live</option>
                                 </select>
-                            </div>
+                </div>
                             <div class="col-md-6">
                                 <label class="metric-label mb-1"><i class="fas fa-user"></i> Account</label>
                                 <select id="accountSelect" class="form-select">
@@ -230,23 +230,23 @@
                             </div>
                         </div>
                         <small class="text-muted">Changes apply immediately and are saved to settings.txt.</small>
-                    </div>
+            </div>
 
                     <div class="metric-card">
                         <div class="row">
                             <div class="col-md-4">
-                                <div class="metric-label">Account Balance</div>
-                                <div class="metric-value" id="balance">$0.00</div>
-                            </div>
+                        <div class="metric-label">Account Balance</div>
+                        <div class="metric-value" id="balance">$0.00</div>
+                    </div>
                             <div class="col-md-4">
-                                <div class="metric-label">Available Funds</div>
-                                <div class="metric-value" id="available">$0.00</div>
-                            </div>
+                        <div class="metric-label">Available Funds</div>
+                        <div class="metric-value" id="available">$0.00</div>
+                    </div>
                             <div class="col-md-4">
-                                <div class="metric-label">Total P&L</div>
-                                <div class="metric-value" id="pnl">$0.00</div>
-                            </div>
-                        </div>
+                        <div class="metric-label">Total P&L</div>
+                        <div class="metric-value" id="pnl">$0.00</div>
+                    </div>
+                </div>
                     </div>
                     
                     <!-- Stop Loss Configuration -->
@@ -257,7 +257,7 @@
                             <label class="form-check-label" for="slNormal">Normal SL (%)</label>
                             <input type="number" class="form-control form-control-sm mt-1" id="slNormalValue" 
                                    placeholder="2.0" step="0.1" style="width: 100px;">
-                        </div>
+                    </div>
                         <div class="form-check mb-2">
                             <input class="form-check-input" type="radio" name="stopLossType" id="slTrailing" value="trailing">
                             <label class="form-check-label" for="slTrailing">Trailing SL</label>
@@ -266,8 +266,8 @@
                                        placeholder="Thresholds: 5,10,15" disabled style="width: 140px;">
                                 <input type="text" class="form-control form-control-sm" id="slAdjustments" 
                                        placeholder="Adjust: 2,5,8" disabled style="width: 120px;">
-                            </div>
-                        </div>
+                </div>
+            </div>
                         <div class="form-check mb-2">
                             <input class="form-check-input" type="radio" name="stopLossType" id="slStaggered" value="staggered">
                             <label class="form-check-label" for="slStaggered">Staggered SL</label>
@@ -276,8 +276,8 @@
                                        placeholder="When: 2,4,5,7,10" disabled style="width: 140px;">
                                 <input type="text" class="form-control form-control-sm" id="slUse" 
                                        placeholder="Use: 0,1,2,4,6" disabled style="width: 120px;">
-                            </div>
-                        </div>
+                    </div>
+                </div>
                         <button class="btn btn-sm btn-primary mt-2" id="btnSaveStopLoss">
                             <i class="fas fa-save"></i> Save SL Settings
                         </button>
@@ -294,7 +294,22 @@
                                 <p class="mb-1"><strong>Bid/Ask:</strong> <span id="bidAsk">-</span></p>
                                 <p class="mb-1"><strong>Spread:</strong> <span id="epicSpread">-</span></p>
                                 <p class="mb-1"><strong>Change:</strong> <span id="percentChange">-</span>%</p>
-                                <p class="mb-1"><strong>Leverage:</strong> <span id="leverage">-</span>x</p>
+                                <div class="mb-1">
+                                    <strong>Leverage:</strong>
+                                    <span id="leverageDisplay">-</span>x
+                                    <div class="mt-2">
+                                        <small class="text-muted">Account Preference</small>
+                                        <div class="d-flex gap-2 align-items-center">
+                                            <select id="leveragePicker" class="form-select form-select-sm bg-dark text-light border-secondary" style="max-width: 140px;">
+                                                <option value="">Loading...</option>
+                                            </select>
+                                            <button class="btn btn-sm btn-outline-info" id="btnApplyLeverage" disabled>
+                                                <i class="fas fa-save"></i>
+                                            </button>
+                                        </div>
+                                        <small id="leverageHelp" class="text-muted"></small>
+                                    </div>
+                                </div>
                             </div>
                             <div class="col-6">
                                 <h6 class="text-muted">Market Hours</h6>
@@ -381,7 +396,7 @@
                                     </tr>
                                 </tbody>
                             </table>
-                        </div>
+                    </div>
                     </div>
                 </div>
             </div>
@@ -595,7 +610,10 @@
             maxDealSize: document.getElementById("maxDealSize"),
             minSizeIncrement: document.getElementById("minSizeIncrement"),
             lotSize: document.getElementById("lotSize"),
-            leverage: document.getElementById("leverage"),
+            leverageDisplay: document.getElementById("leverageDisplay"),
+            leveragePicker: document.getElementById("leveragePicker"),
+            btnApplyLeverage: document.getElementById("btnApplyLeverage"),
+            leverageHelp: document.getElementById("leverageHelp"),
             balance: document.getElementById("balance"),
             available: document.getElementById("available"),
             pnl: document.getElementById("pnl"),
@@ -622,6 +640,9 @@
 
         let ws;
         let reconnectInterval;
+        // Leverage UI control flags
+        let leverageInitialized = false;
+        let lastLeverageUpdateTs = '';
         // Speed Test live sync state
         let speedTestLive = false;
         let stDaysTotal = 0;
@@ -636,8 +657,8 @@
             ws.onopen = function() {
                 // Only show connection status if bot is not running
                 if (elements.status.textContent !== "Bot Running - Monitoring Market") {
-                    elements.connectionStatus.textContent = "Connected";
-                    elements.connectionStatus.className = "connection-status connected";
+                elements.connectionStatus.textContent = "Connected";
+                elements.connectionStatus.className = "connection-status connected";
                     elements.connectionStatus.style.display = 'inline';
                     document.getElementById('connectionSeparator').style.display = 'inline';
                 }
@@ -675,7 +696,7 @@
                 // Only show connection status if bot is not running
                 if (elements.status.textContent !== "Bot Running - Monitoring Market") {
                     elements.connectionStatus.textContent = "Connecting...";
-                    elements.connectionStatus.className = "connection-status disconnected";
+                elements.connectionStatus.className = "connection-status disconnected";
                     elements.connectionStatus.style.display = 'inline';
                     document.getElementById('connectionSeparator').style.display = 'inline';
                 }
@@ -696,7 +717,9 @@
             
             // Update bot status
             elements.epic.textContent = data.epic || "-";
-            elements.leverage.textContent = data.leverage || "-";
+            if (typeof data.leverage !== 'undefined' && elements.leverageDisplay) {
+                elements.leverageDisplay.textContent = String(data.leverage);
+            }
             if (data.environment) {
                 elements.envSelect.value = data.environment;
             }
@@ -734,7 +757,7 @@
                 const statusElem = document.getElementById('connectionStatus');
                 if (statusElem) statusElem.textContent = connStatus;
             }
-            
+
             // Update account information
             if (data.account) {
                 // Account name is shown in the dropdown and badge
@@ -836,6 +859,10 @@
                         elements.percentChange.textContent = change.toFixed(2);
                         elements.percentChange.style.color = change >= 0 ? '#4caf50' : '#f44336';
                     }
+                    // Reflect leverage display from settings or preferences
+                    if (typeof window.latestWsData?.leverage !== 'undefined') {
+                        elements.leverageDisplay.textContent = String(window.latestWsData.leverage);
+                    }
                 }
                 
                 // Update dealing rules if available
@@ -879,11 +906,103 @@
             updateHistoryTable(allTrades);
 
             // Update action log
-        updateActionLogTable(data.action_log || []);
+            updateActionLogTable(data.action_log || []);
+
+            // Initialize leverage picker once when market info is first present
+            if (!leverageInitialized && data.market_info) {
+                leverageInitialized = true;
+                try { await refreshLeverageOptions(); } catch(e) { }
+            }
+
+            // If server applied a leverage update before a trade, reflect it once
+            if (Array.isArray(data.action_log) && data.action_log.length) {
+                const applied = [...data.action_log].reverse().find(a => a.event === 'leverage_update' && a.phase === 'applied' && a.ts && (!lastLeverageUpdateTs || a.ts > lastLeverageUpdateTs));
+                if (applied) {
+                    lastLeverageUpdateTs = applied.ts;
+                    try { await refreshLeverageOptions(); } catch(e) { }
+                    if (elements.leverageDisplay && typeof applied.to !== 'undefined') {
+                        const fromV = typeof applied.from !== 'undefined' ? applied.from : undefined;
+                        elements.leverageDisplay.textContent = String(applied.to);
+                        showNotification(`Leverage updated ${fromV !== undefined ? `(from ${fromV}x ` : '('}to ${applied.to}x) for ${applied.category || ''}`, 'success');
+                    }
+                }
+            }
 
             // Update last update time - removed as element doesn't exist
             // elements.lastUpdate.textContent = new Date().toLocaleTimeString();
+            // Removed frequent leverage refresh; now handled only on init and explicit updates
         }
+
+        // ===== Leverage UI logic =====
+        async function refreshLeverageOptions() {
+            try {
+                elements.leveragePicker.innerHTML = '<option value="">Loading...</option>';
+                const res = await fetch('/account/preferences');
+                const json = await res.json();
+                if (!json.ok || !json.preferences) {
+                    elements.leveragePicker.innerHTML = '<option value="">Unavailable</option>';
+                    elements.btnApplyLeverage.disabled = true;
+                    return;
+                }
+                const prefs = json.preferences;
+                // Determine category from instrument type
+                const mi = window.latestWsData?.market_info || {};
+                const instrumentType = mi.instrument?.type || 'SHARES';
+                const category = instrumentType in (prefs.leverages || {}) ? instrumentType : 'SHARES';
+                const catPrefs = (prefs.leverages || {})[category] || {};
+                const available = catPrefs.available || [];
+                const current = catPrefs.current || window.latestWsData?.leverage || 1;
+                elements.leveragePicker.innerHTML = '';
+                available.forEach(v => {
+                    const opt = document.createElement('option');
+                    opt.value = v; opt.textContent = `${v}x`;
+                    if (Number(v) === Number(current)) opt.selected = true;
+                    elements.leveragePicker.appendChild(opt);
+                });
+                elements.btnApplyLeverage.disabled = available.length === 0;
+                elements.leverageHelp.textContent = `Category: ${category}`;
+                elements.leveragePicker.dataset.category = category;
+            } catch (e) {
+                console.error(e);
+                elements.leveragePicker.innerHTML = '<option value="">Error</option>';
+                elements.btnApplyLeverage.disabled = true;
+            }
+        }
+
+        // Apply leverage change
+        elements.btnApplyLeverage.addEventListener('click', async () => {
+            const category = elements.leveragePicker.dataset.category || 'SHARES';
+            const val = parseInt(elements.leveragePicker.value || '0');
+            if (!val) return;
+            elements.btnApplyLeverage.disabled = true;
+            elements.leverageHelp.textContent = 'Applying leverage...';
+            try {
+                const res = await fetch('/account/leverage', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ category, leverage: val })
+                });
+                const json = await res.json();
+                if (json.ok) {
+                    const prev = elements.leverageDisplay?.textContent ? Number(elements.leverageDisplay.textContent) : undefined;
+                    showNotification(`Leverage updated ${prev ? `(from ${prev}x ` : '('}to ${val}x) for ${category}`, 'success');
+                    elements.leverageHelp.textContent = 'Leverage updated.';
+                    // Update display and reload options
+                    elements.leverageDisplay.textContent = String(val);
+                    await refreshLeverageOptions();
+                } else {
+                    const err = json.error || (json.errorCode || 'Unknown error');
+                    showNotification(`Failed to update leverage: ${err}`, 'error');
+                    elements.leverageHelp.textContent = `Error: ${err}`;
+                }
+            } catch (e) {
+                console.error(e);
+                showNotification(`Error updating leverage: ${e.message}`, 'error');
+                elements.leverageHelp.textContent = `Error: ${e.message}`;
+            } finally {
+                elements.btnApplyLeverage.disabled = false;
+            }
+        });
 
         // ===== Speed Test Live Sync Helpers =====
         function stAddEvent(message, type = 'info') {
@@ -1056,7 +1175,7 @@
         fetchConfig();
         // Don't call fetchAccounts separately - fetchConfig will do it if connected
 
-            function updatePositionsTable(positions) {
+        function updatePositionsTable(positions) {
             if (!positions || positions.length === 0) {
                 elements.positionsTable.innerHTML = `
                     <tr>
@@ -1069,10 +1188,7 @@
                 return;
             }
 
-            // Log first position to understand structure
-            if (positions.length > 0) {
-                console.log('Position structure:', positions[0]);
-            }
+            // Removed noisy console logging of position structure
 
             let html = '';
             positions.forEach(position => {
@@ -1119,7 +1235,7 @@
                 const slDisplay = slLevel 
                     ? `<small>$${slLevel.toFixed(2)}<br>${slPct.toFixed(2)}%<br>${capType}</small>` 
                     : '<small class="text-muted">-</small>';
-
+                
                 html += `
                     <tr>
                         <td>
@@ -1165,10 +1281,7 @@
                 return;
             }
             
-            // Log first trade to understand structure  
-            if (history.length > 0) {
-                console.log('Trade history structure:', history[0]);
-            }
+            // Removed noisy console logging of trade history structure
             
             let html = '';
             history.forEach(h => {
@@ -1747,7 +1860,7 @@
                 showNotification('Error saving settings: ' + e.message, 'error');
             }
         });
-        
+
         // Initialize WebSocket connection
         connectWebSocket();
     </script>
