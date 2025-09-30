@@ -77,6 +77,7 @@ class AppState:
         self.positions = []
         self.trade_history = []
         self.historic_trades = []
+        self.account_transactions = []
         self.is_connected = False
         self.bot = None  # Trading bot (starts stopped)
         self.update_task = None
@@ -134,7 +135,9 @@ async def websocket_endpoint(websocket: WebSocket):
             "trade_history": app_state.bot.trade_history if app_state.bot else [],
             "action_log": getattr(app_state.bot, 'action_log', []) if app_state.bot else [],
             "historic_trades": app_state.historic_trades,
+            "account_transactions": app_state.account_transactions,
                 "stop_loss_type": app_state.settings.get("BOT_CONFIG", "stop_loss_type", "normal"),
+                "override_strategy_sl": app_state.settings.getboolean("BOT_CONFIG", "override_strategy_sl", False),
                 "environment": app_state.api.environment if app_state.api else "demo",
                 "is_connected": app_state.is_connected
             }
@@ -212,6 +215,82 @@ async def continuous_data_update():
                 # Update trade history
                 app_state.historic_trades = await app_state.api.get_trade_history(days=30)
                 logger.info(f"Found {len(app_state.historic_trades)} historic trades")
+                
+                # Get account transactions
+                app_state.account_transactions = []
+                try:
+                    # Get transactions from last 30 days to ensure we catch everything
+                    from datetime import datetime, timedelta
+                    to_date = datetime.utcnow()
+                    from_date = to_date - timedelta(days=30)
+                    
+                    # Use account_activity for more detailed transaction info
+                    # API might have a max range, so fetch in chunks
+                    all_activities = []
+                    
+                    # First try to get all at once
+                    try:
+                        activities = await app_state.api.get_account_activity(
+                            from_date=from_date.strftime('%Y-%m-%dT%H:%M:%S'),
+                            to_date=to_date.strftime('%Y-%m-%dT%H:%M:%S')
+                        )
+                        all_activities.extend(activities)
+                        logger.info(f"Fetched {len(activities)} activities in single request")
+                    except Exception as e:
+                        logger.warning(f"Single request failed, trying day by day: {e}")
+                        # Fall back to day by day
+                        for i in range(30):
+                            day_start = from_date + timedelta(days=i)
+                            day_end = day_start + timedelta(days=1)
+                            
+                            try:
+                                activities = await app_state.api.get_account_activity(
+                                    from_date=day_start.strftime('%Y-%m-%dT%H:%M:%S'),
+                                    to_date=day_end.strftime('%Y-%m-%dT%H:%M:%S')
+                                )
+                                all_activities.extend(activities)
+                            except Exception as e:
+                                logger.warning(f"Error fetching activities for {day_start.date()}: {e}")
+                    
+                    # Log all activity types found
+                    if all_activities:
+                        activity_types = set(a.get('type', 'UNKNOWN') for a in all_activities)
+                        logger.info(f"Found activity types: {activity_types}")
+                    
+                    # Don't filter - show all activities
+                    app_state.account_transactions = all_activities
+                    
+                    # Enrich transactions with trade history data
+                    if app_state.historic_trades:
+                        # Create a map of dealId to trade info
+                        trade_map = {}
+                        for trade in app_state.historic_trades:
+                            deal_id = trade.get('dealId')
+                            if deal_id:
+                                trade_map[deal_id] = trade
+                        
+                        # Enrich each transaction
+                        for transaction in app_state.account_transactions:
+                            deal_id = transaction.get('dealId') or transaction.get('reference')
+                            if deal_id and deal_id in trade_map:
+                                trade = trade_map[deal_id]
+                                # Add enriched fields
+                                transaction['enriched_epic'] = trade.get('epic', trade.get('instrumentName'))
+                                transaction['enriched_pnl'] = trade.get('pnl', trade.get('closePnL'))
+                                transaction['enriched_closeDate'] = trade.get('closeDateUtc', trade.get('closeDate'))
+                                transaction['enriched_reason'] = trade.get('closeReason', trade.get('note'))
+                                transaction['enriched_direction'] = trade.get('direction')
+                                transaction['enriched_size'] = trade.get('size')
+                    
+                    # Sort by date (newest first)
+                    app_state.account_transactions.sort(
+                        key=lambda x: x.get('dateUTC', x.get('date', '')), 
+                        reverse=True
+                    )
+                    
+                    logger.info(f"Found {len(app_state.account_transactions)} account transactions over 7 days")
+                except Exception as e:
+                    logger.error(f"Error fetching account transactions: {e}")
                 
                 # Keepalive
                 await app_state.api.keepalive()
@@ -440,6 +519,12 @@ async def brains_preview():
         max_size = float(rules.get('maxDealSize', {}).get('value', 3250))
         increment = float(rules.get('minSizeIncrement', {}).get('value', 0.1))
 
+        # Get leverage from strategy if available
+        strategy_leverage = decision.get('strategy_leverage', None)
+        if strategy_leverage is not None:
+            leverage = float(strategy_leverage)
+            logger.info(f"Brain Preview: Using leverage {leverage} from strategy '{decision.get('strategy_used', 'N/A')}'")
+        
         sizing = None
         if direction in ('long', 'short') and entry_price:
             # Use account available for preview if available
@@ -472,6 +557,8 @@ async def brains_preview():
                 'available': available,
                 'investment_pct': invest_pct,
                 'leverage': leverage,
+                'strategy_leverage': strategy_leverage,
+                'leverage_source': 'strategy' if strategy_leverage is not None else 'settings',
                 'entry_price': entry_price,
                 'contracts': tsz,
                 'min_size': min_size,
@@ -481,7 +568,16 @@ async def brains_preview():
                 'sl_type': sl_type
             }
 
-        return {"ok": True, "decision": decision, "sizing": sizing, "market_info": market_info, "last_candle": last_candle}
+        return {
+            "ok": True, 
+            "decision": decision, 
+            "sizing": sizing, 
+            "market_info": market_info, 
+            "last_candle": last_candle,
+            "selected_strategy": decision.get('selected_strategy', 'N/A'),
+            "fired_signals": decision.get('fired_signals', {}),
+            "strategy_config": decision.get('strategy_config', None)
+        }
     except Exception as e:
         logger.error(f"Brains preview error: {e}")
         return {"ok": False, "error": str(e)}
@@ -530,6 +626,7 @@ async def save_stoploss_settings(payload: dict = Body(...)):
         # Update settings
         app_state.settings.set_value('BOT_CONFIG', 'stop_loss_type', payload.get('stop_loss_type', 'normal'))
         app_state.settings.set_value('BOT_CONFIG', 'stop_loss_pct', payload.get('stop_loss_pct', '2.0'))
+        app_state.settings.set_value('BOT_CONFIG', 'override_strategy_sl', str(payload.get('override_strategy_sl', False)))
         app_state.settings.set_value('BOT_CONFIG', 'sl_thresholds', payload.get('sl_thresholds', '5,10,15'))
         app_state.settings.set_value('BOT_CONFIG', 'sl_adjustments', payload.get('sl_adjustments', '2,5,8'))
         app_state.settings.set_value('BOT_CONFIG', 'sl_when_at', payload.get('sl_when_at', '2,4,5,7,10,12,15'))

@@ -253,6 +253,12 @@
                     <div class="metric-card">
                         <h6 class="text-muted mb-3"><i class="fas fa-shield-alt"></i> Stop Loss Configuration</h6>
                         <div class="form-check mb-2">
+                            <input class="form-check-input" type="checkbox" id="overrideStrategySL">
+                            <label class="form-check-label" for="overrideStrategySL">
+                                Override Strategy Stop Loss
+                            </label>
+                        </div>
+                        <div class="form-check mb-2">
                             <input class="form-check-input" type="radio" name="stopLossType" id="slNormal" value="normal" checked>
                             <label class="form-check-label" for="slNormal">Normal SL (%)</label>
                             <input type="number" class="form-control form-control-sm mt-1" id="slNormalValue" 
@@ -349,6 +355,7 @@
                             <div>
                                 <button class="tab-btn active" id="tabOpen">Positions & Orders</button>
                                 <button class="tab-btn ms-2" id="tabHistory">Trade History</button>
+                                <button class="tab-btn ms-2" id="tabTransactions">Account Transactions</button>
                             </div>
                         </div>
                         <div class="table-responsive" id="openPositionsPanel">
@@ -380,23 +387,39 @@
                             <table class="table table-hover mb-0">
                                 <thead>
                                     <tr>
-                                        <th>Entry</th>
-                                        <th>Exit</th>
-                                        <th>Dir</th>
+                                        <th>Close Date</th>
+                                        <th>Epic</th>
+                                        <th>Direction</th>
                                         <th>Size</th>
-                                        <th>Entry Px</th>
-                                        <th>Exit Px</th>
+                                        <th>Entry Price</th>
+                                        <th>Exit Price</th>
                                         <th>Net P&L</th>
+                                        <th>Deal ID</th>
+                                        <th>Strategy</th>
                                         <th>Reason</th>
                                     </tr>
                                 </thead>
                                 <tbody id="historyTable">
                                     <tr>
-                                        <td colspan="8" class="text-center text-muted py-4">No history</td>
+                                        <td colspan="10" class="text-center text-muted py-4">No trade history</td>
                                     </tr>
                                 </tbody>
                             </table>
-                    </div>
+                        </div>
+                        <div class="table-responsive" id="transactionsPanel" style="display:none;">
+                            <table class="table table-hover mb-0" id="transactionsTableElement">
+                                <thead id="transactionsTableHeader">
+                                    <tr>
+                                        <th>Loading...</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="transactionsTable">
+                                    <tr>
+                                        <td class="text-center text-muted py-4">No transactions</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -629,9 +652,12 @@
             botNameDisplay: document.getElementById("botNameDisplay"),
             tabOpen: document.getElementById("tabOpen"),
             tabHistory: document.getElementById("tabHistory"),
+            tabTransactions: document.getElementById("tabTransactions"),
             openPositionsPanel: document.getElementById("openPositionsPanel"),
             historyPanel: document.getElementById("historyPanel"),
+            transactionsPanel: document.getElementById("transactionsPanel"),
             historyTable: document.getElementById("historyTable"),
+            transactionsTable: document.getElementById("transactionsTable"),
             btnStart: document.getElementById("btnStart"),
             btnStop: document.getElementById("btnStop"),
             btnSimulate: document.getElementById("btnSimulate"),
@@ -904,9 +930,27 @@
             // Update history - combine bot trades and historic trades
             const allTrades = [...(data.historic_trades || []), ...(data.trade_history || [])];
             updateHistoryTable(allTrades);
+            
+            // Update account transactions
+            updateTransactionsTable(data.account_transactions || []);
 
             // Update action log
             updateActionLogTable(data.action_log || []);
+
+            // Update stop loss settings if present
+            if (data.stop_loss_type !== undefined) {
+                // Update radio button
+                const slRadio = document.querySelector(`input[name="stopLossType"][value="${data.stop_loss_type}"]`);
+                if (slRadio) slRadio.checked = true;
+                
+                // Trigger change event to enable/disable appropriate inputs
+                slRadio.dispatchEvent(new Event('change'));
+            }
+            
+            // Update override checkbox if present
+            if (data.override_strategy_sl !== undefined) {
+                document.getElementById('overrideStrategySL').checked = data.override_strategy_sl;
+            }
 
             // Initialize leverage picker once when market info is first present
             if (!leverageInitialized && data.market_info) {
@@ -1277,87 +1321,156 @@
 
         function updateHistoryTable(history) {
             if (!history || history.length === 0) {
-                elements.historyTable.innerHTML = '<tr><td colspan="8" class="text-center text-muted py-4">No trade history</td></tr>';
+                elements.historyTable.innerHTML = '<tr><td colspan="10" class="text-center text-muted py-4">No trade history</td></tr>';
                 return;
             }
             
-            // Removed noisy console logging of trade history structure
-            
             let html = '';
             history.forEach(h => {
-                // Handle both bot trades and historic trades from API
-                const isHistoricTrade = h.dateUTC || h.date || h.dealId;
+                // Handle different trade formats
+                const closeDate = h.closeDateUtc || h.closeDate || h.dateUtc || h.dateUTC || h.date || '-';
+                const epic = h.epic || h.instrumentName || '-';
+                const pnl = parseFloat(h.pnl || h.closePnL || h.size || 0);
+                const profitClass = pnl >= 0 ? 'text-success fw-bold' : 'text-danger fw-bold';
+                const dealId = h.dealId || h.reference || '-';
+                const reason = h.closeReason || h.note || 'Trade closed';
                 
-                if (isHistoricTrade) {
-                    // Historic trade from Capital.com API
-                    const dateTime = h.dateUTC || h.date || h.timestamp || '-';
-                    const epic = h.epic || h.instrument?.epic || h.market?.epic || '-';
-                    const instrumentName = h.instrumentName || h.instrument?.name || '';
-                    const direction = h.direction || '-';
-                    const size = h.size || h.dealSize || '-';
-                    const openLevel = h.openLevel || h.level || '-';
-                    const closeLevel = h.closeLevel || '-';
-                    const profit = parseFloat(h.profit || h.pl || h.profitAndLoss || h.pnl || 0);
-                    const profitClass = profit >= 0 ? 'text-success fw-bold' : 'text-danger fw-bold';
-                    const dealId = h.dealId || h.reference || '-';
-                    
-                    html += `
-                        <tr>
-                            <td>${dateTime !== '-' ? new Date(dateTime).toLocaleString() : '-'}</td>
-                            <td>
-                                <strong>${epic}</strong>
-                                ${instrumentName ? `<br><small class="text-muted">${instrumentName}</small>` : ''}
-                            </td>
-                            <td>
-                                <span class="badge ${direction === 'BUY' ? 'bg-success' : 'bg-danger'}">
-                                    ${direction}
-                                </span>
-                            </td>
-                            <td>${size}</td>
-                            <td>${openLevel !== '-' ? '$' + openLevel : '-'}</td>
-                            <td>${closeLevel !== '-' ? '$' + closeLevel : '-'}</td>
-                            <td class="${profitClass}">${profit >= 0 ? '+' : ''}$${Math.abs(profit).toFixed(2)}</td>
-                            <td><small>${dealId}</small></td>
-                        </tr>
-                    `;
-                } else {
-                    // Bot trade from our system
-                    const profit = parseFloat(h.net_pnl || 0);
-                    const profitClass = profit >= 0 ? 'text-success fw-bold' : 'text-danger fw-bold';
-                    
-                    html += `
-                        <tr>
-                            <td>${h.entry_date || '-'}</td>
-                            <td>${h.exit_date || '-'}</td>
-                            <td>
-                                <span class="badge ${h.direction === 'BUY' ? 'bg-success' : 'bg-danger'}">
-                                    ${h.direction || '-'}
-                                </span>
-                            </td>
-                            <td>${(h.position_size||0).toFixed ? (h.position_size||0).toFixed(2) : h.position_size || '-'}</td>
-                            <td>${(h.entry_price||0).toFixed ? '$' + (h.entry_price||0).toFixed(4) : h.entry_price || '-'}</td>
-                            <td>${(h.exit_price||0).toFixed ? '$' + (h.exit_price||0).toFixed(4) : h.exit_price || '-'}</td>
-                            <td class="${profitClass}">${profit >= 0 ? '+' : ''}$${Math.abs(profit).toFixed(2)}</td>
-                            <td>${h.exit_reason || '-'}</td>
-                        </tr>
-                    `;
-                }
+                // For now, we don't have complete entry/exit data from the API
+                // These would need to come from our trade_history.csv or be calculated
+                const direction = h.direction || 'UNKNOWN';
+                const directionBadge = direction === 'BUY' || direction === 'LONG' ? 'bg-success' : 
+                                      direction === 'SELL' || direction === 'SHORT' ? 'bg-danger' : 'bg-secondary';
+                
+                const size = h.size !== undefined && h.size !== null ? Math.abs(h.size) : '-';
+                const entryPrice = h.entryPrice || '-';
+                const exitPrice = h.closePrice || h.exitPrice || '-';
+                const strategy = h.strategy || '-';
+                
+                html += `
+                    <tr>
+                        <td>${closeDate !== '-' ? new Date(closeDate).toLocaleString() : '-'}</td>
+                        <td><strong>${epic}</strong></td>
+                        <td>
+                            <span class="badge ${directionBadge}">
+                                ${direction}
+                            </span>
+                        </td>
+                        <td>${size !== '-' && typeof size === 'number' ? size.toFixed(2) : size}</td>
+                        <td>${entryPrice !== '-' && typeof entryPrice === 'number' ? '$' + entryPrice.toFixed(2) : entryPrice}</td>
+                        <td>${exitPrice !== '-' && typeof exitPrice === 'number' ? '$' + exitPrice.toFixed(2) : exitPrice}</td>
+                        <td class="${profitClass}">${pnl >= 0 ? '+' : ''}$${Math.abs(pnl).toFixed(2)}</td>
+                        <td><small>${dealId}</small></td>
+                        <td>${strategy}</td>
+                        <td><small>${reason}</small></td>
+                    </tr>
+                `;
             });
             elements.historyTable.innerHTML = html;
+        }
+        
+        function updateTransactionsTable(transactions) {
+            const headerElement = document.getElementById('transactionsTableHeader');
+            const bodyElement = document.getElementById('transactionsTable');
+            
+            if (!transactions || transactions.length === 0) {
+                headerElement.innerHTML = '<tr><th>No Data</th></tr>';
+                bodyElement.innerHTML = '<tr><td class="text-center text-muted py-4">No transactions</td></tr>';
+                return;
+            }
+            
+            // Get all unique keys from all transactions
+            const allKeys = new Set();
+            transactions.forEach(t => {
+                Object.keys(t).forEach(key => allKeys.add(key));
+            });
+            
+            // Convert to array and sort for consistent ordering
+            const keys = Array.from(allKeys).sort();
+            
+            // Build header
+            let headerHtml = '<tr>';
+            keys.forEach(key => {
+                // Make headers more readable
+                const displayKey = key
+                    .replace(/([A-Z])/g, ' $1')
+                    .replace(/^./, str => str.toUpperCase())
+                    .replace('Utc', 'UTC')
+                    .replace('Id', 'ID')
+                    .trim();
+                headerHtml += `<th>${displayKey}</th>`;
+            });
+            headerHtml += '</tr>';
+            headerElement.innerHTML = headerHtml;
+            
+            // Build body
+            let bodyHtml = '';
+            transactions.forEach(t => {
+                bodyHtml += '<tr>';
+                keys.forEach(key => {
+                    let value = t[key];
+                    
+                    // Format values for display
+                    if (value === null || value === undefined) {
+                        value = '-';
+                    } else if (key.toLowerCase().includes('date') && value) {
+                        // Format dates
+                        try {
+                            value = new Date(value).toLocaleString();
+                        } catch (e) {
+                            // Keep original if not parseable
+                        }
+                    } else if (key === 'status') {
+                        // Format status as badge
+                        value = `<span class="badge ${value === 'PROCESSED' ? 'bg-success' : 'bg-warning'}">${value}</span>`;
+                    } else if (key === 'transactionType' || key === 'type') {
+                        // Format type as badge
+                        value = `<span class="badge bg-secondary">${value}</span>`;
+                    } else if (key.startsWith('enriched_')) {
+                        // Format enriched fields specially
+                        if (key === 'enriched_pnl' && value && value !== '-') {
+                            const pnl = parseFloat(value);
+                            const pnlClass = pnl >= 0 ? 'text-success fw-bold' : 'text-danger fw-bold';
+                            value = `<span class="${pnlClass}">${pnl >= 0 ? '+' : ''}$${Math.abs(pnl).toFixed(2)}</span>`;
+                        } else if (key === 'enriched_direction' && value && value !== '-') {
+                            const dirBadge = value === 'BUY' || value === 'LONG' ? 'bg-success' : 'bg-danger';
+                            value = `<span class="badge ${dirBadge}">${value}</span>`;
+                        }
+                    } else if (typeof value === 'object') {
+                        // Convert objects to JSON string
+                        value = JSON.stringify(value);
+                    }
+                    
+                    bodyHtml += `<td>${value}</td>`;
+                });
+                bodyHtml += '</tr>';
+            });
+            bodyElement.innerHTML = bodyHtml;
         }
 
         // tabs
         elements.tabOpen.addEventListener('click', () => {
             elements.tabOpen.classList.add('active');
             elements.tabHistory.classList.remove('active');
+            elements.tabTransactions.classList.remove('active');
             elements.openPositionsPanel.style.display = '';
             elements.historyPanel.style.display = 'none';
+            elements.transactionsPanel.style.display = 'none';
         });
         elements.tabHistory.addEventListener('click', () => {
             elements.tabHistory.classList.add('active');
             elements.tabOpen.classList.remove('active');
+            elements.tabTransactions.classList.remove('active');
             elements.openPositionsPanel.style.display = 'none';
             elements.historyPanel.style.display = '';
+            elements.transactionsPanel.style.display = 'none';
+        });
+        elements.tabTransactions.addEventListener('click', () => {
+            elements.tabTransactions.classList.add('active');
+            elements.tabOpen.classList.remove('active');
+            elements.tabHistory.classList.remove('active');
+            elements.openPositionsPanel.style.display = 'none';
+            elements.historyPanel.style.display = 'none';
+            elements.transactionsPanel.style.display = '';
         });
 
         function closePosition(dealId) {
@@ -1774,11 +1887,40 @@
                 const rows = [];
                 rows.push(`<tr><td>Signal</td><td><strong>${d.trade_signal || '-'}</strong></td></tr>`);
                 rows.push(`<tr><td>Confidence</td><td>${(d.confidence*100||0).toFixed ? (d.confidence*100).toFixed(2) : d.confidence}%</td></tr>`);
-                if (s.contracts) rows.push(`<tr><td>Contracts</td><td>${Number(s.contracts).toFixed(2)}</td></tr>`);
-                if (s.entry_price) rows.push(`<tr><td>Entry Price</td><td>$${Number(s.entry_price).toFixed(4)}</td></tr>`);
-                if (s.stop_level) rows.push(`<tr><td>Stop Level</td><td>$${Number(s.stop_level).toFixed(4)} (${s.sl_type || 'normal'})</td></tr>`);
-                if (s.min_size) rows.push(`<tr><td>Min Size</td><td>${s.min_size}</td></tr>`);
-                if (s.max_size) rows.push(`<tr><td>Max Size</td><td>${s.max_size}</td></tr>`);
+                rows.push(`<tr><td>Strategy</td><td><strong>${data.selected_strategy || 'N/A'}</strong></td></tr>`);
+                
+                // Show fired signals with winning strategy highlighted
+                if (data.fired_signals) {
+                    const signals = Object.entries(data.fired_signals)
+                        .map(([name, fired]) => {
+                            const isWinner = name === data.selected_strategy;
+                            const badgeClass = fired ? (isWinner ? 'bg-warning' : 'bg-success') : 'bg-secondary';
+                            const winnerMark = isWinner ? ' ⭐ WINNER' : '';
+                            return `<span class="badge ${badgeClass} me-1">${name.replace(/_/g, ' ')}: ${fired ? '✓' : '✗'}${winnerMark}</span>`;
+                        })
+                        .join(' ');
+                    rows.push(`<tr><td>Signals</td><td>${signals}</td></tr>`);
+                }
+                
+                // Show strategy config if available
+                if (data.strategy_config) {
+                    const cfg = data.strategy_config;
+                    rows.push(`<tr><td>Win Rate</td><td><strong>${cfg.win_rate || 0}%</strong></td></tr>`);
+                    rows.push(`<tr><td>Strategy Leverage</td><td><strong>${cfg.leverage || 1}x</strong></td></tr>`);
+                    if (cfg.stop_loss_pct) rows.push(`<tr><td>Stop Loss</td><td>${cfg.stop_loss_pct}%</td></tr>`);
+                }
+                
+                // Show sizing with leverage details
+                if (s.contracts !== undefined) {
+                    rows.push(`<tr><td colspan="2" class="text-center bg-secondary"><strong>Position Sizing</strong></td></tr>`);
+                    rows.push(`<tr><td>Contracts</td><td><strong>${s.contracts.toFixed ? s.contracts.toFixed(2) : s.contracts}</strong></td></tr>`);
+                    rows.push(`<tr><td>Leverage Used</td><td><strong>${s.leverage || 1}x</strong> ${s.leverage_source === 'strategy' ? '(from strategy)' : '(from settings)'}</td></tr>`);
+                    if (s.entry_price) rows.push(`<tr><td>Entry Price</td><td>$${s.entry_price.toFixed ? s.entry_price.toFixed(2) : s.entry_price}</td></tr>`);
+                    if (s.stop_level) rows.push(`<tr><td>Stop Level</td><td>$${s.stop_level.toFixed ? s.stop_level.toFixed(2) : s.stop_level} (${s.sl_type})</td></tr>`);
+                    rows.push(`<tr><td>Available</td><td>$${s.available?.toFixed ? s.available.toFixed(2) : s.available || 0}</td></tr>`);
+                    rows.push(`<tr><td>Investment %</td><td>${(s.investment_pct*100)?.toFixed ? (s.investment_pct*100).toFixed(1) : s.investment_pct*100 || 0}%</td></tr>`);
+                }
+                
                 if (mi.instrument && mi.instrument.name) rows.push(`<tr><td>Instrument</td><td>${mi.instrument.name}</td></tr>`);
                 body.innerHTML = `
                     <div class="mb-3">
@@ -1835,9 +1977,12 @@
         // Save Stop Loss Settings
         document.getElementById('btnSaveStopLoss').addEventListener('click', async () => {
             const selectedType = document.querySelector('input[name="stopLossType"]:checked').value;
+            const overrideStrategySL = document.getElementById('overrideStrategySL').checked;
+            
             const settings = {
                 stop_loss_type: selectedType,
                 stop_loss_pct: slNormalValue.value || '2.0',
+                override_strategy_sl: overrideStrategySL,
                 sl_thresholds: slThresholds.value || '5,10,15',
                 sl_adjustments: slAdjustments.value || '2,5,8',
                 sl_when_at: slWhenAt.value || '2,4,5,7,10,12,15',

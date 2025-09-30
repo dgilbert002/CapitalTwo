@@ -181,61 +181,203 @@ class CapitalComAPI:
             return False
     
     async def get_trade_history(self, days: int = 7) -> List[Dict]:
-        """Get trade history for the last N days using the client's built-in method"""
+        """Get complete trade history with entry and exit details"""
         try:
-            # The capitalcom client has account_transactions_history() method
-            # which returns all transactions - we can filter for trades
-            history = await self._run_sync(self.client.account_transactions_history)
+            # Use direct HTTP request to /history/transactions endpoint
+            from datetime import datetime, timedelta
+            import aiohttp
             
-            transactions = []
-            if history and 'transactions' in history:
-                transactions = history['transactions']
-                
-            # Fallback: try account_activity_history if transactions empty
-            if not transactions:
+            to_date = datetime.utcnow()
+            from_date = to_date - timedelta(days=days)
+            
+            # Format dates
+            from_str = from_date.strftime('%Y-%m-%dT%H:%M:%S')
+            to_str = to_date.strftime('%Y-%m-%dT%H:%M:%S')
+            
+            # Get base URL and build endpoint
+            base_url = 'https://api-capital.backend-capital.com/api/v1'
+            
+            headers = {
+                'X-SECURITY-TOKEN': self.client.x_security_token,
+                'CST': self.client.cst,
+                'Content-Type': 'application/json'
+            }
+            
+            all_transactions = []
+            
+            async with aiohttp.ClientSession() as session:
+                # Get ALL transactions (not just TRADE type) to see full lifecycle
+                endpoint = f"/history/transactions?from={from_str}&to={to_str}"
+                async with session.get(base_url + endpoint, headers=headers) as response:
+                    if response.status == 200:
+                        data = await response.json()
+                        all_transactions = data.get('transactions', [])
+                        logger.info(f"Fetched {len(all_transactions)} total transactions")
+                        
+                        # Log transaction types found
+                        transaction_types = set(t.get('transactionType', 'UNKNOWN') for t in all_transactions)
+                        logger.info(f"Transaction types found: {transaction_types}")
+                        
+                # Also try to get activity history for more details
+                activity_endpoint = f"/history/activity?fr={from_str}&to={to_str}&detailed=true"
                 try:
-                    activity = await self._run_sync(self.client.account_activity_history)
-                    if activity and 'activities' in activity:
-                        # Normalize activity entries with trade-like fields
-                        for a in activity.get('activities', []):
-                            if a.get('type') in ('TRADE', 'POSITION'):
-                                transactions.append({
-                                    'dateUTC': a.get('dateUTC') or a.get('date') or '',
-                                    'epic': a.get('epic') or a.get('instrument', {}).get('epic'),
-                                    'instrumentName': a.get('instrumentName') or a.get('instrument', {}).get('name'),
-                                    'direction': a.get('direction'),
-                                    'size': a.get('size') or a.get('dealSize'),
-                                    'openLevel': a.get('openLevel') or a.get('level'),
-                                    'closeLevel': a.get('closeLevel'),
-                                    'profit': a.get('profitAndLoss') or a.get('profit') or a.get('pnl'),
-                                    'dealId': a.get('dealId') or a.get('reference')
-                                })
-                except Exception:
-                    pass
-
-            # Filter for TRADE type transactions only
-            trades = [t for t in transactions if t.get('type') == 'TRADE' or 'openLevel' in t or 'closeLevel' in t]
-
-            # Sort by date (newest first)
-            trades.sort(key=lambda x: x.get('dateUTC', ''), reverse=True)
-
-            # Filter by date if needed
-            if days and days > 0:
-                from datetime import datetime, timedelta
-                cutoff = datetime.utcnow() - timedelta(days=days)
-                cutoff_str = cutoff.isoformat()
-                trades = [t for t in trades if t.get('dateUTC', '') >= cutoff_str]
-
-            logger.info(f"Fetched {len(trades)} historical trades")
-            if trades:
-                logger.info(f"Trade history fields: {list(trades[0].keys())}")
-                sample = str(trades[0])[:500]
-                logger.info(f"First trade sample: {sample}")
-
-            return trades
+                    async with session.get(base_url + activity_endpoint, headers=headers) as response:
+                        if response.status == 200:
+                            data = await response.json()
+                            activities = data.get('activities', [])
+                            logger.info(f"Fetched {len(activities)} activities")
+                        else:
+                            logger.warning(f"Activity endpoint returned {response.status}")
+                            activities = []
+                except:
+                    activities = []
+                    
+            # Process transactions to build complete trade history
+            trades = []
+            trade_map = {}  # Map dealId to trade info
+            
+            # First pass - identify all trades
+            for trans in all_transactions:
+                if trans.get('transactionType') == 'TRADE':
+                    deal_id = trans.get('dealId')
+                    if deal_id:
+                        if deal_id not in trade_map:
+                            trade_map[deal_id] = {
+                                'dealId': deal_id,
+                                'epic': trans.get('instrumentName'),
+                                'transactions': []
+                            }
+                        trade_map[deal_id]['transactions'].append(trans)
+            
+            # Build complete trade records
+            for deal_id, trade_info in trade_map.items():
+                transactions = trade_info['transactions']
                 
+                # For closed trades, we typically only get the closing transaction
+                # We need to infer the entry details from the closing info
+                for trans in transactions:
+                    # The size in transaction is the P&L amount (negative for losses)
+                    pnl = float(trans.get('size', 0))
+                    
+                    trade = {
+                        'dealId': deal_id,
+                        'epic': trans.get('instrumentName'),
+                        'closeDate': trans.get('date'),
+                        'closeDateUtc': trans.get('dateUtc'),
+                        'pnl': pnl,  # The actual P&L
+                        'currency': trans.get('currency', 'USD'),
+                        'status': trans.get('status'),
+                        'reference': trans.get('reference'),
+                        'note': trans.get('note', ''),
+                        # Direction based on P&L sign is unreliable
+                        # We need to look this up from our records
+                        'direction': None,
+                        'size': None,
+                        'entryDate': None,
+                        'entryPrice': None,
+                        'closePrice': None,
+                        'closeReason': trans.get('note', 'Trade closed'),
+                        'strategy': None
+                    }
+                    trades.append(trade)
+                    
+            # Sort by close date (newest first)
+            trades.sort(key=lambda x: x.get('closeDateUtc', ''), reverse=True)
+            
+            # Try to enhance with data from our CSV file if it exists
+            try:
+                import csv
+                import os
+                
+                csv_path = 'trade_history.csv'
+                if os.path.exists(csv_path):
+                    csv_trades = {}
+                    with open(csv_path, 'r') as csvfile:
+                        reader = csv.DictReader(csvfile)
+                        for row in reader:
+                            deal_ref = row.get('deal_reference')
+                            if deal_ref:
+                                csv_trades[deal_ref] = row
+                    
+                    # Enhance trades with CSV data
+                    for trade in trades:
+                        deal_id = trade.get('dealId')
+                        if deal_id and deal_id in csv_trades:
+                            csv_data = csv_trades[deal_id]
+                            trade['direction'] = csv_data.get('direction', trade.get('direction'))
+                            trade['size'] = float(csv_data.get('size', 0)) if csv_data.get('size') else trade.get('size')
+                            trade['entryPrice'] = float(csv_data.get('entry_price', 0)) if csv_data.get('entry_price') else None
+                            trade['exitPrice'] = float(csv_data.get('exit_price', 0)) if csv_data.get('exit_price') else None
+                            trade['strategy'] = csv_data.get('strategy_used', '-')
+                            trade['entryDate'] = csv_data.get('timestamp')
+                    
+                    logger.info(f"Enhanced {len(csv_trades)} trades with CSV data")
+            except Exception as e:
+                logger.warning(f"Could not load trade history CSV: {e}")
+            
+            logger.info(f"Processed {len(trades)} complete trades")
+            return trades
+                        
         except Exception as e:
-            logger.error(f"Error getting trade history: {e}", exc_info=True)
+            logger.error(f"Error fetching trade history: {e}")
+            return []
+    
+    async def get_account_activity(self, from_date: str = None, to_date: str = None, deal_id: str = None, epic: str = None) -> List[Dict]:
+        """Get ALL account transactions/activities"""
+        try:
+            # Use direct HTTP request to get ALL transactions (not just trades)
+            from datetime import datetime, timedelta
+            import aiohttp
+            
+            if from_date and to_date:
+                # Use provided dates
+                from_str = from_date
+                to_str = to_date
+            else:
+                # Default to last 7 days
+                to_date = datetime.utcnow()
+                from_date = to_date - timedelta(days=7)
+                from_str = from_date.strftime('%Y-%m-%dT%H:%M:%S')
+                to_str = to_date.strftime('%Y-%m-%dT%H:%M:%S')
+            
+            # Get base URL and build endpoint
+            base_url = 'https://api-capital.backend-capital.com/api/v1'
+            # Get ALL transactions, not filtered by type
+            endpoint = f"/history/transactions?from={from_str}&to={to_str}"
+            
+            headers = {
+                'X-SECURITY-TOKEN': self.client.x_security_token,
+                'CST': self.client.cst,
+                'Content-Type': 'application/json'
+            }
+            
+            async with aiohttp.ClientSession() as session:
+                async with session.get(base_url + endpoint, headers=headers) as response:
+                    if response.status == 200:
+                        data = await response.json()
+                        transactions = data.get('transactions', [])
+                        logger.info(f"Fetched {len(transactions)} total transactions")
+                        
+                        # Log all transaction types
+                        if transactions:
+                            types = set(t.get('transactionType', 'UNKNOWN') for t in transactions)
+                            logger.info(f"Transaction types: {types}")
+                        
+                        # Sort by date (newest first)
+                        transactions.sort(key=lambda x: x.get('dateUtc', x.get('dateUTC', '')), reverse=True)
+                        
+                        # If epic filter requested, apply it
+                        if epic:
+                            transactions = [t for t in transactions if t.get('instrumentName') == epic]
+                            logger.info(f"Filtered to {len(transactions)} transactions for {epic}")
+                        
+                        return transactions
+                    else:
+                        logger.error(f"API error {response.status}: {await response.text()}")
+                        return []
+                        
+        except Exception as e:
+            logger.error(f"Error fetching account activity: {e}")
             return []
 
     # ===== Account preferences (hedging/leverage) =====

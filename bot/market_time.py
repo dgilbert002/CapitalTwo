@@ -161,6 +161,7 @@ class MarketTimeManager:
                     "next_event_time_dubai": current_session["close"].astimezone(self.uae_tz),
                     "next_event_time_local": current_session["close"].astimezone(self.local_tz) if self.local_tz else current_session["close"],
                     "time_until_seconds": max(0, time_until_close),
+                    "time_until_close": max(0, time_until_close),  # Add this for compatibility
                     "current_utc_time": now_utc,
                     "current_uae_time": now_dubai,
                     "current_local_time": now_local,
@@ -179,6 +180,7 @@ class MarketTimeManager:
                     "next_event_time_dubai": next_session["open"].astimezone(self.uae_tz),
                     "next_event_time_local": next_session["open"].astimezone(self.local_tz) if self.local_tz else next_session["open"],
                     "time_until_seconds": max(0, time_until_open),
+                    "time_until_open": max(0, time_until_open),  # Add this for compatibility
                     "current_utc_time": now_utc,
                     "current_uae_time": now_dubai,
                     "current_local_time": now_local,

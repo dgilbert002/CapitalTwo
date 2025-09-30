@@ -203,6 +203,15 @@ class TradingBot:
     async def simulate_market_close(self):
         """Simulate market close - LEGACY STYLE: Just manipulate time! Returns step results."""
         try:
+            # Check if market is actually open first
+            market_event = self.market_timer.get_next_market_event(self.market_info)
+            if not market_event or not market_event.get('is_open'):
+                logger.warning("Cannot simulate market close - market is not open")
+                return {
+                    'ok': False,
+                    'error': 'Market must be open to simulate close. Please wait for market to open.'
+                }
+            
             logger.info("="*60)
             logger.info("SIMULATION: Legacy-style time manipulation")
             logger.info("Setting market to T-35 seconds before close")
@@ -509,6 +518,8 @@ class TradingBot:
                 self.positions_closed_today = False
                 self.trade_analyzed_today = False
                 self.highest_threshold_acted = 0  # Reset trailing SL
+                if hasattr(self, '_data_prepared_today'):
+                    delattr(self, '_data_prepared_today')
                 logger.info("Market closed - flags reset for next session")
                 return
             
@@ -516,15 +527,26 @@ class TradingBot:
         if time_until_close <= 60 and time_until_close > 0:
             if int(time_until_close) % 10 == 0:  # Log every 10 seconds
                 logger.info(f"Market closing in {int(time_until_close)} seconds")
+            # Log critical moments
+            if 28 <= time_until_close <= 32:
+                logger.info(f"T-{int(time_until_close)}s: Approaching position close time (T-30s)")
+            elif 13 <= time_until_close <= 17:
+                logger.info(f"T-{int(time_until_close)}s: Approaching trade analysis time (T-15s)")
+        
+        # Prepare data at T-120s (2 minutes before close)
+        if is_open and time_until_close <= 120 and time_until_close > 115 and not hasattr(self, '_data_prepared_today'):
+            logger.info(f"T-120s: Preparing data for market close analysis (time_until_close={time_until_close:.1f}s)")
+            await self.prepare_data_before_close()
+            self._data_prepared_today = True
         
         # Close positions at T-30s
-        if time_until_close <= self.seconds_before_close_to_exit and not self.positions_closed_today:
-            logger.info(f"T-{self.seconds_before_close_to_exit}s: Closing all positions")
+        if is_open and time_until_close <= self.seconds_before_close_to_exit and not self.positions_closed_today:
+            logger.info(f"T-{self.seconds_before_close_to_exit}s: Closing all positions (market is open, time_until_close={time_until_close:.1f}s)")
             await self.close_all_positions_timer()
             self.positions_closed_today = True
         
         # Analyze and trade at T-15s (only after positions are closed)
-        if time_until_close <= self.seconds_before_close_to_trade and not self.trade_analyzed_today and self.positions_closed_today:
+        if is_open and time_until_close <= self.seconds_before_close_to_trade and not self.trade_analyzed_today and self.positions_closed_today:
             logger.info(f"T-{self.seconds_before_close_to_trade}s: Analyzing market and creating position")
             await self.analyze_and_trade_timer()
             self.trade_analyzed_today = True
@@ -609,26 +631,35 @@ class TradingBot:
             
             # Convert DB rows -> DataFrame with correct schema
             # DB returns tuples: (epic, timestamp, open, high, low, close, volume)
-            df = pd.DataFrame(
-                candles,
-                columns=['epic', 'timestamp', 'open', 'high', 'low', 'close', 'volume']
-            )
-            
-            # Drop epic column
-            df = df.drop(columns=['epic'])
-            
-            # Rename columns for Brains compatibility
-            df = df.rename(columns={
-                'open': 'openPrice',
-                'high': 'highPrice',
-                'low': 'lowPrice',
-                'close': 'closePrice',
-                'volume': 'lastTradedVolume'
-            })
-            
-            # Convert timestamp and sort
-            df['timestamp'] = pd.to_datetime(df['timestamp'])
-            df = df.sort_values('timestamp').reset_index(drop=True)
+            try:
+                df = pd.DataFrame(
+                    candles,
+                    columns=['epic', 'timestamp', 'open', 'high', 'low', 'close', 'volume']
+                )
+                
+                # Drop epic column
+                df = df.drop(columns=['epic'])
+                
+                # Rename columns for Brains compatibility
+                df = df.rename(columns={
+                    'open': 'openPrice',
+                    'high': 'highPrice',
+                    'low': 'lowPrice',
+                    'close': 'closePrice',
+                    'volume': 'lastTradedVolume'
+                })
+                
+                # Convert timestamp and sort
+                df['timestamp'] = pd.to_datetime(df['timestamp'])
+                df = df.sort_values('timestamp').reset_index(drop=True)
+            except Exception as e:
+                logger.error(f"Error creating DataFrame: {e}")
+                self.record_action({
+                    'event': 'brains_decision',
+                    'error': f'DataFrame creation failed: {e}',
+                    'epic': self.epic
+                })
+                return
             
             # Ensure we have a DataFrame, not empty
             if df.empty:
@@ -647,18 +678,37 @@ class TradingBot:
                 df,
                 datetime.now()
             )
-            # Record brains decision
-            self.record_action({
+            # Record brains decision with full details
+            brains_decision = {
                 'event': 'brains_decision',
                 'simulation_override': False,
                 'signal': ai_analysis.get('trade_signal'),
                 'confidence': ai_analysis.get('confidence'),
-                'epic': self.epic
-            })
+                'epic': self.epic,
+                'selected_strategy': ai_analysis.get('selected_strategy'),
+                'fired_signals': ai_analysis.get('fired_signals', {}),
+                'strategy_config': ai_analysis.get('strategy_config', {}),
+                'candles_analyzed': len(df),
+                'latest_candle': {
+                    'timestamp': df.iloc[-1]['timestamp'].isoformat() if hasattr(df.iloc[-1]['timestamp'], 'isoformat') else str(df.iloc[-1]['timestamp']),
+                    'close': float(df.iloc[-1]['close'])
+                },
+                'market_snapshot': {
+                    'bid': float(self.market_info.get('snapshot', {}).get('bid', 0)),
+                    'offer': float(self.market_info.get('snapshot', {}).get('offer', 0)),
+                    'spread': float(self.market_info.get('snapshot', {}).get('offer', 0)) - float(self.market_info.get('snapshot', {}).get('bid', 0))
+                }
+            }
+            
+            self.record_action(brains_decision)
+            
+            # Store decision for later matching with trade results
+            self.last_brains_decision = brains_decision
             
             logger.info(f"Brains Decision: Signal={ai_analysis['trade_signal']}, "
                        f"Confidence={ai_analysis['confidence']:.2%}, "
-                       f"Direction={ai_analysis.get('direction', 'N/A')}")
+                       f"Direction={ai_analysis.get('direction', 'N/A')}, "
+                       f"Strategy={ai_analysis.get('selected_strategy', 'N/A')}")
             
             # Check confidence threshold
             min_confidence = self.settings.getfloat('BOT_CONFIG', 'ai_confidence_threshold', 30) / 100
@@ -695,8 +745,18 @@ class TradingBot:
             instrument = self.market_info.get('instrument', {})
             instrument_category = str(instrument.get('type', 'SHARES')).upper() or 'SHARES'
 
-            # Ensure leverage is set as desired in account preferences before sizing
-            desired_leverage = int(self.settings.getfloat('BOT_CONFIG', 'leverage', 1))
+            # Get leverage from the winning strategy
+            strategy_name = ai_analysis.get('strategy_used', '')
+            strategy_leverage = ai_analysis.get('strategy_leverage', None)
+            
+            # Use strategy leverage if available, otherwise fall back to settings
+            if strategy_leverage is not None:
+                desired_leverage = int(strategy_leverage)
+                logger.info(f"Using leverage {desired_leverage} from strategy '{strategy_name}'")
+            else:
+                desired_leverage = int(self.settings.getfloat('BOT_CONFIG', 'leverage', 1))
+                logger.info(f"Using default leverage {desired_leverage} from settings")
+            
             leverage_to_use = desired_leverage
             try:
                 prefs = await self.api.get_account_preferences()
@@ -707,18 +767,70 @@ class TradingBot:
                     available = cat.get('available') or []
                     # Attempt update if different and available
                     if desired_leverage != current_leverage and (not available or desired_leverage in available):
-                        self.record_action({'event': 'leverage_update', 'phase': 'request', 'category': instrument_category, 'from': current_leverage, 'to': desired_leverage})
+                        self.record_action({
+                            'event': 'leverage_update', 
+                            'phase': 'request', 
+                            'strategy': strategy_name,
+                            'category': instrument_category, 
+                            'from': current_leverage, 
+                            'to': desired_leverage
+                        })
+                        logger.info(f"Attempting to update leverage for {instrument_category} from {current_leverage}x to {desired_leverage}x for strategy '{strategy_name}'")
+                        
                         upd = await self.api.update_account_leverage(instrument_category, desired_leverage)
                         ok = bool(upd.get('ok')) if isinstance(upd, dict) else False
+                        
                         if ok:
                             leverage_to_use = desired_leverage
-                            self.record_action({'event': 'leverage_update', 'phase': 'applied', 'category': instrument_category, 'from': current_leverage, 'to': desired_leverage})
+                            self.record_action({
+                                'event': 'leverage_update', 
+                                'phase': 'success', 
+                                'strategy': strategy_name,
+                                'category': instrument_category, 
+                                'from': current_leverage, 
+                                'to': desired_leverage,
+                                'message': f'Successfully updated leverage to {desired_leverage}x'
+                            })
+                            logger.info(f"✓ Leverage successfully updated to {desired_leverage}x")
                         else:
                             # Fall back to current if update rejected (possibly due to open positions)
                             leverage_to_use = current_leverage
-                            self.record_action({'event': 'leverage_update', 'phase': 'rejected', 'category': instrument_category, 'from': current_leverage, 'to': desired_leverage, 'reason': upd.get('error') or upd.get('errorCode') if isinstance(upd, dict) else 'unknown'})
+                            reason = upd.get('error') or upd.get('errorCode') if isinstance(upd, dict) else 'unknown'
+                            self.record_action({
+                                'event': 'leverage_update', 
+                                'phase': 'failed', 
+                                'strategy': strategy_name,
+                                'category': instrument_category, 
+                                'from': current_leverage, 
+                                'to': desired_leverage, 
+                                'reason': reason,
+                                'message': f'Failed to update leverage, using current {current_leverage}x'
+                            })
+                            logger.warning(f"✗ Failed to update leverage: {reason}. Using current leverage {current_leverage}x")
                     else:
                         leverage_to_use = current_leverage
+                        if desired_leverage == current_leverage:
+                            self.record_action({
+                                'event': 'leverage_update', 
+                                'phase': 'no_change_needed', 
+                                'strategy': strategy_name,
+                                'category': instrument_category, 
+                                'current': current_leverage,
+                                'message': f'Leverage already set to {current_leverage}x'
+                            })
+                            logger.info(f"Leverage already at desired level: {current_leverage}x")
+                        else:
+                            self.record_action({
+                                'event': 'leverage_update', 
+                                'phase': 'unavailable', 
+                                'strategy': strategy_name,
+                                'category': instrument_category, 
+                                'current': current_leverage,
+                                'desired': desired_leverage,
+                                'available': available,
+                                'message': f'Desired leverage {desired_leverage}x not available, using {current_leverage}x'
+                            })
+                            logger.warning(f"Desired leverage {desired_leverage}x not in available options {available}, using {current_leverage}x")
                 else:
                     # If preferences unavailable, still proceed with desired from settings
                     leverage_to_use = desired_leverage
@@ -750,31 +862,46 @@ class TradingBot:
             # Floor to increment
             trade_size = (trade_size // increment) * increment
             
+            # Check if we should use strategy stop loss or override
+            override_strategy_sl = self.settings.getboolean('BOT_CONFIG', 'override_strategy_sl', False)
+            strategy_sl_pct = ai_analysis.get('strategy_stop_loss', None)
+            
+            if not override_strategy_sl and strategy_sl_pct is not None:
+                # Use strategy stop loss
+                stop_loss_pct = float(strategy_sl_pct) / 100
+                logger.info(f"Using stop loss {strategy_sl_pct}% from strategy '{strategy_name}'")
+                stop_loss_source = 'strategy'
+            else:
+                # Use configured stop loss
+                stop_loss_pct = self.settings.getfloat('BOT_CONFIG', 'stop_loss_pct', 2) / 100
+                if override_strategy_sl and strategy_sl_pct is not None:
+                    logger.info(f"Overriding strategy stop loss ({strategy_sl_pct}%) with configured {stop_loss_pct*100}%")
+                else:
+                    logger.info(f"Using default stop loss {stop_loss_pct*100}% from settings")
+                stop_loss_source = 'settings'
+            
             # Calculate stop loss based on type
             stop_loss_type = self.settings.get('BOT_CONFIG', 'stop_loss_type', 'normal')
             
             if stop_loss_type == 'normal':
                 # Simple percentage stop loss
-                stop_loss_pct = self.settings.getfloat('BOT_CONFIG', 'stop_loss_pct', 2) / 100
                 stop_level = entry_price * (1 - stop_loss_pct) if direction == 'long' else entry_price * (1 + stop_loss_pct)
             elif stop_loss_type == 'trailing':
-                # Start with normal stop, will trail later
-                stop_loss_pct = self.settings.getfloat('BOT_CONFIG', 'stop_loss_pct', 2) / 100
+                # Start with normal stop (already calculated above), will trail later
                 stop_level = entry_price * (1 - stop_loss_pct) if direction == 'long' else entry_price * (1 + stop_loss_pct)
             elif stop_loss_type == 'staggered':
                 # Start with first staggered level
                 sl_use = self.settings.get('BOT_CONFIG', 'sl_use', '0,1,2,4,6,8,10').split(',')
                 
-                # Use first level or default
+                # Use first level or the calculated stop loss percentage
                 if sl_use and sl_use[0] != '0':
                     first_stop = float(sl_use[0]) / 100
                 else:
-                    first_stop = 0.02  # Default 2%
+                    first_stop = stop_loss_pct  # Use the calculated stop loss
                 
                 stop_level = entry_price * (1 - first_stop) if direction == 'long' else entry_price * (1 + first_stop)
             else:
-                # Fallback to normal
-                stop_loss_pct = self.settings.getfloat('BOT_CONFIG', 'stop_loss_pct', 2) / 100
+                # Fallback to normal (already calculated)
                 stop_level = entry_price * (1 - stop_loss_pct) if direction == 'long' else entry_price * (1 + stop_loss_pct)
             
             logger.info(f"Creating position: {direction.upper()} {trade_size} @ {entry_price}, SL: {stop_level}")
@@ -782,17 +909,23 @@ class TradingBot:
             self.record_action({
                 'event': 'create_position_calculation',
                 'simulation_override': False,
+                'strategy': strategy_name,
                 'direction': direction,
-                    'entry_price': entry_price,
+                'entry_price': entry_price,
                 'available': available,
                 'investment_pct': investment_pct,
-                    'leverage': leverage,
+                'leverage_requested': desired_leverage,
+                'leverage_used': leverage_to_use,
+                'leverage_match': desired_leverage == leverage_to_use,
                 'notional': available * investment_pct * leverage,
                 'contracts': trade_size,
                 'min_size': min_size,
                 'max_size': max_size,
                 'increment': increment,
                 'stop_level': stop_level,
+                'stop_loss_pct': stop_loss_pct * 100,
+                'stop_loss_source': stop_loss_source,
+                'stop_loss_type': stop_loss_type,
                 'epic': self.epic
             })
             
@@ -807,13 +940,42 @@ class TradingBot:
             
             if result:
                 logger.info(f"Trade executed: {result}")
-                self.record_action({
+                
+                # Record comprehensive trade details
+                deal_reference = result.get('dealReference') if isinstance(result, dict) else None
+                trade_record = {
                     'event': 'api_execution',
                     'success': True,
                     'response': result,
-                    'dealReference': result.get('dealReference') if isinstance(result, dict) else None,
-                    'epic': self.epic
-                })
+                    'dealReference': deal_reference,
+                    'epic': self.epic,
+                    'epic_name': self.market_info.get('instrument', {}).get('name', ''),
+                    'direction': direction,
+                    'size': trade_size,
+                    'entry_price': entry_price,
+                    'stop_level': stop_level,
+                    'stop_type': stop_type,
+                    'leverage': desired_leverage,
+                    'notional_value': notional_value,
+                    'margin': margin,
+                    'timestamp': datetime.now().isoformat(),
+                    'strategy_used': getattr(self, 'last_brains_decision', {}).get('selected_strategy'),
+                    'confidence': getattr(self, 'last_brains_decision', {}).get('confidence'),
+                    'fired_signals': getattr(self, 'last_brains_decision', {}).get('fired_signals', {}),
+                    'strategy_config': getattr(self, 'last_brains_decision', {}).get('strategy_config', {})
+                }
+                
+                self.record_action(trade_record)
+                
+                # Store trade info for later tracking
+                if not hasattr(self, 'active_trades'):
+                    self.active_trades = {}
+                if deal_reference:
+                    self.active_trades[deal_reference] = trade_record
+                
+                # Write to CSV trade log
+                await self.write_trade_to_csv(trade_record, 'OPEN')
+                
                 self.trade_analyzed_today = True
                 self.last_trade_date = datetime.now().date()
                 return True
@@ -853,6 +1015,10 @@ class TradingBot:
             # Get market event
             market_event = self.market_timer.get_next_market_event(self.market_info)
             
+            # Debug log market event every 10 seconds
+            if status_counter % 10 == 0:
+                logger.debug(f"Market event: {market_event}")
+            
             # Periodic status update
             status_counter += 1
             if status_counter >= 30:
@@ -872,7 +1038,18 @@ class TradingBot:
             # Execute strategy
             await self.execute_timer_based_strategy(market_event)
             
-            await asyncio.sleep(1)
+            # Track closed trades every loop
+            await self.track_closed_trades()
+            
+            # Sleep less frequently near market close for better timer accuracy
+            if market_event and market_event.get('is_open'):
+                time_until_close = market_event.get('time_until_close', float('inf'))
+                if time_until_close <= 150:  # Within 2.5 minutes of close
+                    await asyncio.sleep(0.5)  # Check every 0.5 seconds
+                else:
+                    await asyncio.sleep(1)
+            else:
+                await asyncio.sleep(1)
     
     async def update_data(self):
         """Update market data"""
@@ -1079,7 +1256,159 @@ class TradingBot:
                 'gaps': 0,
                 'coverage_pct': 0
             }
+    
+    async def prepare_data_before_close(self):
+        """Download and prepare data 120 seconds before market close"""
+        try:
+            logger.info("Pre-close data preparation: downloading fresh candles...")
+            
+            # Download latest candles
+            await self.downloader.download_and_store_candles(
+                self.epic, 
+                ResolutionType.MINUTE_5, 
+                200  # Enough for analysis but not too heavy
+            )
+            
+            # Pre-calculate indicators to warm up cache
+            candles = self.db.get_candles(self.epic, limit=200)
+            if candles and len(candles) >= 100:
+                # Convert to DataFrame for AI system
+                df = pd.DataFrame(candles, columns=['epic', 'timestamp', 'open', 'high', 'low', 'close', 'volume'])
+                df = df.drop(columns=['epic'])
+                df['timestamp'] = pd.to_datetime(df['timestamp'], utc=True)
+                df = df.sort_values('timestamp').reset_index(drop=True)
+                
+                # Pre-calculate indicators
+                df_with_indicators = self.ai_system.calculate_technical_indicators(df.copy())
+                
+                logger.info(f"Data preparation complete: {len(df)} candles ready for analysis")
+                self.record_action({
+                    'event': 'data_preparation',
+                    'candles_ready': len(df),
+                    'timestamp': datetime.now().isoformat()
+                })
+            else:
+                logger.warning("Insufficient candles for pre-close preparation")
+                
+        except Exception as e:
+            logger.error(f"Error in pre-close data preparation: {e}")
+            self.record_action({
+                'event': 'data_preparation_error',
+                'error': str(e)
+            })
 
+    async def write_trade_to_csv(self, trade_record: Dict, status: str):
+        """Write trade details to CSV file for analysis"""
+        try:
+            import csv
+            import os
+            
+            csv_path = 'trade_history.csv'
+            file_exists = os.path.exists(csv_path)
+            
+            with open(csv_path, 'a', newline='') as csvfile:
+                fieldnames = [
+                    'timestamp', 'status', 'deal_reference', 'epic', 'epic_name',
+                    'direction', 'size', 'entry_price', 'exit_price', 'stop_level',
+                    'stop_type', 'leverage', 'notional_value', 'margin',
+                    'strategy_used', 'confidence', 'win_rate', 'pnl_amount', 'pnl_percent',
+                    'exit_reason', 'fired_signals'
+                ]
+                
+                writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+                
+                if not file_exists:
+                    writer.writeheader()
+                
+                row = {
+                    'timestamp': trade_record.get('timestamp', datetime.now().isoformat()),
+                    'status': status,
+                    'deal_reference': trade_record.get('dealReference', ''),
+                    'epic': trade_record.get('epic', ''),
+                    'epic_name': trade_record.get('epic_name', ''),
+                    'direction': trade_record.get('direction', ''),
+                    'size': trade_record.get('size', ''),
+                    'entry_price': trade_record.get('entry_price', ''),
+                    'exit_price': trade_record.get('exit_price', ''),
+                    'stop_level': trade_record.get('stop_level', ''),
+                    'stop_type': trade_record.get('stop_type', ''),
+                    'leverage': trade_record.get('leverage', ''),
+                    'notional_value': trade_record.get('notional_value', ''),
+                    'margin': trade_record.get('margin', ''),
+                    'strategy_used': trade_record.get('strategy_used', ''),
+                    'confidence': trade_record.get('confidence', ''),
+                    'win_rate': trade_record.get('strategy_config', {}).get('win_rate', '') if trade_record.get('strategy_config') else '',
+                    'pnl_amount': trade_record.get('pnl_amount', ''),
+                    'pnl_percent': trade_record.get('pnl_percent', ''),
+                    'exit_reason': trade_record.get('exit_reason', ''),
+                    'fired_signals': str(trade_record.get('fired_signals', {}))
+                }
+                
+                writer.writerow(row)
+                logger.info(f"Trade logged to CSV: {status} - {trade_record.get('dealReference', 'N/A')}")
+                
+        except Exception as e:
+            logger.error(f"Error writing trade to CSV: {e}")
+    
+    async def track_closed_trades(self):
+        """Check for closed trades and update records"""
+        if not hasattr(self, 'active_trades') or not self.active_trades:
+            return
+        
+        try:
+            # Get recent account activity
+            activities = await self.api.get_account_activity(
+                deal_id=None,  # Get all recent activity
+                epic=self.epic
+            )
+            
+            for activity in activities:
+                deal_id = activity.get('dealId')
+                if deal_id in self.active_trades and activity.get('type') == 'POSITION':
+                    # Check if this is a close event
+                    if activity.get('source') in ('CLOSE_OUT', 'SL', 'TP', 'USER', 'SYSTEM'):
+                        trade_record = self.active_trades[deal_id].copy()
+                        
+                        # Update with close information
+                        trade_record['exit_price'] = activity.get('closeLevel', activity.get('level'))
+                        trade_record['exit_reason'] = activity.get('source', 'UNKNOWN')
+                        trade_record['exit_timestamp'] = activity.get('dateUTC', datetime.now().isoformat())
+                        
+                        # Calculate P&L
+                        if trade_record.get('entry_price') and trade_record.get('exit_price'):
+                            entry = float(trade_record['entry_price'])
+                            exit = float(trade_record['exit_price'])
+                            size = float(trade_record.get('size', 0))
+                            
+                            if trade_record['direction'] == 'long':
+                                pnl_amount = (exit - entry) * size
+                                pnl_percent = ((exit - entry) / entry) * 100
+                            else:
+                                pnl_amount = (entry - exit) * size
+                                pnl_percent = ((entry - exit) / entry) * 100
+                            
+                            trade_record['pnl_amount'] = round(pnl_amount, 2)
+                            trade_record['pnl_percent'] = round(pnl_percent, 2)
+                        
+                        # Write to CSV
+                        await self.write_trade_to_csv(trade_record, 'CLOSED')
+                        
+                        # Record in action log
+                        self.record_action({
+                            'event': 'trade_closed',
+                            'deal_id': deal_id,
+                            'exit_reason': trade_record['exit_reason'],
+                            'pnl_amount': trade_record.get('pnl_amount', 0),
+                            'pnl_percent': trade_record.get('pnl_percent', 0),
+                            'strategy_used': trade_record.get('strategy_used')
+                        })
+                        
+                        # Remove from active trades
+                        del self.active_trades[deal_id]
+                        
+        except Exception as e:
+            logger.error(f"Error tracking closed trades: {e}")
+    
     def stop(self):
         """Stop the trading bot"""
         self.is_running = False

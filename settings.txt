@@ -21,6 +21,7 @@ sl_thresholds = 5,10,15
 sl_adjustments = 2,5,8
 sl_when_at = 2,4,5,7,10,12,15
 sl_use = 0,1,2,4,6,8,10
+override_strategy_sl = True
 
 [ENV_ACCOUNTS]
 demo = 290950804147613982
