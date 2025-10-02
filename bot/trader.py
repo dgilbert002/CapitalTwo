@@ -533,9 +533,17 @@ class TradingBot:
             elif 13 <= time_until_close <= 17:
                 logger.info(f"T-{int(time_until_close)}s: Approaching trade analysis time (T-15s)")
         
-        # Prepare data at T-120s (2 minutes before close)
+        # Prepare data AND perform maintenance at T-120s (2 minutes before close)
         if is_open and time_until_close <= 120 and time_until_close > 115 and not hasattr(self, '_data_prepared_today'):
-            logger.info(f"T-120s: Preparing data for market close analysis (time_until_close={time_until_close:.1f}s)")
+            logger.info(f"T-120s: Preparing data and performing maintenance for market close (time_until_close={time_until_close:.1f}s)")
+            
+            # First, perform data maintenance (download 1000 candles for quality check)
+            try:
+                await self.maintain_data_at_market_close()
+            except Exception as e:
+                logger.error(f"Error during data maintenance at T-120s: {e}")
+            
+            # Then prepare data for analysis
             await self.prepare_data_before_close()
             self._data_prepared_today = True
         
@@ -595,17 +603,6 @@ class TradingBot:
             
         except Exception as e:
             logger.error(f"Error closing positions: {e}")
-        
-        # Perform data maintenance after closing positions
-        try:
-            await self.maintain_data_at_market_close()
-        except Exception as e:
-            logger.error(f"Error during data maintenance: {e}")
-            self.record_action({
-                'event': 'data_maintenance_error',
-                'error': f'Data maintenance failed: {e}',
-                'epic': self.epic
-            })
     
     async def analyze_and_trade_timer(self) -> None:
         """Analyze market and create position using GOSPEL Brains"""
@@ -705,10 +702,24 @@ class TradingBot:
             # Store decision for later matching with trade results
             self.last_brains_decision = brains_decision
             
-            logger.info(f"Brains Decision: Signal={ai_analysis['trade_signal']}, "
-                       f"Confidence={ai_analysis['confidence']:.2%}, "
-                       f"Direction={ai_analysis.get('direction', 'N/A')}, "
-                       f"Strategy={ai_analysis.get('selected_strategy', 'N/A')}")
+            # Log comprehensive decision details
+            strategy_name = ai_analysis.get('selected_strategy', 'N/A')
+            strategy_config = ai_analysis.get('strategy_config', {})
+            fired_signals = ai_analysis.get('fired_signals', {})
+            
+            logger.info("="*60)
+            logger.info("BRAINS ANALYSIS COMPLETE")
+            logger.info(f"Strategy Used: {strategy_name}")
+            logger.info(f"Signal: {ai_analysis['trade_signal']}")
+            logger.info(f"Confidence: {ai_analysis['confidence']:.2%}")
+            logger.info(f"Direction: {ai_analysis.get('direction', 'N/A')}")
+            if strategy_config:
+                logger.info(f"Strategy Config: Win Rate={strategy_config.get('win_rate', 'N/A')}%, "
+                           f"Leverage={strategy_config.get('leverage', 'N/A')}x, "
+                           f"Stop Loss={strategy_config.get('stop_loss_pct', 'N/A')}%")
+            if fired_signals:
+                logger.info(f"Indicators Fired: {', '.join([f'{k}={v}' for k, v in fired_signals.items()])}")
+            logger.info("="*60)
             
             # Check confidence threshold
             min_confidence = self.settings.getfloat('BOT_CONFIG', 'ai_confidence_threshold', 30) / 100
@@ -943,6 +954,20 @@ class TradingBot:
                 
                 # Record comprehensive trade details
                 deal_reference = result.get('dealReference') if isinstance(result, dict) else None
+                
+                # Log trade execution summary with strategy details
+                logger.info("="*60)
+                logger.info("TRADE EXECUTED SUCCESSFULLY")
+                logger.info(f"Deal ID: {deal_reference}")
+                logger.info(f"Strategy: {strategy_name}")
+                logger.info(f"Direction: {direction.upper()}")
+                logger.info(f"Entry Price: ${entry_price:.2f}")
+                logger.info(f"Size: {trade_size} contracts")
+                logger.info(f"Stop Loss: ${stop_level:.2f} ({stop_loss_pct*100:.1f}% - {stop_loss_source})")
+                logger.info(f"Leverage: {leverage_to_use}x")
+                logger.info(f"Notional Value: ${notional_value:.2f}")
+                logger.info(f"Margin Required: ${margin:.2f}")
+                logger.info("="*60)
                 trade_record = {
                     'event': 'api_execution',
                     'success': True,
@@ -1081,12 +1106,13 @@ class TradingBot:
             await asyncio.sleep(30)
     
     async def maintain_data_at_market_close(self):
-        """Download latest 1000 candles and perform quality checks at market close"""
+        """Download latest 1000 candles and perform quality checks (called at T-120s)"""
         try:
             self.record_action({
                 'event': 'data_maintenance_start',
                 'epic': self.epic,
-                'timestamp': datetime.now().isoformat()
+                'timestamp': datetime.now().isoformat(),
+                'timing': 'T-120s before close'
             })
             
             logger.info("Starting market close data maintenance...")
