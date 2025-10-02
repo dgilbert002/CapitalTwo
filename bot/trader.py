@@ -120,7 +120,7 @@ class TradingBot:
         except Exception as e:
             logger.error(f"Failed to initialize: {e}")
             return False
-    
+
     async def create_position_with_retry(self, epic: str, direction: str, size: float, stop_level: float, max_attempts: int = 3) -> Optional[Dict]:
         """Create position with retry logic - validates API response"""
         for attempt in range(1, max_attempts + 1):
@@ -628,9 +628,10 @@ class TradingBot:
             
             # Convert DB rows -> DataFrame with correct schema
             # DB returns tuples: (epic, timestamp, open, high, low, close, volume)
+            df = None  # Initialize df to None
             try:
                 df = pd.DataFrame(
-                    candles,
+                    candles, 
                     columns=['epic', 'timestamp', 'open', 'high', 'low', 'close', 'volume']
                 )
                 
@@ -651,6 +652,9 @@ class TradingBot:
                 df = df.sort_values('timestamp').reset_index(drop=True)
             except Exception as e:
                 logger.error(f"Error creating DataFrame: {e}")
+                logger.error(f"Candles type: {type(candles)}, length: {len(candles) if candles else 0}")
+                if candles and len(candles) > 0:
+                    logger.error(f"First candle: {candles[0]}")
                 self.record_action({
                     'event': 'brains_decision',
                     'error': f'DataFrame creation failed: {e}',
@@ -658,8 +662,8 @@ class TradingBot:
                 })
                 return
             
-            # Ensure we have a DataFrame, not empty
-            if df.empty:
+            # Ensure we have a valid DataFrame, not None or empty
+            if df is None or df.empty:
                 logger.error("DataFrame is empty after conversion")
                 self.record_action({
                     'event': 'brains_decision',
@@ -670,8 +674,10 @@ class TradingBot:
             
             # GOSPEL Brains analysis
             df = self.ai_system.calculate_technical_indicators(df)
+            # Pass the last row as a single-row DataFrame, not a dict
+            day_data = df.iloc[[-1]].copy()  # Use [[-1]] to get a DataFrame with one row
             ai_analysis = self.ai_system.analyze_market_conditions(
-                df.iloc[-1].to_dict(),
+                day_data,
                 df,
                 datetime.now()
             )
@@ -743,7 +749,7 @@ class TradingBot:
             signal = ai_analysis.get('trade_signal', 'hold')
             if signal == 'hold':
                 return False
-            
+    
             direction = 'long' if signal == 'buy' else 'short'
             entry_price = offer if direction == 'long' else bid
             
@@ -851,7 +857,7 @@ class TradingBot:
                 self.record_action({'event': 'leverage_update', 'phase': 'error', 'category': instrument_category, 'error': str(e)})
 
             # Get account balance
-            accounts = await self.api.get_accounts()
+                accounts = await self.api.get_accounts()
             available = 0
             for acc in accounts:
                 if acc['accountId'] == self.current_account['accountId']:
@@ -873,6 +879,10 @@ class TradingBot:
             # Floor to increment
             trade_size = (trade_size // increment) * increment
             
+            # Calculate notional value and margin
+            notional_value = trade_size * entry_price
+            margin = notional_value / leverage
+            
             # Check if we should use strategy stop loss or override
             override_strategy_sl = self.settings.getboolean('BOT_CONFIG', 'override_strategy_sl', False)
             strategy_sl_pct = ai_analysis.get('strategy_stop_loss', None)
@@ -893,6 +903,7 @@ class TradingBot:
             
             # Calculate stop loss based on type
             stop_loss_type = self.settings.get('BOT_CONFIG', 'stop_loss_type', 'normal')
+            stop_type = stop_loss_type  # For consistency in trade record
             
             if stop_loss_type == 'normal':
                 # Simple percentage stop loss
@@ -1018,7 +1029,7 @@ class TradingBot:
             logger.error(f"Error creating position: {e}")
             self.record_action({'event': 'api_execution', 'success': False, 'error': str(e), 'epic': self.epic})
             return False
-    
+
     async def run(self):
         """Main trading loop"""
         self.is_running = True
@@ -1036,7 +1047,7 @@ class TradingBot:
         
         while self.is_running:
             await self.update_data()
-            
+
             # Get market event
             market_event = self.market_timer.get_next_market_event(self.market_info)
             
@@ -1108,6 +1119,11 @@ class TradingBot:
     async def maintain_data_at_market_close(self):
         """Download latest 1000 candles and perform quality checks (called at T-120s)"""
         try:
+            # Check if API is ready
+            if not self.api_connected or not hasattr(self.api, 'client') or not self.api.client:
+                logger.warning("API not ready for data maintenance, skipping")
+                return
+            
             self.record_action({
                 'event': 'data_maintenance_start',
                 'epic': self.epic,
@@ -1288,12 +1304,17 @@ class TradingBot:
         try:
             logger.info("Pre-close data preparation: downloading fresh candles...")
             
-            # Download latest candles
-            await self.downloader.download_and_store_candles(
-                self.epic, 
-                ResolutionType.MINUTE_5, 
-                200  # Enough for analysis but not too heavy
-            )
+            # Ensure API is ready before downloading
+            if not self.api_connected or not hasattr(self.api, 'client') or not self.api.client:
+                logger.warning("API not ready for data preparation, skipping download")
+                # Fall back to using existing database data
+            else:
+                # Download latest candles
+                await self.downloader.download_and_store_candles(
+                    self.epic, 
+                    ResolutionType.MINUTE_5, 
+                    200  # Enough for analysis but not too heavy
+                )
             
             # Pre-calculate indicators to warm up cache
             candles = self.db.get_candles(self.epic, limit=200)
@@ -1315,7 +1336,7 @@ class TradingBot:
                 })
             else:
                 logger.warning("Insufficient candles for pre-close preparation")
-                
+            
         except Exception as e:
             logger.error(f"Error in pre-close data preparation: {e}")
             self.record_action({
@@ -1431,10 +1452,10 @@ class TradingBot:
                         
                         # Remove from active trades
                         del self.active_trades[deal_id]
-                        
+                
         except Exception as e:
             logger.error(f"Error tracking closed trades: {e}")
-    
+
     def stop(self):
         """Stop the trading bot"""
         self.is_running = False

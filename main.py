@@ -23,6 +23,36 @@ def configure_logging():
     
     formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 
+    class ConsoleActionFilter(logging.Filter):
+        """Only allow actionable messages to the console.
+
+        Rules:
+        - Always allow WARNING and above (failures, exceptions, disconnections)
+        - Additionally allow INFO messages that match important trading milestones
+          like market open/close, timer triggers, brains analysis, trade exec/close,
+          and key P&L summaries.
+        """
+        KEYWORDS = (
+            'MARKET OPEN', 'MARKET CLOSED', 'Market opening', 'Market closing',
+            'T-30s', 'T-15s', 'Closing all positions',
+            'BRAINS ANALYSIS COMPLETE', 'TRADE EXECUTED SUCCESSFULLY',
+            'Trade logged to CSV', 'trade_closed', 'P&L', 'profit', 'loss'
+        )
+
+        def filter(self, record: logging.LogRecord) -> bool:  # type: ignore[override]
+            try:
+                if record.levelno >= logging.WARNING:
+                    return True
+                msg = record.getMessage()
+                # Whitelist specific actionable INFO lines
+                for kw in self.KEYWORDS:
+                    if kw in msg:
+                        return True
+                return False
+            except Exception:
+                # Fail-open for safety on console
+                return True
+
     root = logging.getLogger()
     root.setLevel(logging.INFO)
 
@@ -34,17 +64,21 @@ def configure_logging():
     file_handler.setLevel(logging.INFO)
     file_handler.setFormatter(formatter)
 
+    # Console: only actionable logs via filter, suppress general INFO noise
     stream_handler = logging.StreamHandler()
     stream_handler.setLevel(logging.INFO)
     stream_handler.setFormatter(formatter)
+    stream_handler.addFilter(ConsoleActionFilter())
 
     root.addHandler(file_handler)
     root.addHandler(stream_handler)
 
-    # Also attach to uvicorn loggers so access/error go to the same file
+    # Apply sane defaults to framework loggers:
+    # - File: keep at INFO via root handler above
+    # - Console: reduce access/info noise by raising level to WARNING
     for name in ("uvicorn", "uvicorn.error", "uvicorn.access", "fastapi"):
         lg = logging.getLogger(name)
-        lg.setLevel(logging.INFO)
+        lg.setLevel(logging.WARNING)
         lg.propagate = True
 
 configure_logging()
