@@ -173,7 +173,10 @@ async def websocket_endpoint(websocket: WebSocket):
                 "stop_loss_type": app_state.settings.get("BOT_CONFIG", "stop_loss_type", "normal"),
                 "override_strategy_sl": app_state.settings.getboolean("BOT_CONFIG", "override_strategy_sl", False),
                 "environment": app_state.api.environment if app_state.api else "demo",
-                "is_connected": app_state.is_connected
+                "is_connected": app_state.is_connected,
+                # Add strategy settings for UI to load on page refresh
+                "strategy_mode": app_state.settings.get("STRATEGY", "strategy_mode", "enhanced") if app_state.settings.has_section("STRATEGY") else "enhanced",
+                "enable_crash_protection": app_state.settings.getboolean("STRATEGY", "enable_crash_protection", True) if app_state.settings.has_section("STRATEGY") else True
             }
             
             # Log what we're sending (first time only for debugging)
@@ -417,6 +420,13 @@ async def bot_simulate():
             temp_bot.api_connected = True
             temp_bot.current_account = app_state.current_account
             
+            # Fetch market info for the bot
+            try:
+                temp_bot.market_info = await temp_bot.api.get_market_info(temp_bot.epic)
+            except Exception as e:
+                logger.error(f"Failed to get market info for simulation: {e}")
+                temp_bot.market_info = None
+            
             # Run simulation
             result = await temp_bot.simulate_market_close()
             if isinstance(result, dict):
@@ -428,6 +438,14 @@ async def bot_simulate():
     # Use existing bot
     if not app_state.bot.is_running:
         logger.info("Bot exists but not running - starting temporarily for simulation")
+        
+        # Ensure market info is fetched
+        if not app_state.bot.market_info and app_state.bot.api:
+            try:
+                app_state.bot.market_info = await app_state.bot.api.get_market_info(app_state.bot.epic)
+            except Exception as e:
+                logger.error(f"Failed to get market info for simulation: {e}")
+        
         # Temporarily mark as running for simulation
         app_state.bot.is_running = True
         result = await app_state.bot.simulate_market_close()
@@ -518,9 +536,30 @@ async def brains_preview():
         df = df.sort_values('timestamp').reset_index(drop=True)
 
         ai = HybridIntelligentSystem()
+        
+        # Load current strategy settings
+        if app_state.settings.has_section('STRATEGY'):
+            strategy_mode = app_state.settings.get('STRATEGY', 'strategy_mode', 'enhanced')
+            
+            # Handle Test6 modes
+            if strategy_mode == 'test6_no_protection':
+                ai.strategy_mode = 'test6'
+                ai.enable_crash_protection = False
+            elif strategy_mode == 'test6_with_protection':
+                ai.strategy_mode = 'test6'
+                ai.enable_crash_protection = True
+            else:
+                ai.strategy_mode = strategy_mode
+                ai.enable_crash_protection = app_state.settings.getboolean('STRATEGY', 'enable_crash_protection', True)
+            
+            logger.info(f"Brain Preview using strategy: {strategy_mode}, Crash protection: {ai.enable_crash_protection}")
+        
         df_for_ai = ai.calculate_technical_indicators(df.copy())
         latest_row = df_for_ai.iloc[-1]
         decision = ai.analyze_market_conditions(latest_row, df_for_ai, __import__('datetime').datetime.now())
+        
+        # Log the decision details
+        logger.info(f"Brain Preview Result - Signal: {decision.get('signal', 'None')}, Confidence: {decision.get('confidence', 0):.1f}%, Trade: {decision.get('trade_signal', 'hold')}")
 
         # Prepare last candle (5m) summary
         # Display time in local timezone for UI consistency
@@ -602,14 +641,39 @@ async def brains_preview():
                 'sl_type': sl_type
             }
 
+        # Convert numpy values to regular Python types
+        import numpy as np
+        
+        def convert_numpy(obj):
+            """Convert numpy types to Python native types"""
+            if isinstance(obj, np.bool_):
+                return bool(obj)
+            elif isinstance(obj, np.integer):
+                return int(obj)
+            elif isinstance(obj, np.floating):
+                return float(obj)
+            elif isinstance(obj, np.ndarray):
+                return obj.tolist()
+            elif isinstance(obj, dict):
+                return {k: convert_numpy(v) for k, v in obj.items()}
+            elif isinstance(obj, list):
+                return [convert_numpy(item) for item in obj]
+            return obj
+        
+        # Clean up the decision dictionary
+        decision = convert_numpy(decision)
+        fired_signals = decision.get('fired_signals', {})
+        
         return {
             "ok": True, 
+            "strategy_mode": strategy_mode if 'strategy_mode' in locals() else "enhanced",
+            "crash_protection": bool(ai.enable_crash_protection),
             "decision": decision, 
             "sizing": sizing, 
             "market_info": market_info, 
             "last_candle": last_candle,
             "selected_strategy": decision.get('selected_strategy', 'N/A'),
-            "fired_signals": decision.get('fired_signals', {}),
+            "fired_signals": fired_signals,
             "strategy_config": decision.get('strategy_config', None)
         }
     except Exception as e:
@@ -652,6 +716,39 @@ async def get_config():
         "selected_account_id": selected,
         "is_connected": app_state.is_connected
     }
+
+@app.post("/api/strategy/settings")
+async def save_strategy_settings(payload: dict = Body(...)):
+    """Save strategy mode settings - PROVEN $699K SYSTEM"""
+    try:
+        strategy_mode = payload.get('strategy_mode', 'enhanced')
+        enable_crash_protection = payload.get('enable_crash_protection', True)
+        
+        # Update settings file
+        app_state.settings.set_value('STRATEGY', 'strategy_mode', strategy_mode)
+        app_state.settings.set_value('STRATEGY', 'enable_crash_protection', str(enable_crash_protection))
+        app_state.settings.save()
+        
+        # Update bot's AI system
+        if app_state.bot and app_state.bot.ai_system:
+            app_state.bot.ai_system.strategy_mode = strategy_mode
+            app_state.bot.ai_system.enable_crash_protection = enable_crash_protection
+            logger.info(f"Strategy updated: {strategy_mode}, Crash protection: {enable_crash_protection}")
+            
+            # Log expected performance based on ACTUAL tested results
+            if strategy_mode == 'all_signals' and enable_crash_protection:
+                logger.info("✅ Expected: $699,074 (57.2% WR, -96.9% DD) - PROVEN RESULT")
+            elif strategy_mode == 'all_signals' and not enable_crash_protection:
+                logger.info("⚠️ Expected: $376,004 (56.1% WR, -98.7% DD) - NO PROTECTION")
+            elif strategy_mode == 'two_rsi_only' and enable_crash_protection:
+                logger.info("🛡️ Expected: $485,948 (59.6% WR, -33.9% DD) - LOWEST RISK")
+            elif strategy_mode == 'two_rsi_only' and not enable_crash_protection:
+                logger.info("⚠️ Expected: $348,803 (58.1% WR, -68.5% DD) - NO PROTECTION")
+        
+        return {"success": True, "message": "Strategy settings saved"}
+    except Exception as e:
+        logger.error(f"Error saving strategy settings: {e}")
+        return {"success": False, "error": str(e)}
 
 @app.post("/config/stoploss")
 async def save_stoploss_settings(payload: dict = Body(...)):

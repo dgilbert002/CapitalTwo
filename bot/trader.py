@@ -30,6 +30,23 @@ class TradingBot:
         self.market_timer = MarketTimeManager(settings)
         self.ai_system = HybridIntelligentSystem()
         
+        # Load strategy configuration
+        if settings.has_section('STRATEGY'):
+            strategy_mode = settings.get('STRATEGY', 'strategy_mode', 'enhanced')
+            
+            # Handle Test6 modes specially
+            if strategy_mode == 'test6_no_protection':
+                self.ai_system.strategy_mode = 'test6'
+                self.ai_system.enable_crash_protection = False
+            elif strategy_mode == 'test6_with_protection':
+                self.ai_system.strategy_mode = 'test6'
+                self.ai_system.enable_crash_protection = True
+            else:
+                self.ai_system.strategy_mode = strategy_mode
+                self.ai_system.enable_crash_protection = settings.getboolean('STRATEGY', 'enable_crash_protection', True)
+            
+            logger.info(f"Strategy mode: {self.ai_system.strategy_mode}, Crash protection: {self.ai_system.enable_crash_protection}")
+        
         # Get timer settings
         self.use_timer_based_trading = True
         self.seconds_before_close_to_exit = int(settings.get('BOT_CONFIG', 'seconds_before_close_to_exit', 30))
@@ -56,6 +73,9 @@ class TradingBot:
         # Trading data
         self.trade_history = []
         self.action_log = []
+        
+        # Store T-120s analysis result for T-15s use
+        self.pending_trade_analysis = None
         
         # Tasks
         self.keepalive_task = None
@@ -214,6 +234,7 @@ class TradingBot:
             
             logger.info("="*60)
             logger.info("SIMULATION: Legacy-style time manipulation")
+            logger.info(f"Strategy: {self.ai_system.strategy_mode}, Crash Protection: {self.ai_system.enable_crash_protection}")
             logger.info("Setting market to T-35 seconds before close")
             logger.info("="*60)
             
@@ -239,7 +260,13 @@ class TradingBot:
                 }
                 
                 # Log key moments
-                if seconds == 30:
+                if seconds == 120:
+                    logger.info("="*40)
+                    logger.info("SIMULATION: T-120s - DATA & BRAINS ANALYSIS")
+                    logger.info("="*40)
+                    # Trigger data download and analysis
+                    await self.prepare_data_before_close()
+                elif seconds == 30:
                     logger.info("="*40)
                     logger.info("SIMULATION: T-30s - CLOSING POSITIONS")
                     logger.info("="*40)
@@ -259,13 +286,16 @@ class TradingBot:
                     self.record_action({'event': 'close_positions_summary', 'success': bool(closed_positions_success), 'before': before_count, 'after': after_count})
                 elif seconds == 15:
                     logger.info("="*40)
-                    logger.info("SIMULATION: T-15s - ANALYZING & TRADING")
+                    logger.info("SIMULATION: T-15s - EXECUTING TRADE (FROM T-120s ANALYSIS)")
                     logger.info("="*40)
                 elif seconds <= 5 and seconds > 0:
                     logger.info(f"SIMULATION: T-{seconds}s - Final countdown")
                 elif seconds == 0:
                     logger.info("="*40)
                     logger.info("SIMULATION: MARKET CLOSED")
+                    logger.info("  - Downloaded data & analyzed at T-120s")
+                    logger.info("  - Closed positions at T-30s")
+                    logger.info("  - Executed trade at T-15s")
                     logger.info("="*40)
                 
                 # At T-15s, proactively trigger trade analysis/creation to mirror legacy sim
@@ -605,82 +635,35 @@ class TradingBot:
             logger.error(f"Error closing positions: {e}")
     
     async def analyze_and_trade_timer(self) -> None:
-        """Analyze market and create position using GOSPEL Brains"""
+        """Use T-120s analysis to create position at T-15s"""
         try:
-            # Get market info
+            # Check if we have a pending analysis from T-120s
+            if not self.pending_trade_analysis:
+                logger.warning("No pending trade analysis from T-120s")
+                self.record_action({
+                    'event': 'brains_decision',
+                    'error': 'No analysis available from T-120s',
+                    'epic': self.epic
+                })
+                return
+            
+            # Use the stored analysis
+            ai_analysis = self.pending_trade_analysis
+            
+            logger.info("="*60)
+            logger.info("T-15s: USING T-120s ANALYSIS")
+            logger.info(f"Signal: {ai_analysis.get('trade_signal', 'N/A')}")
+            logger.info(f"Confidence: {ai_analysis.get('confidence', 0):.1%}")
+            logger.info(f"Strategy: {ai_analysis.get('selected_strategy', 'N/A')}")
+            logger.info("="*60)
+            
+            # Get market info for dealing rules
             self.market_info = await self.api.get_market_info(self.epic)
             if not self.market_info:
                 logger.error("Failed to get market info")
                 return
             
             dealing_rules = self.market_info.get('dealingRules', {})
-            
-            # Get historical data
-            candles = self.db.get_latest_candles(self.epic, 200)
-            if not candles or len(candles) < 100:
-                logger.warning(f"Insufficient historical data: {len(candles) if candles else 0} candles")
-                self.record_action({
-                    'event': 'brains_decision',
-                    'error': f'Insufficient data: {len(candles) if candles else 0} candles',
-                    'epic': self.epic
-                })
-                return
-            
-            # Convert DB rows -> DataFrame with correct schema
-            # DB returns tuples: (epic, timestamp, open, high, low, close, volume)
-            df = None  # Initialize df to None
-            try:
-                df = pd.DataFrame(
-                    candles, 
-                    columns=['epic', 'timestamp', 'open', 'high', 'low', 'close', 'volume']
-                )
-                
-                # Drop epic column
-                df = df.drop(columns=['epic'])
-                
-                # Rename columns for Brains compatibility
-                df = df.rename(columns={
-                    'open': 'openPrice',
-                    'high': 'highPrice',
-                    'low': 'lowPrice',
-                    'close': 'closePrice',
-                    'volume': 'lastTradedVolume'
-                })
-                
-                # Convert timestamp and sort
-                df['timestamp'] = pd.to_datetime(df['timestamp'])
-                df = df.sort_values('timestamp').reset_index(drop=True)
-            except Exception as e:
-                logger.error(f"Error creating DataFrame: {e}")
-                logger.error(f"Candles type: {type(candles)}, length: {len(candles) if candles else 0}")
-                if candles and len(candles) > 0:
-                    logger.error(f"First candle: {candles[0]}")
-                self.record_action({
-                    'event': 'brains_decision',
-                    'error': f'DataFrame creation failed: {e}',
-                    'epic': self.epic
-                })
-                return
-            
-            # Ensure we have a valid DataFrame, not None or empty
-            if df is None or df.empty:
-                logger.error("DataFrame is empty after conversion")
-                self.record_action({
-                    'event': 'brains_decision',
-                    'error': 'Empty DataFrame after conversion',
-                    'epic': self.epic
-                })
-                return
-            
-            # GOSPEL Brains analysis
-            df = self.ai_system.calculate_technical_indicators(df)
-            # Pass the last row as a single-row DataFrame, not a dict
-            day_data = df.iloc[[-1]].copy()  # Use [[-1]] to get a DataFrame with one row
-            ai_analysis = self.ai_system.analyze_market_conditions(
-                day_data,
-                df,
-                datetime.now()
-            )
             # Record brains decision with full details
             brains_decision = {
                 'event': 'brains_decision',
@@ -691,11 +674,7 @@ class TradingBot:
                 'selected_strategy': ai_analysis.get('selected_strategy'),
                 'fired_signals': ai_analysis.get('fired_signals', {}),
                 'strategy_config': ai_analysis.get('strategy_config', {}),
-                'candles_analyzed': len(df),
-                'latest_candle': {
-                    'timestamp': df.iloc[-1]['timestamp'].isoformat() if hasattr(df.iloc[-1]['timestamp'], 'isoformat') else str(df.iloc[-1]['timestamp']),
-                    'close': float(df.iloc[-1]['close'])
-                },
+                'analysis_from': 'T-120s',
                 'market_snapshot': {
                     'bid': float(self.market_info.get('snapshot', {}).get('bid', 0)),
                     'offer': float(self.market_info.get('snapshot', {}).get('offer', 0)),
@@ -857,7 +836,7 @@ class TradingBot:
                 self.record_action({'event': 'leverage_update', 'phase': 'error', 'category': instrument_category, 'error': str(e)})
 
             # Get account balance
-                accounts = await self.api.get_accounts()
+            accounts = await self.api.get_accounts()
             available = 0
             for acc in accounts:
                 if acc['accountId'] == self.current_account['accountId']:
@@ -1299,46 +1278,192 @@ class TradingBot:
                 'coverage_pct': 0
             }
     
-    async def prepare_data_before_close(self):
-        """Download and prepare data 120 seconds before market close"""
+    async def refresh_alpha_vantage_data(self):
+        """Refresh latest data from Alpha Vantage API at T-120s"""
         try:
-            logger.info("Pre-close data preparation: downloading fresh candles...")
+            import requests
+            import pandas as pd
+            import sqlite3
+            from datetime import datetime
             
-            # Ensure API is ready before downloading
-            if not self.api_connected or not hasattr(self.api, 'client') or not self.api.client:
-                logger.warning("API not ready for data preparation, skipping download")
-                # Fall back to using existing database data
+            # Get Alpha Vantage settings
+            api_key = self.settings.get('ALPHA_VANTAGE', 'api_key')
+            symbol = self.settings.get('ALPHA_VANTAGE', 'symbol', 'TECL')
+            interval = self.settings.get('ALPHA_VANTAGE', 'interval', '5min')
+            db_path = self.settings.get('ALPHA_VANTAGE', 'database', 'database_av.db')
+            table_name = self.settings.get('ALPHA_VANTAGE', 'table_name', 'TECL_av_5min')
+            
+            if not api_key:
+                logger.error("Alpha Vantage API key not configured")
+                return False
+            
+            logger.info(f"Fetching latest {symbol} data from Alpha Vantage...")
+            
+            # Make API request
+            url = 'https://www.alphavantage.co/query'
+            params = {
+                'function': 'TIME_SERIES_INTRADAY',
+                'symbol': symbol,
+                'interval': interval,
+                'apikey': api_key,
+                'extended_hours': 'true',
+                'outputsize': 'compact'  # Last 100 data points
+            }
+            
+            response = requests.get(url, params=params)
+            
+            if response.status_code == 200:
+                data = response.json()
+                
+                # Check for errors
+                if 'Error Message' in data:
+                    logger.error(f"Alpha Vantage API Error: {data['Error Message']}")
+                    return False
+                
+                # Extract time series data
+                time_series_key = f'Time Series ({interval})'
+                if time_series_key not in data:
+                    logger.error("No time series data in Alpha Vantage response")
+                    return False
+                
+                # Convert to DataFrame
+                time_series = data[time_series_key]
+                df = pd.DataFrame.from_dict(time_series, orient='index')
+                df.index = pd.to_datetime(df.index)
+                df = df.reset_index()
+                df.columns = ['timestamp', 'open', 'high', 'low', 'close', 'volume']
+                
+                # Convert values to float
+                for col in ['open', 'high', 'low', 'close', 'volume']:
+                    df[col] = pd.to_numeric(df[col])
+                
+                # Store in database
+                conn = sqlite3.connect(db_path)
+                df['timestamp'] = df['timestamp'].astype(str)
+                
+                inserted = 0
+                for _, row in df.iterrows():
+                    try:
+                        insert_query = f"""
+                        INSERT OR REPLACE INTO {table_name} 
+                        (timestamp, open, high, low, close, volume)
+                        VALUES (?, ?, ?, ?, ?, ?)
+                        """
+                        conn.execute(insert_query, tuple(row))
+                        inserted += 1
+                    except Exception as e:
+                        pass  # Skip duplicates
+                
+                conn.commit()
+                conn.close()
+                
+                logger.info(f"✅ Alpha Vantage refresh complete: {inserted} new/updated candles")
+                return True
             else:
-                # Download latest candles
-                await self.downloader.download_and_store_candles(
-                    self.epic, 
-                    ResolutionType.MINUTE_5, 
-                    200  # Enough for analysis but not too heavy
-                )
+                logger.error(f"Alpha Vantage API request failed: {response.status_code}")
+                return False
+                
+        except Exception as e:
+            logger.error(f"Error refreshing Alpha Vantage data: {e}")
+            return False
+    
+    async def prepare_data_before_close(self):
+        """Download data and run Brains analysis 120 seconds before market close"""
+        try:
+            logger.info("T-120s: Refreshing Alpha Vantage data and running Brains analysis...")
             
-            # Pre-calculate indicators to warm up cache
-            candles = self.db.get_candles(self.epic, limit=200)
+            # Reset pending analysis
+            self.pending_trade_analysis = None
+            
+            # Refresh Alpha Vantage data first
+            await self.refresh_alpha_vantage_data()
+            
+            # Use Alpha Vantage database for analysis
+            import sqlite3
+            av_db_path = self.settings.get('ALPHA_VANTAGE', 'database', 'database_av.db')
+            av_table = self.settings.get('ALPHA_VANTAGE', 'table_name', 'TECL_av_5min')
+            
+            # Get candles from Alpha Vantage database
+            conn = sqlite3.connect(av_db_path)
+            query = f"""
+                SELECT timestamp, open, high, low, close, volume 
+                FROM {av_table} 
+                ORDER BY timestamp DESC 
+                LIMIT 1000
+            """
+            cursor = conn.cursor()
+            cursor.execute(query)
+            candles = cursor.fetchall()
+            conn.close()
+            
+            # Convert to format expected by existing code
+            if candles:
+                # Reverse to get chronological order
+                candles = list(reversed(candles))
+                # Add epic column for compatibility
+                candles = [('TECL',) + candle for candle in candles]
             if candles and len(candles) >= 100:
                 # Convert to DataFrame for AI system
                 df = pd.DataFrame(candles, columns=['epic', 'timestamp', 'open', 'high', 'low', 'close', 'volume'])
                 df = df.drop(columns=['epic'])
-                df['timestamp'] = pd.to_datetime(df['timestamp'], utc=True)
+                # Alpha Vantage timestamps are in Eastern Time
+                eastern = pytz.timezone('US/Eastern')
+                df['timestamp'] = pd.to_datetime(df['timestamp'])
+                # Localize to Eastern Time then convert to UTC for consistency
+                df['timestamp'] = df['timestamp'].dt.tz_localize(eastern).dt.tz_convert('UTC')
                 df = df.sort_values('timestamp').reset_index(drop=True)
                 
-                # Pre-calculate indicators
+                # Rename columns for Brains compatibility
+                df = df.rename(columns={
+                    'open': 'openPrice',
+                    'high': 'highPrice',
+                    'low': 'lowPrice',
+                    'close': 'closePrice',
+                    'volume': 'lastTradedVolume'
+                })
+                
+                # Calculate indicators and run Brains analysis
                 df_with_indicators = self.ai_system.calculate_technical_indicators(df.copy())
                 
-                logger.info(f"Data preparation complete: {len(df)} candles ready for analysis")
+                # Pass the last row as a single-row DataFrame for analysis
+                day_data = df_with_indicators.iloc[[-1]].copy()
+                ai_analysis = self.ai_system.analyze_market_conditions(
+                    day_data,
+                    df_with_indicators,
+                    datetime.now()
+                )
+                
+                # Store analysis for T-15s use
+                self.pending_trade_analysis = ai_analysis
+                
+                # Log the analysis result
+                logger.info("="*60)
+                logger.info("T-120s BRAINS ANALYSIS COMPLETE")
+                logger.info(f"Signal: {ai_analysis.get('trade_signal', 'N/A')}")
+                logger.info(f"Confidence: {ai_analysis.get('confidence', 0):.1%}")
+                logger.info(f"Strategy: {ai_analysis.get('selected_strategy', 'N/A')}")
+                logger.info(f"Leverage: {ai_analysis.get('strategy_leverage', 'N/A')}x")
+                logger.info(f"Stop Loss: {ai_analysis.get('strategy_stop_loss', 'N/A')}%")
+                logger.info("Analysis stored for T-15s execution")
+                logger.info("="*60)
+                
                 self.record_action({
-                    'event': 'data_preparation',
+                    'event': 'brains_analysis_t120',
                     'candles_ready': len(df),
+                    'signal': ai_analysis.get('trade_signal'),
+                    'confidence': ai_analysis.get('confidence'),
+                    'strategy': ai_analysis.get('selected_strategy'),
                     'timestamp': datetime.now().isoformat()
                 })
             else:
-                logger.warning("Insufficient candles for pre-close preparation")
+                logger.warning(f"Insufficient candles for analysis: {len(candles) if candles else 0}")
+                self.record_action({
+                    'event': 'data_preparation_error',
+                    'error': f'Insufficient candles: {len(candles) if candles else 0}'
+                })
             
         except Exception as e:
-            logger.error(f"Error in pre-close data preparation: {e}")
+            logger.error(f"Error in T-120s preparation and analysis: {e}")
             self.record_action({
                 'event': 'data_preparation_error',
                 'error': str(e)

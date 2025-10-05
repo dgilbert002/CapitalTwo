@@ -3,6 +3,12 @@ import numpy as np
 from datetime import datetime, timedelta, time
 import warnings
 import talib
+# Import the proven $699k strategy system
+from Brains.strategy_signals import (
+    get_strategy_analysis,
+    SIGNAL_CONFIGS,
+    validate_implementation
+)
 import os
 import sys
 warnings.filterwarnings("ignore")
@@ -18,6 +24,18 @@ class HybridIntelligentSystem:
         # Real Capital.com fees - EXACT from uploaded files
         self.SPREAD_COST = 0.00019  # 0.019% per trade
         self.OVERNIGHT_FUNDING_LONG = -0.00023  # -0.023% per day for longs
+        
+        # Strategy mode: 'enhanced' (current), 'all_signals' ($376k/$699k), 'two_rsi_only' (lower risk),
+        #               'test6_no_protection' ($509k), 'test6_with_protection' ($958k BEST!)
+        self.strategy_mode = 'enhanced'  # Default to current system
+        self.enable_crash_protection = True
+        
+        # Validate the proven strategy implementation on init
+        try:
+            validate_implementation()
+            print("✅ Proven $699k strategy validated and ready!")
+        except Exception as e:
+            print(f"Warning: Strategy validation failed: {e}")
         
         # Strategy definitions from TEST1 with proven win rates
         self.STRATEGIES = {
@@ -45,6 +63,16 @@ class HybridIntelligentSystem:
                 'leverage': 5.0, 'fast_period': 13, 'slow_period': 30, 'signal_period': 9, 
                 'threshold': 0.05, 'stop_loss_pct': 4.0,
                 'win_rate': 55.0, 'final_balance': 7654.32, 'sharpe_ratio': 2.10
+            },
+            # New Test6 strategies from TSV (8 total strategies)
+            'keltner_lower_break': {
+                'leverage': 5.0, 'multiplier': 2.0, 'period': 10, 'stop_loss_pct': 4.0,
+                'win_rate': 74.2, 'final_balance': 118723.43, 'sharpe_ratio': 2.87
+            },
+            'macd_histogram_negative': {
+                'leverage': 5.0, 'fast_period': 8, 'slow_period': 18, 
+                'signal_period': 4, 'threshold': -0.05, 'stop_loss_pct': 4.0,
+                'win_rate': 70.7, 'final_balance': 119960.31, 'sharpe_ratio': 2.8
             }
         }
 
@@ -144,10 +172,11 @@ class HybridIntelligentSystem:
         fired['roc_below_threshold'] = False
         if 'roc_below_threshold' in conds:
             try:
+                # CRITICAL FIX: Don't pass threshold, use default -1.0% from indicators.py
                 fired['roc_below_threshold'] = conds['roc_below_threshold'](
                     hist, idx,
-                    period=self.STRATEGIES['roc_below_threshold']['period'],
-                    threshold=self.STRATEGIES['roc_below_threshold']['threshold']
+                    period=self.STRATEGIES['roc_below_threshold']['period']
+                    # NO threshold parameter - uses default -1.0%
                 )
             except Exception:
                 pass
@@ -162,6 +191,32 @@ class HybridIntelligentSystem:
                     slow_period=self.STRATEGIES['macd_positive']['slow_period'],
                     signal_period=self.STRATEGIES['macd_positive']['signal_period'],
                     threshold=self.STRATEGIES['macd_positive']['threshold']
+                )
+            except Exception:
+                pass
+        
+        # Keltner Lower Break (Test6 strategy)
+        fired['keltner_lower_break'] = False
+        if 'keltner_lower_break' in conds:
+            try:
+                fired['keltner_lower_break'] = conds['keltner_lower_break'](
+                    hist, idx,
+                    period=self.STRATEGIES['keltner_lower_break']['period'],
+                    multiplier=self.STRATEGIES['keltner_lower_break']['multiplier']
+                )
+            except Exception:
+                pass
+        
+        # MACD Histogram Negative (Test6 strategy)
+        fired['macd_histogram_negative'] = False
+        if 'macd_histogram_negative' in conds:
+            try:
+                fired['macd_histogram_negative'] = conds['macd_histogram_negative'](
+                    hist, idx,
+                    fast_period=self.STRATEGIES['macd_histogram_negative']['fast_period'],
+                    slow_period=self.STRATEGIES['macd_histogram_negative']['slow_period'],
+                    signal_period=self.STRATEGIES['macd_histogram_negative']['signal_period'],
+                    threshold=self.STRATEGIES['macd_histogram_negative']['threshold']
                 )
             except Exception:
                 pass
@@ -185,8 +240,33 @@ class HybridIntelligentSystem:
         return best_signal, self.STRATEGIES[best_signal]
 
     def analyze_market_conditions(self, day_data, historical_data, current_date):
-        """Enhanced multi-strategy OR logic analysis"""
+        """Enhanced multi-strategy OR logic analysis with proven strategy support"""
         
+        # Use proven strategy if configured
+        if self.strategy_mode in ['all_signals', 'two_rsi_only', 'test6', 'test6_no_protection', 'test6_with_protection']:
+            # Ensure date column exists for crash protection
+            if 'date' not in historical_data.columns:
+                historical_data['date'] = pd.to_datetime(historical_data['timestamp']).dt.date
+            
+            # Get current date for crash protection
+            if isinstance(current_date, datetime):
+                check_date = current_date.date()
+            else:
+                check_date = current_date
+            
+            # Run the proven strategy analysis
+            analysis = get_strategy_analysis(
+                historical_data,
+                strategy_mode=self.strategy_mode,
+                enable_crash_protection=self.enable_crash_protection,
+                current_date=check_date
+            )
+            
+            # Add direction for compatibility
+            analysis['direction'] = 'long'
+            return analysis
+        
+        # Otherwise use enhanced mode (current system)
         if day_data.empty or len(historical_data) < 50:
             return {
                 'trade_signal': 'hold',

@@ -27,6 +27,11 @@ class TradingBotSettings:
         except Exception as e:
             logger.error(f"Error loading settings: {e}")
     
+    def has_section(self, section: str) -> bool:
+        """Check if a section exists in the config"""
+        self.load_settings()  # Reload if file changed
+        return self.config.has_section(section)
+    
     def get(self, section: str, key: str, fallback: str = "") -> str:
         """Get setting value"""
         self.load_settings()  # Check for updates

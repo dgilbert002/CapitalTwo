@@ -249,6 +249,90 @@
                 </div>
                     </div>
                     
+                    <!-- Strategy Mode Selection - PROVEN RESULTS MATRIX -->
+                    <div class="metric-card mb-3">
+                        <h6 class="text-muted mb-3"><i class="fas fa-chart-line"></i> Strategy Mode - Proven Results</h6>
+                        <div class="alert alert-info mb-3" style="font-size: 0.9em;">
+                            <i class="fas fa-info-circle"></i> <strong>Important:</strong> The $699k and $486k results INCLUDE crash protection. Select the exact configuration you want:
+                        </div>
+                        <div class="strategy-mode-selection">
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="radio" name="strategyMode" value="all_with_protection" id="allWithProtection" checked>
+                                <label class="form-check-label" for="allWithProtection">
+                                    <strong>All 6 Signals WITH Protection</strong> ✅
+                                    <br><span class="text-success">→ $699,074 (57.2% WR, -96.9% DD)</span>
+                                </label>
+                            </div>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="radio" name="strategyMode" value="all_no_protection" id="allNoProtection">
+                                <label class="form-check-label" for="allNoProtection">
+                                    <strong>All 6 Signals NO Protection</strong>
+                                    <br><span class="text-warning">→ $376,004 (56.1% WR, -98.7% DD)</span>
+                                </label>
+                            </div>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="radio" name="strategyMode" value="two_rsi_protection" id="twoRsiProtection">
+                                <label class="form-check-label" for="twoRsiProtection">
+                                    <strong>Two RSI WITH Protection</strong> 🛡️
+                                    <br><span class="text-success">→ $485,948 (59.6% WR, -33.9% DD) <span class="badge bg-success">Lowest Risk</span></span>
+                                </label>
+                            </div>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="radio" name="strategyMode" value="two_rsi_no_protection" id="twoRsiNoProtection">
+                                <label class="form-check-label" for="twoRsiNoProtection">
+                                    <strong>Two RSI NO Protection</strong>
+                                    <br><span class="text-warning">→ $348,803 (58.1% WR, -68.5% DD)</span>
+                                </label>
+                            </div>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="radio" name="strategyMode" value="test6_no_protection" id="test6NoProtection">
+                                <label class="form-check-label" for="test6NoProtection">
+                                    <strong>Test6 - 8 Signals NO Protection</strong> 🚀
+                                    <br><span class="text-info">→ $509,453 (8 strategies including Keltner & MACD Histogram)</span>
+                                </label>
+                            </div>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="radio" name="strategyMode" value="test6_with_protection" id="test6WithProtection">
+                                <label class="form-check-label" for="test6WithProtection">
+                                    <strong>Test6 - 8 Signals WITH Protection</strong> 🏆
+                                    <br><span class="text-primary fw-bold">→ $958,260 <span class="badge bg-primary">BEST PERFORMER!</span></span>
+                                </label>
+                            </div>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="radio" name="strategyMode" value="enhanced" id="enhanced">
+                                <label class="form-check-label" for="enhanced">
+                                    <strong>Enhanced</strong> - Current AI system
+                                </label>
+                            </div>
+                        </div>
+                        <div class="table-responsive mt-3">
+                            <table class="table table-sm table-bordered" style="font-size: 0.85em;">
+                                <thead>
+                                    <tr>
+                                        <th>Strategy</th>
+                                        <th class="text-success">WITH Protection</th>
+                                        <th class="text-warning">WITHOUT Protection</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>All 6 Signals</td>
+                                        <td class="text-success"><strong>$699,074</strong> ✅</td>
+                                        <td class="text-warning">$376,004</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Two RSI Only</td>
+                                        <td class="text-success"><strong>$485,948</strong> 🛡️</td>
+                                        <td class="text-warning">$348,803</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <button onclick="saveStrategySettings()" class="btn btn-primary btn-sm mt-3">
+                            <i class="fas fa-save"></i> Save Strategy Settings
+                        </button>
+                    </div>
+                    
                     <!-- Stop Loss Configuration -->
                     <div class="metric-card">
                         <h6 class="text-muted mb-3"><i class="fas fa-shield-alt"></i> Stop Loss Configuration</h6>
@@ -620,6 +704,79 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
+        // Save strategy settings function - PROVEN RESULTS MATRIX
+        function saveStrategySettings() {
+            const strategyMode = document.querySelector('input[name="strategyMode"]:checked').value;
+            console.log('Saving strategy:', strategyMode);
+            
+            // Parse the combined strategy mode to extract strategy and protection settings
+            let actualStrategy = 'enhanced';
+            let crashProtection = false;
+            
+            if (strategyMode === 'all_with_protection') {
+                actualStrategy = 'all_signals';
+                crashProtection = true;
+            } else if (strategyMode === 'all_no_protection') {
+                actualStrategy = 'all_signals';
+                crashProtection = false;
+            } else if (strategyMode === 'two_rsi_protection') {
+                actualStrategy = 'two_rsi_only';
+                crashProtection = true;
+            } else if (strategyMode === 'two_rsi_no_protection') {
+                actualStrategy = 'two_rsi_only';
+                crashProtection = false;
+            } else if (strategyMode === 'test6_no_protection') {
+                actualStrategy = 'test6_no_protection';
+                crashProtection = false;
+            } else if (strategyMode === 'test6_with_protection') {
+                actualStrategy = 'test6_with_protection';
+                crashProtection = true;
+            } else {
+                actualStrategy = 'enhanced';
+                crashProtection = false;
+            }
+            
+            fetch('/api/strategy/settings', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    strategy_mode: actualStrategy,
+                    enable_crash_protection: crashProtection
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Show specific result expectation
+                    let expectedResult = '';
+                    if (strategyMode === 'all_with_protection') {
+                        expectedResult = '$699,074 (Proven result with crash protection)';
+                    } else if (strategyMode === 'all_no_protection') {
+                        expectedResult = '$376,004 (Higher risk without protection)';
+                    } else if (strategyMode === 'two_rsi_protection') {
+                        expectedResult = '$485,948 (Lowest risk, -33.9% max DD)';
+                    } else if (strategyMode === 'two_rsi_no_protection') {
+                        expectedResult = '$348,803 (Two RSI without protection)';
+                    } else if (strategyMode === 'test6_no_protection') {
+                        expectedResult = '$509,453 (8 strategies without protection)';
+                    } else if (strategyMode === 'test6_with_protection') {
+                        expectedResult = '$958,260 (BEST PERFORMER! 8 strategies with protection)';
+                    } else {
+                        expectedResult = 'Enhanced AI system';
+                    }
+                    
+                    showNotification(`Strategy saved! Expected: ${expectedResult}`, 'success');
+                    console.log(`Strategy: ${actualStrategy}, Protection: ${crashProtection}, Expected: ${expectedResult}`);
+                } else {
+                    showNotification('Failed to save strategy settings', 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error saving strategy:', error);
+                showNotification('Error saving strategy settings', 'error');
+            });
+        }
+        
         const elements = {
             connectionStatus: document.getElementById("connectionStatus"),
             statusIndicator: document.getElementById("statusIndicator"),
@@ -674,6 +831,51 @@
         let stDaysTotal = 0;
         let stLastTs = '';
 
+        // Track if we've already loaded the saved settings
+        let strategySettingsLoaded = false;
+        
+        // Load saved strategy settings - will be called ONCE when WebSocket first sends data
+        function loadSavedStrategySettings(strategyMode, crashProtection) {
+            // Only load once on initial connection
+            if (strategySettingsLoaded) {
+                return;
+            }
+            
+            try {
+                // Map backend settings to radio button values
+                let radioValue = 'enhanced';
+                if (strategyMode === 'all_signals' && crashProtection === true) {
+                    radioValue = 'all_with_protection';
+                } else if (strategyMode === 'all_signals' && crashProtection === false) {
+                    radioValue = 'all_no_protection';
+                } else if (strategyMode === 'two_rsi_only' && crashProtection === true) {
+                    radioValue = 'two_rsi_protection';
+                } else if (strategyMode === 'two_rsi_only' && crashProtection === false) {
+                    radioValue = 'two_rsi_no_protection';
+                } else if (strategyMode === 'test6_no_protection') {
+                    radioValue = 'test6_no_protection';
+                } else if (strategyMode === 'test6_with_protection') {
+                    radioValue = 'test6_with_protection';
+                } else if (strategyMode === 'test6' && crashProtection === true) {
+                    radioValue = 'test6_with_protection';
+                } else if (strategyMode === 'test6' && crashProtection === false) {
+                    radioValue = 'test6_no_protection';
+                } else if (strategyMode === 'enhanced') {
+                    radioValue = 'enhanced';
+                }
+                
+                // Set the radio button
+                const radioButton = document.querySelector(`input[name="strategyMode"][value="${radioValue}"]`);
+                if (radioButton) {
+                    radioButton.checked = true;
+                    console.log(`Loaded saved strategy: ${strategyMode}, Protection: ${crashProtection}, Radio: ${radioValue}`);
+                    strategySettingsLoaded = true; // Mark as loaded
+                }
+            } catch (error) {
+                console.error('Error loading saved strategy settings:', error);
+            }
+        }
+
         function connectWebSocket() {
             const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
             const wsUrl = `${protocol}//${window.location.host}/ws`;
@@ -709,6 +911,11 @@
                     // Keep latest payload for SL type access in positions table
                     window.latestWsData = data;
                     updateDashboard(data);
+                    
+                    // Load saved strategy settings from WebSocket data
+                    if (data.strategy_mode !== undefined && data.enable_crash_protection !== undefined) {
+                        loadSavedStrategySettings(data.strategy_mode, data.enable_crash_protection);
+                    }
                     // Live-sync Speed Test from action log
                     if (speedTestLive) {
                         syncSpeedTestFromActionLog(data.action_log || []);
@@ -719,6 +926,9 @@
             };
 
             ws.onclose = function() {
+                // Reset the flag so settings load again on reconnect
+                strategySettingsLoaded = false;
+                
                 // Only show connection status if bot is not running
                 if (elements.status.textContent !== "Bot Running - Monitoring Market") {
                     elements.connectionStatus.textContent = "Connecting...";
@@ -1885,6 +2095,24 @@
                 const mi = data.market_info || {};
                 const lc = data.last_candle || {};
                 const rows = [];
+                
+                // Show which strategy mode is being used
+                if (data.strategy_mode) {
+                    let strategyDisplay = data.strategy_mode;
+                    if (data.strategy_mode === 'test6_with_protection') {
+                        strategyDisplay = 'Test6 - 8 Signals WITH Protection ($958k)';
+                    } else if (data.strategy_mode === 'test6_no_protection') {
+                        strategyDisplay = 'Test6 - 8 Signals NO Protection ($509k)';
+                    } else if (data.strategy_mode === 'all_signals') {
+                        strategyDisplay = data.crash_protection ? 'All 6 Signals WITH Protection ($699k)' : 'All 6 Signals NO Protection ($376k)';
+                    } else if (data.strategy_mode === 'two_rsi_only') {
+                        strategyDisplay = data.crash_protection ? 'Two RSI WITH Protection ($486k)' : 'Two RSI NO Protection ($349k)';
+                    } else if (data.strategy_mode === 'enhanced') {
+                        strategyDisplay = 'Enhanced (AI System)';
+                    }
+                    rows.push(`<tr><td colspan="2" class="text-center bg-primary text-white"><strong>Using Strategy: ${strategyDisplay}</strong></td></tr>`);
+                }
+                
                 rows.push(`<tr><td>Signal</td><td><strong>${d.trade_signal || '-'}</strong></td></tr>`);
                 rows.push(`<tr><td>Confidence</td><td>${(d.confidence*100||0).toFixed ? (d.confidence*100).toFixed(2) : d.confidence}%</td></tr>`);
                 rows.push(`<tr><td>Strategy</td><td><strong>${data.selected_strategy || 'N/A'}</strong></td></tr>`);
@@ -2008,6 +2236,8 @@
 
         // Initialize WebSocket connection
         connectWebSocket();
+        
+        // Strategy settings will be loaded when WebSocket sends data
     </script>
 </body>
 </html>

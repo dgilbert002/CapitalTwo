@@ -21,8 +21,30 @@ sl_thresholds = 5,10,15
 sl_adjustments = 2,5,8
 sl_when_at = 2,4,5,7,10,12,15
 sl_use = 0,1,2,4,6,8,10
-override_strategy_sl = True
+override_strategy_sl = False
 
 [ENV_ACCOUNTS]
 demo = 290950804147613982
+
+[STRATEGY]
+strategy_mode = test6_with_protection
+enable_crash_protection = True
+start_balance = 500.0
+monthly_top_up = 100.0
+
+[ALPHA_VANTAGE]
+api_key = OCQ5ZK0K035MOEHM
+symbol = TECL
+interval = 5min
+extended_hours = true
+database = database_av.db
+table_name = TECL_av_5min
+
+[DATA]
+start_date = 2024-01-01
+end_date = 2025-10-03
+
+[TESTING]
+start_date = 2024-01-01
+end_date = 2025-10-03
 
