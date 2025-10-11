@@ -319,30 +319,11 @@
                                 </label>
                             </div>
                         </div>
-                        <div class="table-responsive mt-3">
-                            <table class="table table-sm table-bordered" style="font-size: 0.85em;">
-                                <thead>
-                                    <tr>
-                                        <th>Strategy</th>
-                                        <th class="text-success">WITH Protection</th>
-                                        <th class="text-warning">WITHOUT Protection</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td>All 6 Signals</td>
-                                        <td class="text-success"><strong>$699,074</strong> ✅</td>
-                                        <td class="text-warning">$376,004</td>
-                                    </tr>
-                                    <tr>
-                                        <td>Two RSI Only</td>
-                                        <td class="text-success"><strong>$485,948</strong> 🛡️</td>
-                                        <td class="text-warning">$348,803</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                        <button onclick="saveStrategySettings()" class="btn btn-primary btn-sm mt-3">
+                        <div class="mt-3">
+                            <button onclick="showStrategyDetails()" class="btn btn-info btn-sm me-2">
+                                <i class="fas fa-info-circle"></i> View Strategy Details
+                            </button>
+                            <button onclick="saveStrategySettings()" class="btn btn-primary btn-sm">
                             <i class="fas fa-save"></i> Save Strategy Settings
                         </button>
                     </div>
@@ -745,6 +726,12 @@
             } else if (strategyMode === 'test6_with_protection') {
                 actualStrategy = 'test6_with_protection';
                 crashProtection = true;
+            } else if (strategyMode === 'test7_no_protection') {
+                actualStrategy = 'test7_no_protection';
+                crashProtection = false;
+            } else if (strategyMode === 'test7_with_protection') {
+                actualStrategy = 'test7_with_protection';
+                crashProtection = true;
             } else {
                 actualStrategy = 'enhanced';
                 crashProtection = false;
@@ -775,6 +762,10 @@
                         expectedResult = '$509,453 (8 strategies without protection)';
                     } else if (strategyMode === 'test6_with_protection') {
                         expectedResult = '$958,260 (BEST PERFORMER! 8 strategies with protection)';
+                    } else if (strategyMode === 'test7_no_protection') {
+                        expectedResult = 'Test7 - 9 Signals (includes MACD v2) without protection';
+                    } else if (strategyMode === 'test7_with_protection') {
+                        expectedResult = 'Test7 - 9 Signals (includes MACD v2) WITH protection';
                     } else {
                         expectedResult = 'Enhanced AI system';
                     }
@@ -2252,6 +2243,215 @@
         connectWebSocket();
         
         // Strategy settings will be loaded when WebSocket sends data
+        
+        // Show strategy details modal
+        function showStrategyDetails() {
+            const modal = new bootstrap.Modal(document.getElementById('strategyDetailsModal'));
+            modal.show();
+        }
     </script>
+    
+    <!-- Strategy Details Modal -->
+    <div class="modal fade" id="strategyDetailsModal" tabindex="-1">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Strategy Details - What Each Signal Means</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="accordion" id="strategyAccordion">
+                        <!-- All 6 Signals -->
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#all6Signals">
+                                    <strong>All 6 Signals Strategy</strong>
+                                </button>
+                            </h2>
+                            <div id="all6Signals" class="accordion-collapse collapse show" data-bs-parent="#strategyAccordion">
+                                <div class="accordion-body">
+                                    <p class="text-muted">Uses 6 different market indicators. When multiple signals fire, the system picks the one with highest priority.</p>
+                                    <ul class="list-unstyled">
+                                        <li class="mb-3">
+                                            <strong>📉 RSI Oversold (Priority: 80)</strong>
+                                            <div class="text-muted small">Triggers when: Stock is heavily sold and RSI drops below 25</div>
+                                            <div class="text-success small">Plain English: "The stock has been beaten down too much and is likely to bounce back"</div>
+                                        </li>
+                                        <li class="mb-3">
+                                            <strong>📈 RSI Bullish Cross (Priority: 63)</strong>
+                                            <div class="text-muted small">Triggers when: RSI crosses above 50 from below</div>
+                                            <div class="text-success small">Plain English: "The stock is gaining momentum and starting an upward trend"</div>
+                                        </li>
+                                        <li class="mb-3">
+                                            <strong>📊 Bollinger Band Break (Priority: 80)</strong>
+                                            <div class="text-muted small">Triggers when: Price touches the lower Bollinger Band</div>
+                                            <div class="text-success small">Plain English: "The stock has moved unusually far from its average and should snap back"</div>
+                                        </li>
+                                        <li class="mb-3">
+                                            <strong>💹 Price Above VWAP (Priority: 57.6)</strong>
+                                            <div class="text-muted small">Triggers when: Current price is above the volume-weighted average</div>
+                                            <div class="text-success small">Plain English: "Big traders are buying at these levels, showing institutional support"</div>
+                                        </li>
+                                        <li class="mb-3">
+                                            <strong>🔻 ROC Below Threshold (Priority: 78.9)</strong>
+                                            <div class="text-muted small">Triggers when: Rate of change drops below -1%</div>
+                                            <div class="text-success small">Plain English: "The stock has dropped quickly and is due for a reversal"</div>
+                                        </li>
+                                        <li class="mb-3">
+                                            <strong>🎯 MACD Positive (Priority: 63)</strong>
+                                            <div class="text-muted small">Triggers when: MACD line crosses above signal line</div>
+                                            <div class="text-success small">Plain English: "Short-term momentum is overtaking long-term trend - bullish signal"</div>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Two RSI Strategy -->
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#twoRSI">
+                                    <strong>Two RSI Strategy</strong>
+                                </button>
+                            </h2>
+                            <div id="twoRSI" class="accordion-collapse collapse" data-bs-parent="#strategyAccordion">
+                                <div class="accordion-body">
+                                    <p class="text-muted">Simplified strategy using only the two RSI signals. Lower risk, fewer trades.</p>
+                                    <ul class="list-unstyled">
+                                        <li class="mb-3">
+                                            <strong>📉 RSI Oversold (Priority: 80)</strong>
+                                            <div class="text-muted small">Triggers when: RSI < 25</div>
+                                            <div class="text-success small">Plain English: "Buy when everyone else is fearful"</div>
+                                        </li>
+                                        <li class="mb-3">
+                                            <strong>📈 RSI Bullish Cross (Priority: 63)</strong>
+                                            <div class="text-muted small">Triggers when: RSI crosses above 50</div>
+                                            <div class="text-success small">Plain English: "Buy when momentum shifts positive"</div>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Test6 Strategy -->
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#test6">
+                                    <strong>Test6 - 8 Signals Strategy</strong>
+                                </button>
+                            </h2>
+                            <div id="test6" class="accordion-collapse collapse" data-bs-parent="#strategyAccordion">
+                                <div class="accordion-body">
+                                    <p class="text-muted">All 6 base signals PLUS 2 additional advanced indicators.</p>
+                                    <p class="small">Includes all signals from "All 6 Signals" plus:</p>
+                                    <ul class="list-unstyled">
+                                        <li class="mb-3">
+                                            <strong>📐 Keltner Channel Break (Priority: 74.2)</strong>
+                                            <div class="text-muted small">Triggers when: Price breaks below lower Keltner Channel</div>
+                                            <div class="text-success small">Plain English: "Price has moved beyond normal volatility range - expect a snapback"</div>
+                                        </li>
+                                        <li class="mb-3">
+                                            <strong>📊 MACD Histogram Negative (Priority: 70.7)</strong>
+                                            <div class="text-muted small">Triggers when: MACD histogram goes negative by more than -0.05</div>
+                                            <div class="text-success small">Plain English: "Momentum is oversold and reversal is likely"</div>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Test7 Strategy -->
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#test7">
+                                    <strong>Test7 - 9 Signals Strategy</strong>
+                                </button>
+                            </h2>
+                            <div id="test7" class="accordion-collapse collapse" data-bs-parent="#strategyAccordion">
+                                <div class="accordion-body">
+                                    <p class="text-muted">All 8 signals from Test6 PLUS an optimized MACD variant.</p>
+                                    <p class="small">Includes all signals from Test6 plus:</p>
+                                    <ul class="list-unstyled">
+                                        <li class="mb-3">
+                                            <strong>📈 MACD Histogram v2 (Priority: 75.9)</strong>
+                                            <div class="text-muted small">Triggers when: Optimized MACD histogram (5/18/4) goes below -0.10</div>
+                                            <div class="text-success small">Plain English: "Enhanced momentum reversal detector with tighter parameters"</div>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Enhanced Strategy -->
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#enhanced">
+                                    <strong>Enhanced - Current AI System</strong>
+                                </button>
+                            </h2>
+                            <div id="enhanced" class="accordion-collapse collapse" data-bs-parent="#strategyAccordion">
+                                <div class="accordion-body">
+                                    <p class="text-muted">The original AI system with dynamic confidence scoring.</p>
+                                    <ul class="list-unstyled">
+                                        <li class="mb-3">
+                                            <strong>🤖 AI Confidence System</strong>
+                                            <div class="text-muted small">Uses all available signals but requires minimum confidence threshold</div>
+                                            <div class="text-success small">Plain English: "Only trades when the AI is confident enough based on market conditions"</div>
+                                        </li>
+                                        <li class="mb-3">
+                                            <strong>📊 Dynamic Analysis</strong>
+                                            <div class="text-muted small">Analyzes multiple timeframes and market conditions</div>
+                                            <div class="text-success small">Plain English: "Adapts to changing market conditions rather than fixed rules"</div>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Crash Protection -->
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#crashProtection">
+                                    <strong>🛡️ What is Crash Protection?</strong>
+                                </button>
+                            </h2>
+                            <div id="crashProtection" class="accordion-collapse collapse" data-bs-parent="#strategyAccordion">
+                                <div class="accordion-body">
+                                    <p class="text-muted">Crash protection prevents trading during severe market downturns.</p>
+                                    <ul class="list-unstyled">
+                                        <li class="mb-3">
+                                            <strong>🚫 Trade Blocking</strong>
+                                            <div class="text-muted small">Blocks trades when: 3-day drawdown exceeds 10%</div>
+                                            <div class="text-success small">Plain English: "If the market dropped 10% in 3 days, stop trading until it recovers"</div>
+                                        </li>
+                                        <li class="mb-3">
+                                            <strong>📉 Bottom Detection</strong>
+                                            <div class="text-muted small">Resumes when: RSI < 20 and volume spikes 1.5x normal</div>
+                                            <div class="text-success small">Plain English: "Wait for signs of panic selling (the bottom) before trading again"</div>
+                                        </li>
+                                        <li class="mb-3">
+                                            <strong>📈 Recovery Threshold</strong>
+                                            <div class="text-muted small">Fully resumes when: Market recovers to within 3% of recent highs</div>
+                                            <div class="text-success small">Plain English: "Once the market is almost back to normal, trade normally again"</div>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="alert alert-info mt-3">
+                        <i class="fas fa-lightbulb"></i> <strong>How It Works:</strong> 
+                        The system checks all active signals every day at market close. When multiple signals trigger, 
+                        it selects the one with the highest priority number. Higher priority = historically better performance.
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
 </body>
 </html>

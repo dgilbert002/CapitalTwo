@@ -1,91 +1,825 @@
-2025-10-11 15:58:26,680 - bot.settings - INFO - Settings reloaded from file
-2025-10-11 15:58:26,686 - main - INFO - Starting app connection layer...
-2025-10-11 15:58:26,688 - bot.api - INFO - CapitalComAPI.authenticate(environment=demo)
-2025-10-11 15:58:27,935 - bot.api - INFO - Successfully authenticated with Capital.com
-2025-10-11 15:58:29,641 - bot.api - INFO - Switched to account: 290950804147613982
-2025-10-11 15:58:29,641 - main - INFO - Connected to demo account: USD
-2025-10-11 15:58:29,641 - main - INFO - Starting continuous data updates
-2025-10-11 15:58:29,641 - main - INFO - Running data update #1
-2025-10-11 15:58:30,477 - main - INFO - Account balance: $972.33
-2025-10-11 15:58:30,944 - main - INFO - WebSocket connected
-2025-10-11 15:58:31,273 - main - INFO - Found 0 open positions
-2025-10-11 15:58:31,869 - main - INFO - Selecting account 290950804147613982
-2025-10-11 15:58:31,948 - main - INFO - Account structure: accountName=USD, balance_keys=['balance', 'deposit', 'profitLoss', 'available']
-2025-10-11 15:58:31,949 - main - INFO - Balance values: balance=972.33, available=972.33, profitLoss=0.0
-2025-10-11 15:58:32,066 - bot.api - INFO - Market data keys for TECL: ['instrument', 'dealingRules', 'snapshot']
-2025-10-11 15:58:32,066 - bot.api - INFO - Snapshot for TECL: bid=118.28, offer=118.74, high=None, low=None, percentageChange=-0.14
-2025-10-11 15:58:32,066 - bot.api - INFO - Instrument for TECL: name=Direxion Daily Technology Bull 3X Shares, type=SHARES, marketId=None, expiry=-, lotSize=1
-2025-10-11 15:58:32,066 - bot.api - INFO - Opening hours for TECL: {'mon': ['13:30 - 20:00'], 'tue': ['13:30 - 20:00'], 'wed': ['13:30 - 20:00'], 'thu': ['13:30 - 20:00'], 'fri': ['13:30 - 20:00'], 'sat': [], 'sun': [], 'zone': 'UTC'}
-2025-10-11 15:58:32,066 - bot.api - INFO - Dealing rules (top level): minDealSize={'unit': 'POINTS', 'value': 0.1}, maxDealSize={'unit': 'POINTS', 'value': 3250}, minSizeIncrement={'unit': 'POINTS', 'value': 0.1}
-2025-10-11 15:58:32,066 - main - INFO - Market data updated for TECL
-2025-10-11 15:58:35,651 - main - INFO - Market is CLOSED, next open in 49.5 hours
-2025-10-11 15:58:36,281 - bot.api - INFO - Switched to account: 290950804147613982
-2025-10-11 15:58:36,283 - bot.settings - INFO - Settings saved to file
-2025-10-11 15:58:36,283 - bot.settings - INFO - Saved environment account map: demo -> 290950804147613982
-2025-10-11 15:58:36,949 - bot.api - INFO - Fetched 36 total transactions
-2025-10-11 15:58:36,949 - bot.api - INFO - Transaction types found: {'TRADE', 'SWAP'}
-2025-10-11 15:58:37,210 - bot.api - INFO - Fetched 2 activities
-2025-10-11 15:58:37,211 - bot.api - INFO - Processed 26 complete trades
-2025-10-11 15:58:37,211 - main - INFO - Found 26 historic trades
-2025-10-11 15:58:37,863 - bot.api - INFO - Fetched 36 total transactions
-2025-10-11 15:58:37,863 - bot.api - INFO - Transaction types: {'TRADE', 'SWAP'}
-2025-10-11 15:58:37,865 - main - INFO - Fetched 36 activities in single request
-2025-10-11 15:58:37,865 - main - INFO - Found activity types: {'UNKNOWN'}
-2025-10-11 15:58:37,865 - main - INFO - Found 36 account transactions over 7 days
-2025-10-11 15:58:40,331 - main - INFO - WebSocket disconnected
-2025-10-11 15:58:43,789 - main - INFO - Running data update #2
-2025-10-11 15:58:44,683 - main - INFO - Account balance: $972.33
-2025-10-11 15:58:45,475 - main - INFO - Found 0 open positions
-2025-10-11 15:58:46,246 - bot.api - INFO - Market data keys for TECL: ['instrument', 'dealingRules', 'snapshot']
-2025-10-11 15:58:46,246 - bot.api - INFO - Snapshot for TECL: bid=118.28, offer=118.74, high=None, low=None, percentageChange=-0.14
-2025-10-11 15:58:46,246 - bot.api - INFO - Instrument for TECL: name=Direxion Daily Technology Bull 3X Shares, type=SHARES, marketId=None, expiry=-, lotSize=1
-2025-10-11 15:58:46,246 - bot.api - INFO - Opening hours for TECL: {'mon': ['13:30 - 20:00'], 'tue': ['13:30 - 20:00'], 'wed': ['13:30 - 20:00'], 'thu': ['13:30 - 20:00'], 'fri': ['13:30 - 20:00'], 'sat': [], 'sun': [], 'zone': 'UTC'}
-2025-10-11 15:58:46,246 - bot.api - INFO - Dealing rules (top level): minDealSize={'unit': 'POINTS', 'value': 0.1}, maxDealSize={'unit': 'POINTS', 'value': 3250}, minSizeIncrement={'unit': 'POINTS', 'value': 0.1}
-2025-10-11 15:58:46,247 - main - INFO - Market data updated for TECL
-2025-10-11 15:58:46,247 - main - INFO - Market is CLOSED, next open in 49.5 hours
-2025-10-11 15:58:47,198 - bot.api - INFO - Fetched 36 total transactions
-2025-10-11 15:58:47,198 - bot.api - INFO - Transaction types found: {'TRADE', 'SWAP'}
-2025-10-11 15:58:47,450 - bot.api - INFO - Fetched 2 activities
-2025-10-11 15:58:47,450 - bot.api - INFO - Processed 26 complete trades
-2025-10-11 15:58:47,450 - main - INFO - Found 26 historic trades
-2025-10-11 15:58:47,894 - bot.api - INFO - Fetched 36 total transactions
-2025-10-11 15:58:47,894 - bot.api - INFO - Transaction types: {'TRADE', 'SWAP'}
-2025-10-11 15:58:47,896 - main - INFO - Fetched 36 activities in single request
-2025-10-11 15:58:47,896 - main - INFO - Found activity types: {'UNKNOWN'}
-2025-10-11 15:58:47,896 - main - INFO - Found 36 account transactions over 7 days
-2025-10-11 15:58:53,648 - main - INFO - Running data update #3
-2025-10-11 15:58:54,671 - main - INFO - Account balance: $972.33
-2025-10-11 15:58:55,456 - main - INFO - Found 0 open positions
-2025-10-11 15:58:56,232 - bot.api - INFO - Market data keys for TECL: ['instrument', 'dealingRules', 'snapshot']
-2025-10-11 15:58:56,233 - bot.api - INFO - Snapshot for TECL: bid=118.28, offer=118.74, high=None, low=None, percentageChange=-0.14
-2025-10-11 15:58:56,233 - bot.api - INFO - Instrument for TECL: name=Direxion Daily Technology Bull 3X Shares, type=SHARES, marketId=None, expiry=-, lotSize=1
-2025-10-11 15:58:56,233 - bot.api - INFO - Opening hours for TECL: {'mon': ['13:30 - 20:00'], 'tue': ['13:30 - 20:00'], 'wed': ['13:30 - 20:00'], 'thu': ['13:30 - 20:00'], 'fri': ['13:30 - 20:00'], 'sat': [], 'sun': [], 'zone': 'UTC'}
-2025-10-11 15:58:56,233 - bot.api - INFO - Dealing rules (top level): minDealSize={'unit': 'POINTS', 'value': 0.1}, maxDealSize={'unit': 'POINTS', 'value': 3250}, minSizeIncrement={'unit': 'POINTS', 'value': 0.1}
-2025-10-11 15:58:56,233 - main - INFO - Market data updated for TECL
-2025-10-11 15:58:56,233 - main - INFO - Market is CLOSED, next open in 49.5 hours
-2025-10-11 15:58:56,895 - bot.api - INFO - Fetched 36 total transactions
-2025-10-11 15:58:56,895 - bot.api - INFO - Transaction types found: {'TRADE', 'SWAP'}
-2025-10-11 15:58:57,147 - bot.api - INFO - Fetched 2 activities
-2025-10-11 15:58:57,148 - bot.api - INFO - Processed 26 complete trades
-2025-10-11 15:58:57,148 - main - INFO - Found 26 historic trades
-2025-10-11 15:58:57,405 - bot.api - INFO - Fetched 36 total transactions
-2025-10-11 15:58:57,405 - bot.api - INFO - Transaction types: {'TRADE', 'SWAP'}
-2025-10-11 15:58:57,407 - main - INFO - Fetched 36 activities in single request
-2025-10-11 15:58:57,407 - main - INFO - Found activity types: {'UNKNOWN'}
-2025-10-11 15:58:57,407 - main - INFO - Found 36 account transactions over 7 days
-2025-10-11 15:59:03,170 - main - INFO - Running data update #4
-2025-10-11 15:59:04,065 - main - INFO - Account balance: $972.33
-2025-10-11 15:59:04,802 - main - INFO - Found 0 open positions
-2025-10-11 15:59:05,544 - bot.api - INFO - Market data keys for TECL: ['instrument', 'dealingRules', 'snapshot']
-2025-10-11 15:59:05,544 - bot.api - INFO - Snapshot for TECL: bid=118.28, offer=118.74, high=None, low=None, percentageChange=-0.14
-2025-10-11 15:59:05,544 - bot.api - INFO - Instrument for TECL: name=Direxion Daily Technology Bull 3X Shares, type=SHARES, marketId=None, expiry=-, lotSize=1
-2025-10-11 15:59:05,544 - bot.api - INFO - Opening hours for TECL: {'mon': ['13:30 - 20:00'], 'tue': ['13:30 - 20:00'], 'wed': ['13:30 - 20:00'], 'thu': ['13:30 - 20:00'], 'fri': ['13:30 - 20:00'], 'sat': [], 'sun': [], 'zone': 'UTC'}
-2025-10-11 15:59:05,544 - bot.api - INFO - Dealing rules (top level): minDealSize={'unit': 'POINTS', 'value': 0.1}, maxDealSize={'unit': 'POINTS', 'value': 3250}, minSizeIncrement={'unit': 'POINTS', 'value': 0.1}
-2025-10-11 15:59:05,544 - main - INFO - Market data updated for TECL
-2025-10-11 15:59:05,544 - main - INFO - Market is CLOSED, next open in 49.5 hours
-2025-10-11 15:59:06,266 - bot.api - INFO - Fetched 36 total transactions
-2025-10-11 15:59:06,266 - bot.api - INFO - Transaction types found: {'TRADE', 'SWAP'}
-2025-10-11 15:59:06,536 - bot.api - INFO - Fetched 2 activities
-2025-10-11 15:59:06,538 - bot.api - INFO - Processed 26 complete trades
-2025-10-11 15:59:06,538 - main - INFO - Found 26 historic trades
-2025-10-11 15:59:06,726 - main - INFO - Stopping app...
+2025-10-11 16:31:15,565 - bot.settings - INFO - Settings reloaded from file
+2025-10-11 16:31:15,569 - main - INFO - Starting app connection layer...
+2025-10-11 16:31:15,570 - bot.api - INFO - CapitalComAPI.authenticate(environment=demo)
+2025-10-11 16:31:16,869 - bot.api - INFO - Successfully authenticated with Capital.com
+2025-10-11 16:31:18,491 - bot.api - INFO - Switched to account: 290950804147613982
+2025-10-11 16:31:18,491 - main - INFO - Connected to demo account: USD
+2025-10-11 16:31:18,491 - main - INFO - Starting continuous data updates
+2025-10-11 16:31:18,491 - main - INFO - Running data update #1
+2025-10-11 16:31:19,299 - main - INFO - Account balance: $972.33
+2025-10-11 16:31:19,771 - main - INFO - WebSocket connected
+2025-10-11 16:31:20,067 - main - INFO - Found 0 open positions
+2025-10-11 16:31:20,739 - main - INFO - Selecting account 290950804147613982
+2025-10-11 16:31:20,780 - main - INFO - Account structure: accountName=USD, balance_keys=['balance', 'deposit', 'profitLoss', 'available']
+2025-10-11 16:31:20,780 - main - INFO - Balance values: balance=972.33, available=972.33, profitLoss=0.0
+2025-10-11 16:31:20,886 - bot.api - INFO - Market data keys for TECL: ['instrument', 'dealingRules', 'snapshot']
+2025-10-11 16:31:20,886 - bot.api - INFO - Snapshot for TECL: bid=118.28, offer=118.74, high=None, low=None, percentageChange=-0.14
+2025-10-11 16:31:20,886 - bot.api - INFO - Instrument for TECL: name=Direxion Daily Technology Bull 3X Shares, type=SHARES, marketId=None, expiry=-, lotSize=1
+2025-10-11 16:31:20,886 - bot.api - INFO - Opening hours for TECL: {'mon': ['13:30 - 20:00'], 'tue': ['13:30 - 20:00'], 'wed': ['13:30 - 20:00'], 'thu': ['13:30 - 20:00'], 'fri': ['13:30 - 20:00'], 'sat': [], 'sun': [], 'zone': 'UTC'}
+2025-10-11 16:31:20,886 - bot.api - INFO - Dealing rules (top level): minDealSize={'unit': 'POINTS', 'value': 0.1}, maxDealSize={'unit': 'POINTS', 'value': 3250}, minSizeIncrement={'unit': 'POINTS', 'value': 0.1}
+2025-10-11 16:31:20,886 - main - INFO - Market data updated for TECL
+2025-10-11 16:31:20,938 - main - INFO - Market is CLOSED, next open in 49.0 hours
+2025-10-11 16:31:21,764 - bot.api - INFO - Switched to account: 290950804147613982
+2025-10-11 16:31:21,765 - bot.settings - INFO - Settings saved to file
+2025-10-11 16:31:21,765 - bot.settings - INFO - Saved environment account map: demo -> 290950804147613982
+2025-10-11 16:31:22,296 - bot.api - INFO - Fetched 36 total transactions
+2025-10-11 16:31:22,296 - bot.api - INFO - Transaction types found: {'SWAP', 'TRADE'}
+2025-10-11 16:31:22,555 - bot.api - INFO - Fetched 2 activities
+2025-10-11 16:31:22,556 - bot.api - INFO - Processed 26 complete trades
+2025-10-11 16:31:22,556 - main - INFO - Found 26 historic trades
+2025-10-11 16:31:23,242 - bot.api - INFO - Fetched 36 total transactions
+2025-10-11 16:31:23,242 - bot.api - INFO - Transaction types: {'SWAP', 'TRADE'}
+2025-10-11 16:31:23,243 - main - INFO - Fetched 36 activities in single request
+2025-10-11 16:31:23,244 - main - INFO - Found activity types: {'UNKNOWN'}
+2025-10-11 16:31:23,244 - main - INFO - Found 36 account transactions over 7 days
+2025-10-11 16:31:28,249 - bot.settings - INFO - TradingBotSettings.set_value(section=API_CONFIG, key=environment, value=live)
+2025-10-11 16:31:28,251 - bot.settings - INFO - Settings saved to file
+2025-10-11 16:31:28,253 - main - INFO - Environment changed to live; re-authenticating
+2025-10-11 16:31:28,253 - bot.api - INFO - CapitalComAPI.authenticate(environment=live)
+2025-10-11 16:31:29,011 - bot.api - INFO - Successfully authenticated with Capital.com
+2025-10-11 16:31:29,032 - main - INFO - Running data update #2
+2025-10-11 16:31:30,829 - main - INFO - Found 1 open positions
+2025-10-11 16:31:30,829 - main - INFO - Position fields: ['position', 'market']
+2025-10-11 16:31:30,829 - main - INFO - First position: {'position': {'contractSize': 1, 'createdDate': '2025-10-10T23:59:48.717', 'createdDateUTC': '2025-10-10T19:59:48.717', 'dealId': '005050cc-0001-54c4-0000-000080ad0087', 'dealReference': 'p_005050cc-0001-54c4-0000-000080ad0087', 'workingOrderId': '005050cc-0001-54c4-0000-000080ad0086', 'size': 20.8, 'leverage': 5, 'upl': -7.072, 'direction': 'BUY', 'level': 118.62, 'currency': 'USD', 'guaranteedStop': False, 'stopLevel': 113.93, 'trailingStop': False}, 'market': {'instrumentName': 'Direxion Daily Technology Bull 3X Shares', 'instrumentId': 22606835240490180, 'expiry': '-', 'epic': 'TECL', 'symbol': 'TECL', 'instrumentType': 'SHARES', 'marketStatus': 'CLOSED', 'lotSize': 1, 'percentageChange': -0.14, 'bid': 118.28, 'offer': 118.74, 'updateTime': '2025-10-10T23:59:59.322', 'updateTimeUTC': '2025-10-10T19:59:59.322', 'delayTime': 0, 'streamingPricesAvailable': True, 'scalingFactor': 1, 'marketModes': ['LONG_ONLY'], 'pipPosition': 2, 'tickSize': 0.01}}
+2025-10-11 16:31:30,863 - bot.api - INFO - Switched to account: 211640169982416068
+2025-10-11 16:31:31,544 - bot.api - INFO - Market data keys for TECL: ['instrument', 'dealingRules', 'snapshot']
+2025-10-11 16:31:31,544 - bot.api - INFO - Snapshot for TECL: bid=118.28, offer=118.74, high=None, low=None, percentageChange=-0.14
+2025-10-11 16:31:31,544 - bot.api - INFO - Instrument for TECL: name=Direxion Daily Technology Bull 3X Shares, type=SHARES, marketId=None, expiry=-, lotSize=1
+2025-10-11 16:31:31,545 - bot.api - INFO - Opening hours for TECL: {'mon': ['13:30 - 20:00'], 'tue': ['13:30 - 20:00'], 'wed': ['13:30 - 20:00'], 'thu': ['13:30 - 20:00'], 'fri': ['13:30 - 20:00'], 'sat': [], 'sun': [], 'zone': 'UTC'}
+2025-10-11 16:31:31,545 - bot.api - INFO - Dealing rules (top level): minDealSize={'unit': 'POINTS', 'value': 0.1}, maxDealSize={'unit': 'POINTS', 'value': 3250}, minSizeIncrement={'unit': 'POINTS', 'value': 0.1}
+2025-10-11 16:31:31,545 - main - INFO - Market data updated for TECL
+2025-10-11 16:31:31,545 - main - INFO - Market is CLOSED, next open in 49.0 hours
+2025-10-11 16:31:31,609 - main - INFO - Selecting account 211640169982416068
+2025-10-11 16:31:31,818 - bot.api - INFO - Fetched 34 total transactions
+2025-10-11 16:31:31,818 - bot.api - INFO - Transaction types found: {'SWAP', 'REBATE', 'TRADE'}
+2025-10-11 16:31:32,055 - bot.api - INFO - Fetched 0 activities
+2025-10-11 16:31:32,056 - bot.api - INFO - Processed 5 complete trades
+2025-10-11 16:31:32,057 - main - INFO - Found 5 historic trades
+2025-10-11 16:31:32,416 - bot.api - INFO - Fetched 34 total transactions
+2025-10-11 16:31:32,417 - bot.api - INFO - Transaction types: {'SWAP', 'REBATE', 'TRADE'}
+2025-10-11 16:31:32,417 - main - INFO - Fetched 34 activities in single request
+2025-10-11 16:31:32,418 - main - INFO - Found activity types: {'UNKNOWN'}
+2025-10-11 16:31:32,418 - main - INFO - Found 34 account transactions over 7 days
+2025-10-11 16:31:32,588 - bot.api - INFO - Switched to account: 211640169982416068
+2025-10-11 16:31:32,589 - bot.settings - INFO - Settings saved to file
+2025-10-11 16:31:32,589 - bot.settings - INFO - Saved environment account map: live -> 211640169982416068
+2025-10-11 16:31:33,912 - main - INFO - Selecting account 290795266196460740
+2025-10-11 16:31:34,518 - bot.api - INFO - Switched to account: 290795266196460740
+2025-10-11 16:31:34,520 - bot.settings - INFO - Settings saved to file
+2025-10-11 16:31:34,520 - bot.settings - INFO - Saved environment account map: live -> 290795266196460740
+2025-10-11 16:31:38,078 - main - INFO - Running data update #3
+2025-10-11 16:31:38,708 - main - INFO - Account balance: $494.24
+2025-10-11 16:31:39,659 - main - INFO - Found 1 open positions
+2025-10-11 16:31:39,659 - main - INFO - Position fields: ['position', 'market']
+2025-10-11 16:31:39,659 - main - INFO - First position: {'position': {'contractSize': 1, 'createdDate': '2025-10-10T23:59:48.717', 'createdDateUTC': '2025-10-10T19:59:48.717', 'dealId': '005050cc-0001-54c4-0000-000080ad0087', 'dealReference': 'p_005050cc-0001-54c4-0000-000080ad0087', 'workingOrderId': '005050cc-0001-54c4-0000-000080ad0086', 'size': 20.8, 'leverage': 5, 'upl': -7.072, 'direction': 'BUY', 'level': 118.62, 'currency': 'USD', 'guaranteedStop': False, 'stopLevel': 113.93, 'trailingStop': False}, 'market': {'instrumentName': 'Direxion Daily Technology Bull 3X Shares', 'instrumentId': 22606835240490180, 'expiry': '-', 'epic': 'TECL', 'symbol': 'TECL', 'instrumentType': 'SHARES', 'marketStatus': 'CLOSED', 'lotSize': 1, 'percentageChange': -0.14, 'bid': 118.28, 'offer': 118.74, 'updateTime': '2025-10-10T23:59:59.322', 'updateTimeUTC': '2025-10-10T19:59:59.322', 'delayTime': 0, 'streamingPricesAvailable': True, 'scalingFactor': 1, 'marketModes': ['LONG_ONLY'], 'pipPosition': 2, 'tickSize': 0.01}}
+2025-10-11 16:31:40,637 - bot.api - INFO - Market data keys for TECL: ['instrument', 'dealingRules', 'snapshot']
+2025-10-11 16:31:40,638 - bot.api - INFO - Snapshot for TECL: bid=118.28, offer=118.74, high=None, low=None, percentageChange=-0.14
+2025-10-11 16:31:40,638 - bot.api - INFO - Instrument for TECL: name=Direxion Daily Technology Bull 3X Shares, type=SHARES, marketId=None, expiry=-, lotSize=1
+2025-10-11 16:31:40,638 - bot.api - INFO - Opening hours for TECL: {'mon': ['13:30 - 20:00'], 'tue': ['13:30 - 20:00'], 'wed': ['13:30 - 20:00'], 'thu': ['13:30 - 20:00'], 'fri': ['13:30 - 20:00'], 'sat': [], 'sun': [], 'zone': 'UTC'}
+2025-10-11 16:31:40,638 - bot.api - INFO - Dealing rules (top level): minDealSize={'unit': 'POINTS', 'value': 0.1}, maxDealSize={'unit': 'POINTS', 'value': 3250}, minSizeIncrement={'unit': 'POINTS', 'value': 0.1}
+2025-10-11 16:31:40,638 - main - INFO - Market data updated for TECL
+2025-10-11 16:31:40,638 - main - INFO - Market is CLOSED, next open in 49.0 hours
+2025-10-11 16:31:41,256 - bot.api - INFO - Fetched 2 total transactions
+2025-10-11 16:31:41,256 - bot.api - INFO - Transaction types found: {'SWAP', 'DEPOSIT'}
+2025-10-11 16:31:41,488 - bot.api - INFO - Fetched 3 activities
+2025-10-11 16:31:41,489 - bot.api - INFO - Processed 0 complete trades
+2025-10-11 16:31:41,490 - main - INFO - Found 0 historic trades
+2025-10-11 16:31:42,121 - bot.api - INFO - Fetched 2 total transactions
+2025-10-11 16:31:42,121 - bot.api - INFO - Transaction types: {'SWAP', 'DEPOSIT'}
+2025-10-11 16:31:42,122 - main - INFO - Fetched 2 activities in single request
+2025-10-11 16:31:42,122 - main - INFO - Found activity types: {'UNKNOWN'}
+2025-10-11 16:31:42,122 - main - INFO - Found 2 account transactions over 7 days
+2025-10-11 16:31:47,678 - main - INFO - Running data update #4
+2025-10-11 16:31:48,397 - main - INFO - Account balance: $494.24
+2025-10-11 16:31:48,970 - main - INFO - Found 1 open positions
+2025-10-11 16:31:48,970 - main - INFO - Position fields: ['position', 'market']
+2025-10-11 16:31:48,970 - main - INFO - First position: {'position': {'contractSize': 1, 'createdDate': '2025-10-10T23:59:48.717', 'createdDateUTC': '2025-10-10T19:59:48.717', 'dealId': '005050cc-0001-54c4-0000-000080ad0087', 'dealReference': 'p_005050cc-0001-54c4-0000-000080ad0087', 'workingOrderId': '005050cc-0001-54c4-0000-000080ad0086', 'size': 20.8, 'leverage': 5, 'upl': -7.072, 'direction': 'BUY', 'level': 118.62, 'currency': 'USD', 'guaranteedStop': False, 'stopLevel': 113.93, 'trailingStop': False}, 'market': {'instrumentName': 'Direxion Daily Technology Bull 3X Shares', 'instrumentId': 22606835240490180, 'expiry': '-', 'epic': 'TECL', 'symbol': 'TECL', 'instrumentType': 'SHARES', 'marketStatus': 'CLOSED', 'lotSize': 1, 'percentageChange': -0.14, 'bid': 118.28, 'offer': 118.74, 'updateTime': '2025-10-10T23:59:59.322', 'updateTimeUTC': '2025-10-10T19:59:59.322', 'delayTime': 0, 'streamingPricesAvailable': True, 'scalingFactor': 1, 'marketModes': ['LONG_ONLY'], 'pipPosition': 2, 'tickSize': 0.01}}
+2025-10-11 16:31:49,513 - bot.api - INFO - Market data keys for TECL: ['instrument', 'dealingRules', 'snapshot']
+2025-10-11 16:31:49,513 - bot.api - INFO - Snapshot for TECL: bid=118.28, offer=118.74, high=None, low=None, percentageChange=-0.14
+2025-10-11 16:31:49,513 - bot.api - INFO - Instrument for TECL: name=Direxion Daily Technology Bull 3X Shares, type=SHARES, marketId=None, expiry=-, lotSize=1
+2025-10-11 16:31:49,513 - bot.api - INFO - Opening hours for TECL: {'mon': ['13:30 - 20:00'], 'tue': ['13:30 - 20:00'], 'wed': ['13:30 - 20:00'], 'thu': ['13:30 - 20:00'], 'fri': ['13:30 - 20:00'], 'sat': [], 'sun': [], 'zone': 'UTC'}
+2025-10-11 16:31:49,514 - bot.api - INFO - Dealing rules (top level): minDealSize={'unit': 'POINTS', 'value': 0.1}, maxDealSize={'unit': 'POINTS', 'value': 3250}, minSizeIncrement={'unit': 'POINTS', 'value': 0.1}
+2025-10-11 16:31:49,514 - main - INFO - Market data updated for TECL
+2025-10-11 16:31:49,514 - main - INFO - Market is CLOSED, next open in 49.0 hours
+2025-10-11 16:31:49,764 - bot.api - INFO - Fetched 2 total transactions
+2025-10-11 16:31:49,764 - bot.api - INFO - Transaction types found: {'SWAP', 'DEPOSIT'}
+2025-10-11 16:31:50,083 - bot.api - INFO - Fetched 3 activities
+2025-10-11 16:31:50,084 - bot.api - INFO - Processed 0 complete trades
+2025-10-11 16:31:50,085 - main - INFO - Found 0 historic trades
+2025-10-11 16:31:50,342 - bot.api - INFO - Fetched 2 total transactions
+2025-10-11 16:31:50,342 - bot.api - INFO - Transaction types: {'SWAP', 'DEPOSIT'}
+2025-10-11 16:31:50,343 - main - INFO - Fetched 2 activities in single request
+2025-10-11 16:31:50,343 - main - INFO - Found activity types: {'UNKNOWN'}
+2025-10-11 16:31:50,343 - main - INFO - Found 2 account transactions over 7 days
+2025-10-11 16:31:56,284 - main - INFO - Running data update #5
+2025-10-11 16:31:57,390 - main - INFO - Account balance: $494.24
+2025-10-11 16:31:57,983 - main - INFO - Found 1 open positions
+2025-10-11 16:31:57,983 - main - INFO - Position fields: ['position', 'market']
+2025-10-11 16:31:57,983 - main - INFO - First position: {'position': {'contractSize': 1, 'createdDate': '2025-10-10T23:59:48.717', 'createdDateUTC': '2025-10-10T19:59:48.717', 'dealId': '005050cc-0001-54c4-0000-000080ad0087', 'dealReference': 'p_005050cc-0001-54c4-0000-000080ad0087', 'workingOrderId': '005050cc-0001-54c4-0000-000080ad0086', 'size': 20.8, 'leverage': 5, 'upl': -7.072, 'direction': 'BUY', 'level': 118.62, 'currency': 'USD', 'guaranteedStop': False, 'stopLevel': 113.93, 'trailingStop': False}, 'market': {'instrumentName': 'Direxion Daily Technology Bull 3X Shares', 'instrumentId': 22606835240490180, 'expiry': '-', 'epic': 'TECL', 'symbol': 'TECL', 'instrumentType': 'SHARES', 'marketStatus': 'CLOSED', 'lotSize': 1, 'percentageChange': -0.14, 'bid': 118.28, 'offer': 118.74, 'updateTime': '2025-10-10T23:59:59.322', 'updateTimeUTC': '2025-10-10T19:59:59.322', 'delayTime': 0, 'streamingPricesAvailable': True, 'scalingFactor': 1, 'marketModes': ['LONG_ONLY'], 'pipPosition': 2, 'tickSize': 0.01}}
+2025-10-11 16:31:58,570 - bot.api - INFO - Market data keys for TECL: ['instrument', 'dealingRules', 'snapshot']
+2025-10-11 16:31:58,570 - bot.api - INFO - Snapshot for TECL: bid=118.28, offer=118.74, high=None, low=None, percentageChange=-0.14
+2025-10-11 16:31:58,570 - bot.api - INFO - Instrument for TECL: name=Direxion Daily Technology Bull 3X Shares, type=SHARES, marketId=None, expiry=-, lotSize=1
+2025-10-11 16:31:58,570 - bot.api - INFO - Opening hours for TECL: {'mon': ['13:30 - 20:00'], 'tue': ['13:30 - 20:00'], 'wed': ['13:30 - 20:00'], 'thu': ['13:30 - 20:00'], 'fri': ['13:30 - 20:00'], 'sat': [], 'sun': [], 'zone': 'UTC'}
+2025-10-11 16:31:58,570 - bot.api - INFO - Dealing rules (top level): minDealSize={'unit': 'POINTS', 'value': 0.1}, maxDealSize={'unit': 'POINTS', 'value': 3250}, minSizeIncrement={'unit': 'POINTS', 'value': 0.1}
+2025-10-11 16:31:58,570 - main - INFO - Market data updated for TECL
+2025-10-11 16:31:58,570 - main - INFO - Market is CLOSED, next open in 49.0 hours
+2025-10-11 16:31:58,841 - bot.api - INFO - Fetched 2 total transactions
+2025-10-11 16:31:58,841 - bot.api - INFO - Transaction types found: {'SWAP', 'DEPOSIT'}
+2025-10-11 16:31:59,078 - bot.api - INFO - Fetched 3 activities
+2025-10-11 16:31:59,079 - bot.api - INFO - Processed 0 complete trades
+2025-10-11 16:31:59,079 - main - INFO - Found 0 historic trades
+2025-10-11 16:31:59,715 - bot.api - INFO - Fetched 2 total transactions
+2025-10-11 16:31:59,715 - bot.api - INFO - Transaction types: {'SWAP', 'DEPOSIT'}
+2025-10-11 16:31:59,716 - main - INFO - Fetched 2 activities in single request
+2025-10-11 16:31:59,716 - main - INFO - Found activity types: {'UNKNOWN'}
+2025-10-11 16:31:59,716 - main - INFO - Found 2 account transactions over 7 days
+2025-10-11 16:32:05,275 - main - INFO - Running data update #6
+2025-10-11 16:32:05,952 - main - INFO - Account balance: $494.24
+2025-10-11 16:32:06,868 - main - INFO - Found 1 open positions
+2025-10-11 16:32:06,868 - main - INFO - Position fields: ['position', 'market']
+2025-10-11 16:32:06,868 - main - INFO - First position: {'position': {'contractSize': 1, 'createdDate': '2025-10-10T23:59:48.717', 'createdDateUTC': '2025-10-10T19:59:48.717', 'dealId': '005050cc-0001-54c4-0000-000080ad0087', 'dealReference': 'p_005050cc-0001-54c4-0000-000080ad0087', 'workingOrderId': '005050cc-0001-54c4-0000-000080ad0086', 'size': 20.8, 'leverage': 5, 'upl': -7.072, 'direction': 'BUY', 'level': 118.62, 'currency': 'USD', 'guaranteedStop': False, 'stopLevel': 113.93, 'trailingStop': False}, 'market': {'instrumentName': 'Direxion Daily Technology Bull 3X Shares', 'instrumentId': 22606835240490180, 'expiry': '-', 'epic': 'TECL', 'symbol': 'TECL', 'instrumentType': 'SHARES', 'marketStatus': 'CLOSED', 'lotSize': 1, 'percentageChange': -0.14, 'bid': 118.28, 'offer': 118.74, 'updateTime': '2025-10-10T23:59:59.322', 'updateTimeUTC': '2025-10-10T19:59:59.322', 'delayTime': 0, 'streamingPricesAvailable': True, 'scalingFactor': 1, 'marketModes': ['LONG_ONLY'], 'pipPosition': 2, 'tickSize': 0.01}}
+2025-10-11 16:32:07,440 - bot.api - INFO - Market data keys for TECL: ['instrument', 'dealingRules', 'snapshot']
+2025-10-11 16:32:07,440 - bot.api - INFO - Snapshot for TECL: bid=118.28, offer=118.74, high=None, low=None, percentageChange=-0.14
+2025-10-11 16:32:07,440 - bot.api - INFO - Instrument for TECL: name=Direxion Daily Technology Bull 3X Shares, type=SHARES, marketId=None, expiry=-, lotSize=1
+2025-10-11 16:32:07,440 - bot.api - INFO - Opening hours for TECL: {'mon': ['13:30 - 20:00'], 'tue': ['13:30 - 20:00'], 'wed': ['13:30 - 20:00'], 'thu': ['13:30 - 20:00'], 'fri': ['13:30 - 20:00'], 'sat': [], 'sun': [], 'zone': 'UTC'}
+2025-10-11 16:32:07,440 - bot.api - INFO - Dealing rules (top level): minDealSize={'unit': 'POINTS', 'value': 0.1}, maxDealSize={'unit': 'POINTS', 'value': 3250}, minSizeIncrement={'unit': 'POINTS', 'value': 0.1}
+2025-10-11 16:32:07,440 - main - INFO - Market data updated for TECL
+2025-10-11 16:32:07,440 - main - INFO - Market is CLOSED, next open in 49.0 hours
+2025-10-11 16:32:07,692 - bot.api - INFO - Fetched 2 total transactions
+2025-10-11 16:32:07,694 - bot.api - INFO - Transaction types found: {'SWAP', 'DEPOSIT'}
+2025-10-11 16:32:07,963 - bot.api - INFO - Fetched 3 activities
+2025-10-11 16:32:07,965 - bot.api - INFO - Processed 0 complete trades
+2025-10-11 16:32:07,965 - main - INFO - Found 0 historic trades
+2025-10-11 16:32:08,583 - bot.api - INFO - Fetched 2 total transactions
+2025-10-11 16:32:08,583 - bot.api - INFO - Transaction types: {'SWAP', 'DEPOSIT'}
+2025-10-11 16:32:08,584 - main - INFO - Fetched 2 activities in single request
+2025-10-11 16:32:08,584 - main - INFO - Found activity types: {'UNKNOWN'}
+2025-10-11 16:32:08,584 - main - INFO - Found 2 account transactions over 7 days
+2025-10-11 16:32:14,129 - main - INFO - Running data update #7
+2025-10-11 16:32:14,741 - main - INFO - Account balance: $494.24
+2025-10-11 16:32:15,691 - main - INFO - Found 1 open positions
+2025-10-11 16:32:15,691 - main - INFO - Position fields: ['position', 'market']
+2025-10-11 16:32:15,691 - main - INFO - First position: {'position': {'contractSize': 1, 'createdDate': '2025-10-10T23:59:48.717', 'createdDateUTC': '2025-10-10T19:59:48.717', 'dealId': '005050cc-0001-54c4-0000-000080ad0087', 'dealReference': 'p_005050cc-0001-54c4-0000-000080ad0087', 'workingOrderId': '005050cc-0001-54c4-0000-000080ad0086', 'size': 20.8, 'leverage': 5, 'upl': -7.072, 'direction': 'BUY', 'level': 118.62, 'currency': 'USD', 'guaranteedStop': False, 'stopLevel': 113.93, 'trailingStop': False}, 'market': {'instrumentName': 'Direxion Daily Technology Bull 3X Shares', 'instrumentId': 22606835240490180, 'expiry': '-', 'epic': 'TECL', 'symbol': 'TECL', 'instrumentType': 'SHARES', 'marketStatus': 'CLOSED', 'lotSize': 1, 'percentageChange': -0.14, 'bid': 118.28, 'offer': 118.74, 'updateTime': '2025-10-10T23:59:59.322', 'updateTimeUTC': '2025-10-10T19:59:59.322', 'delayTime': 0, 'streamingPricesAvailable': True, 'scalingFactor': 1, 'marketModes': ['LONG_ONLY'], 'pipPosition': 2, 'tickSize': 0.01}}
+2025-10-11 16:32:16,623 - bot.api - INFO - Market data keys for TECL: ['instrument', 'dealingRules', 'snapshot']
+2025-10-11 16:32:16,624 - bot.api - INFO - Snapshot for TECL: bid=118.28, offer=118.74, high=None, low=None, percentageChange=-0.14
+2025-10-11 16:32:16,624 - bot.api - INFO - Instrument for TECL: name=Direxion Daily Technology Bull 3X Shares, type=SHARES, marketId=None, expiry=-, lotSize=1
+2025-10-11 16:32:16,624 - bot.api - INFO - Opening hours for TECL: {'mon': ['13:30 - 20:00'], 'tue': ['13:30 - 20:00'], 'wed': ['13:30 - 20:00'], 'thu': ['13:30 - 20:00'], 'fri': ['13:30 - 20:00'], 'sat': [], 'sun': [], 'zone': 'UTC'}
+2025-10-11 16:32:16,624 - bot.api - INFO - Dealing rules (top level): minDealSize={'unit': 'POINTS', 'value': 0.1}, maxDealSize={'unit': 'POINTS', 'value': 3250}, minSizeIncrement={'unit': 'POINTS', 'value': 0.1}
+2025-10-11 16:32:16,624 - main - INFO - Market data updated for TECL
+2025-10-11 16:32:16,624 - main - INFO - Market is CLOSED, next open in 49.0 hours
+2025-10-11 16:32:16,875 - bot.api - INFO - Fetched 2 total transactions
+2025-10-11 16:32:16,875 - bot.api - INFO - Transaction types found: {'SWAP', 'DEPOSIT'}
+2025-10-11 16:32:17,112 - bot.api - INFO - Fetched 3 activities
+2025-10-11 16:32:17,113 - bot.api - INFO - Processed 0 complete trades
+2025-10-11 16:32:17,113 - main - INFO - Found 0 historic trades
+2025-10-11 16:32:17,367 - bot.api - INFO - Fetched 2 total transactions
+2025-10-11 16:32:17,367 - bot.api - INFO - Transaction types: {'SWAP', 'DEPOSIT'}
+2025-10-11 16:32:17,368 - main - INFO - Fetched 2 activities in single request
+2025-10-11 16:32:17,368 - main - INFO - Found activity types: {'UNKNOWN'}
+2025-10-11 16:32:17,368 - main - INFO - Found 2 account transactions over 7 days
+2025-10-11 16:32:22,992 - main - INFO - Running data update #8
+2025-10-11 16:32:23,604 - main - INFO - Account balance: $494.24
+2025-10-11 16:32:24,546 - main - INFO - Found 1 open positions
+2025-10-11 16:32:24,546 - main - INFO - Position fields: ['position', 'market']
+2025-10-11 16:32:24,547 - main - INFO - First position: {'position': {'contractSize': 1, 'createdDate': '2025-10-10T23:59:48.717', 'createdDateUTC': '2025-10-10T19:59:48.717', 'dealId': '005050cc-0001-54c4-0000-000080ad0087', 'dealReference': 'p_005050cc-0001-54c4-0000-000080ad0087', 'workingOrderId': '005050cc-0001-54c4-0000-000080ad0086', 'size': 20.8, 'leverage': 5, 'upl': -7.072, 'direction': 'BUY', 'level': 118.62, 'currency': 'USD', 'guaranteedStop': False, 'stopLevel': 113.93, 'trailingStop': False}, 'market': {'instrumentName': 'Direxion Daily Technology Bull 3X Shares', 'instrumentId': 22606835240490180, 'expiry': '-', 'epic': 'TECL', 'symbol': 'TECL', 'instrumentType': 'SHARES', 'marketStatus': 'CLOSED', 'lotSize': 1, 'percentageChange': -0.14, 'bid': 118.28, 'offer': 118.74, 'updateTime': '2025-10-10T23:59:59.322', 'updateTimeUTC': '2025-10-10T19:59:59.322', 'delayTime': 0, 'streamingPricesAvailable': True, 'scalingFactor': 1, 'marketModes': ['LONG_ONLY'], 'pipPosition': 2, 'tickSize': 0.01}}
+2025-10-11 16:32:25,122 - bot.api - INFO - Market data keys for TECL: ['instrument', 'dealingRules', 'snapshot']
+2025-10-11 16:32:25,122 - bot.api - INFO - Snapshot for TECL: bid=118.28, offer=118.74, high=None, low=None, percentageChange=-0.14
+2025-10-11 16:32:25,122 - bot.api - INFO - Instrument for TECL: name=Direxion Daily Technology Bull 3X Shares, type=SHARES, marketId=None, expiry=-, lotSize=1
+2025-10-11 16:32:25,122 - bot.api - INFO - Opening hours for TECL: {'mon': ['13:30 - 20:00'], 'tue': ['13:30 - 20:00'], 'wed': ['13:30 - 20:00'], 'thu': ['13:30 - 20:00'], 'fri': ['13:30 - 20:00'], 'sat': [], 'sun': [], 'zone': 'UTC'}
+2025-10-11 16:32:25,122 - bot.api - INFO - Dealing rules (top level): minDealSize={'unit': 'POINTS', 'value': 0.1}, maxDealSize={'unit': 'POINTS', 'value': 3250}, minSizeIncrement={'unit': 'POINTS', 'value': 0.1}
+2025-10-11 16:32:25,122 - main - INFO - Market data updated for TECL
+2025-10-11 16:32:25,122 - main - INFO - Market is CLOSED, next open in 49.0 hours
+2025-10-11 16:32:25,375 - bot.api - INFO - Fetched 2 total transactions
+2025-10-11 16:32:25,375 - bot.api - INFO - Transaction types found: {'SWAP', 'DEPOSIT'}
+2025-10-11 16:32:25,610 - bot.api - INFO - Fetched 3 activities
+2025-10-11 16:32:25,611 - bot.api - INFO - Processed 0 complete trades
+2025-10-11 16:32:25,611 - main - INFO - Found 0 historic trades
+2025-10-11 16:32:26,248 - bot.api - INFO - Fetched 2 total transactions
+2025-10-11 16:32:26,249 - bot.api - INFO - Transaction types: {'SWAP', 'DEPOSIT'}
+2025-10-11 16:32:26,249 - main - INFO - Fetched 2 activities in single request
+2025-10-11 16:32:26,249 - main - INFO - Found activity types: {'UNKNOWN'}
+2025-10-11 16:32:26,249 - main - INFO - Found 2 account transactions over 7 days
+2025-10-11 16:32:31,779 - main - INFO - Running data update #9
+2025-10-11 16:32:32,873 - main - INFO - Account balance: $494.24
+2025-10-11 16:32:33,444 - main - INFO - Found 1 open positions
+2025-10-11 16:32:33,444 - main - INFO - Position fields: ['position', 'market']
+2025-10-11 16:32:33,444 - main - INFO - First position: {'position': {'contractSize': 1, 'createdDate': '2025-10-10T23:59:48.717', 'createdDateUTC': '2025-10-10T19:59:48.717', 'dealId': '005050cc-0001-54c4-0000-000080ad0087', 'dealReference': 'p_005050cc-0001-54c4-0000-000080ad0087', 'workingOrderId': '005050cc-0001-54c4-0000-000080ad0086', 'size': 20.8, 'leverage': 5, 'upl': -7.072, 'direction': 'BUY', 'level': 118.62, 'currency': 'USD', 'guaranteedStop': False, 'stopLevel': 113.93, 'trailingStop': False}, 'market': {'instrumentName': 'Direxion Daily Technology Bull 3X Shares', 'instrumentId': 22606835240490180, 'expiry': '-', 'epic': 'TECL', 'symbol': 'TECL', 'instrumentType': 'SHARES', 'marketStatus': 'CLOSED', 'lotSize': 1, 'percentageChange': -0.14, 'bid': 118.28, 'offer': 118.74, 'updateTime': '2025-10-10T23:59:59.322', 'updateTimeUTC': '2025-10-10T19:59:59.322', 'delayTime': 0, 'streamingPricesAvailable': True, 'scalingFactor': 1, 'marketModes': ['LONG_ONLY'], 'pipPosition': 2, 'tickSize': 0.01}}
+2025-10-11 16:32:34,021 - bot.api - INFO - Market data keys for TECL: ['instrument', 'dealingRules', 'snapshot']
+2025-10-11 16:32:34,021 - bot.api - INFO - Snapshot for TECL: bid=118.28, offer=118.74, high=None, low=None, percentageChange=-0.14
+2025-10-11 16:32:34,021 - bot.api - INFO - Instrument for TECL: name=Direxion Daily Technology Bull 3X Shares, type=SHARES, marketId=None, expiry=-, lotSize=1
+2025-10-11 16:32:34,021 - bot.api - INFO - Opening hours for TECL: {'mon': ['13:30 - 20:00'], 'tue': ['13:30 - 20:00'], 'wed': ['13:30 - 20:00'], 'thu': ['13:30 - 20:00'], 'fri': ['13:30 - 20:00'], 'sat': [], 'sun': [], 'zone': 'UTC'}
+2025-10-11 16:32:34,021 - bot.api - INFO - Dealing rules (top level): minDealSize={'unit': 'POINTS', 'value': 0.1}, maxDealSize={'unit': 'POINTS', 'value': 3250}, minSizeIncrement={'unit': 'POINTS', 'value': 0.1}
+2025-10-11 16:32:34,021 - main - INFO - Market data updated for TECL
+2025-10-11 16:32:34,021 - main - INFO - Market is CLOSED, next open in 49.0 hours
+2025-10-11 16:32:34,271 - bot.api - INFO - Fetched 2 total transactions
+2025-10-11 16:32:34,273 - bot.api - INFO - Transaction types found: {'SWAP', 'DEPOSIT'}
+2025-10-11 16:32:34,534 - bot.api - INFO - Fetched 3 activities
+2025-10-11 16:32:34,535 - bot.api - INFO - Processed 0 complete trades
+2025-10-11 16:32:34,535 - main - INFO - Found 0 historic trades
+2025-10-11 16:32:34,777 - bot.api - INFO - Fetched 2 total transactions
+2025-10-11 16:32:34,777 - bot.api - INFO - Transaction types: {'SWAP', 'DEPOSIT'}
+2025-10-11 16:32:34,779 - main - INFO - Fetched 2 activities in single request
+2025-10-11 16:32:34,779 - main - INFO - Found activity types: {'UNKNOWN'}
+2025-10-11 16:32:34,779 - main - INFO - Found 2 account transactions over 7 days
+2025-10-11 16:32:40,303 - main - INFO - Running data update #10
+2025-10-11 16:32:40,955 - main - INFO - Account balance: $494.24
+2025-10-11 16:32:41,579 - main - INFO - Found 1 open positions
+2025-10-11 16:32:41,579 - main - INFO - Position fields: ['position', 'market']
+2025-10-11 16:32:41,579 - main - INFO - First position: {'position': {'contractSize': 1, 'createdDate': '2025-10-10T23:59:48.717', 'createdDateUTC': '2025-10-10T19:59:48.717', 'dealId': '005050cc-0001-54c4-0000-000080ad0087', 'dealReference': 'p_005050cc-0001-54c4-0000-000080ad0087', 'workingOrderId': '005050cc-0001-54c4-0000-000080ad0086', 'size': 20.8, 'leverage': 5, 'upl': -7.072, 'direction': 'BUY', 'level': 118.62, 'currency': 'USD', 'guaranteedStop': False, 'stopLevel': 113.93, 'trailingStop': False}, 'market': {'instrumentName': 'Direxion Daily Technology Bull 3X Shares', 'instrumentId': 22606835240490180, 'expiry': '-', 'epic': 'TECL', 'symbol': 'TECL', 'instrumentType': 'SHARES', 'marketStatus': 'CLOSED', 'lotSize': 1, 'percentageChange': -0.14, 'bid': 118.28, 'offer': 118.74, 'updateTime': '2025-10-10T23:59:59.322', 'updateTimeUTC': '2025-10-10T19:59:59.322', 'delayTime': 0, 'streamingPricesAvailable': True, 'scalingFactor': 1, 'marketModes': ['LONG_ONLY'], 'pipPosition': 2, 'tickSize': 0.01}}
+2025-10-11 16:32:42,120 - bot.api - INFO - Market data keys for TECL: ['instrument', 'dealingRules', 'snapshot']
+2025-10-11 16:32:42,120 - bot.api - INFO - Snapshot for TECL: bid=118.28, offer=118.74, high=None, low=None, percentageChange=-0.14
+2025-10-11 16:32:42,120 - bot.api - INFO - Instrument for TECL: name=Direxion Daily Technology Bull 3X Shares, type=SHARES, marketId=None, expiry=-, lotSize=1
+2025-10-11 16:32:42,120 - bot.api - INFO - Opening hours for TECL: {'mon': ['13:30 - 20:00'], 'tue': ['13:30 - 20:00'], 'wed': ['13:30 - 20:00'], 'thu': ['13:30 - 20:00'], 'fri': ['13:30 - 20:00'], 'sat': [], 'sun': [], 'zone': 'UTC'}
+2025-10-11 16:32:42,120 - bot.api - INFO - Dealing rules (top level): minDealSize={'unit': 'POINTS', 'value': 0.1}, maxDealSize={'unit': 'POINTS', 'value': 3250}, minSizeIncrement={'unit': 'POINTS', 'value': 0.1}
+2025-10-11 16:32:42,120 - main - INFO - Market data updated for TECL
+2025-10-11 16:32:42,120 - main - INFO - Market is CLOSED, next open in 49.0 hours
+2025-10-11 16:32:42,373 - bot.api - INFO - Fetched 2 total transactions
+2025-10-11 16:32:42,374 - bot.api - INFO - Transaction types found: {'SWAP', 'DEPOSIT'}
+2025-10-11 16:32:42,626 - bot.api - INFO - Fetched 3 activities
+2025-10-11 16:32:42,627 - bot.api - INFO - Processed 0 complete trades
+2025-10-11 16:32:42,627 - main - INFO - Found 0 historic trades
+2025-10-11 16:32:42,879 - bot.api - INFO - Fetched 2 total transactions
+2025-10-11 16:32:42,879 - bot.api - INFO - Transaction types: {'SWAP', 'DEPOSIT'}
+2025-10-11 16:32:42,880 - main - INFO - Fetched 2 activities in single request
+2025-10-11 16:32:42,880 - main - INFO - Found activity types: {'UNKNOWN'}
+2025-10-11 16:32:42,880 - main - INFO - Found 2 account transactions over 7 days
+2025-10-11 16:32:48,502 - main - INFO - Running data update #11
+2025-10-11 16:32:49,243 - main - INFO - Account balance: $494.24
+2025-10-11 16:32:50,444 - main - INFO - Found 1 open positions
+2025-10-11 16:32:50,444 - main - INFO - Position fields: ['position', 'market']
+2025-10-11 16:32:50,444 - main - INFO - First position: {'position': {'contractSize': 1, 'createdDate': '2025-10-10T23:59:48.717', 'createdDateUTC': '2025-10-10T19:59:48.717', 'dealId': '005050cc-0001-54c4-0000-000080ad0087', 'dealReference': 'p_005050cc-0001-54c4-0000-000080ad0087', 'workingOrderId': '005050cc-0001-54c4-0000-000080ad0086', 'size': 20.8, 'leverage': 5, 'upl': -7.072, 'direction': 'BUY', 'level': 118.62, 'currency': 'USD', 'guaranteedStop': False, 'stopLevel': 113.93, 'trailingStop': False}, 'market': {'instrumentName': 'Direxion Daily Technology Bull 3X Shares', 'instrumentId': 22606835240490180, 'expiry': '-', 'epic': 'TECL', 'symbol': 'TECL', 'instrumentType': 'SHARES', 'marketStatus': 'CLOSED', 'lotSize': 1, 'percentageChange': -0.14, 'bid': 118.28, 'offer': 118.74, 'updateTime': '2025-10-10T23:59:59.322', 'updateTimeUTC': '2025-10-10T19:59:59.322', 'delayTime': 0, 'streamingPricesAvailable': True, 'scalingFactor': 1, 'marketModes': ['LONG_ONLY'], 'pipPosition': 2, 'tickSize': 0.01}}
+2025-10-11 16:32:50,990 - bot.api - INFO - Market data keys for TECL: ['instrument', 'dealingRules', 'snapshot']
+2025-10-11 16:32:50,990 - bot.api - INFO - Snapshot for TECL: bid=118.28, offer=118.74, high=None, low=None, percentageChange=-0.14
+2025-10-11 16:32:50,990 - bot.api - INFO - Instrument for TECL: name=Direxion Daily Technology Bull 3X Shares, type=SHARES, marketId=None, expiry=-, lotSize=1
+2025-10-11 16:32:50,990 - bot.api - INFO - Opening hours for TECL: {'mon': ['13:30 - 20:00'], 'tue': ['13:30 - 20:00'], 'wed': ['13:30 - 20:00'], 'thu': ['13:30 - 20:00'], 'fri': ['13:30 - 20:00'], 'sat': [], 'sun': [], 'zone': 'UTC'}
+2025-10-11 16:32:50,990 - bot.api - INFO - Dealing rules (top level): minDealSize={'unit': 'POINTS', 'value': 0.1}, maxDealSize={'unit': 'POINTS', 'value': 3250}, minSizeIncrement={'unit': 'POINTS', 'value': 0.1}
+2025-10-11 16:32:50,990 - main - INFO - Market data updated for TECL
+2025-10-11 16:32:50,990 - main - INFO - Market is CLOSED, next open in 49.0 hours
+2025-10-11 16:32:51,618 - bot.api - INFO - Fetched 2 total transactions
+2025-10-11 16:32:51,618 - bot.api - INFO - Transaction types found: {'SWAP', 'DEPOSIT'}
+2025-10-11 16:32:51,854 - bot.api - INFO - Fetched 3 activities
+2025-10-11 16:32:51,855 - bot.api - INFO - Processed 0 complete trades
+2025-10-11 16:32:51,855 - main - INFO - Found 0 historic trades
+2025-10-11 16:32:52,111 - bot.api - INFO - Fetched 2 total transactions
+2025-10-11 16:32:52,111 - bot.api - INFO - Transaction types: {'SWAP', 'DEPOSIT'}
+2025-10-11 16:32:52,112 - main - INFO - Fetched 2 activities in single request
+2025-10-11 16:32:52,112 - main - INFO - Found activity types: {'UNKNOWN'}
+2025-10-11 16:32:52,112 - main - INFO - Found 2 account transactions over 7 days
+2025-10-11 16:32:57,755 - main - INFO - Running data update #12
+2025-10-11 16:32:58,391 - main - INFO - Account balance: $494.24
+2025-10-11 16:32:59,368 - main - INFO - Found 1 open positions
+2025-10-11 16:32:59,368 - main - INFO - Position fields: ['position', 'market']
+2025-10-11 16:32:59,369 - main - INFO - First position: {'position': {'contractSize': 1, 'createdDate': '2025-10-10T23:59:48.717', 'createdDateUTC': '2025-10-10T19:59:48.717', 'dealId': '005050cc-0001-54c4-0000-000080ad0087', 'dealReference': 'p_005050cc-0001-54c4-0000-000080ad0087', 'workingOrderId': '005050cc-0001-54c4-0000-000080ad0086', 'size': 20.8, 'leverage': 5, 'upl': -7.072, 'direction': 'BUY', 'level': 118.62, 'currency': 'USD', 'guaranteedStop': False, 'stopLevel': 113.93, 'trailingStop': False}, 'market': {'instrumentName': 'Direxion Daily Technology Bull 3X Shares', 'instrumentId': 22606835240490180, 'expiry': '-', 'epic': 'TECL', 'symbol': 'TECL', 'instrumentType': 'SHARES', 'marketStatus': 'CLOSED', 'lotSize': 1, 'percentageChange': -0.14, 'bid': 118.28, 'offer': 118.74, 'updateTime': '2025-10-10T23:59:59.322', 'updateTimeUTC': '2025-10-10T19:59:59.322', 'delayTime': 0, 'streamingPricesAvailable': True, 'scalingFactor': 1, 'marketModes': ['LONG_ONLY'], 'pipPosition': 2, 'tickSize': 0.01}}
+2025-10-11 16:33:00,000 - bot.api - INFO - Market data keys for TECL: ['instrument', 'dealingRules', 'snapshot']
+2025-10-11 16:33:00,001 - bot.api - INFO - Snapshot for TECL: bid=118.28, offer=118.74, high=None, low=None, percentageChange=-0.14
+2025-10-11 16:33:00,001 - bot.api - INFO - Instrument for TECL: name=Direxion Daily Technology Bull 3X Shares, type=SHARES, marketId=None, expiry=-, lotSize=1
+2025-10-11 16:33:00,001 - bot.api - INFO - Opening hours for TECL: {'mon': ['13:30 - 20:00'], 'tue': ['13:30 - 20:00'], 'wed': ['13:30 - 20:00'], 'thu': ['13:30 - 20:00'], 'fri': ['13:30 - 20:00'], 'sat': [], 'sun': [], 'zone': 'UTC'}
+2025-10-11 16:33:00,001 - bot.api - INFO - Dealing rules (top level): minDealSize={'unit': 'POINTS', 'value': 0.1}, maxDealSize={'unit': 'POINTS', 'value': 3250}, minSizeIncrement={'unit': 'POINTS', 'value': 0.1}
+2025-10-11 16:33:00,001 - main - INFO - Market data updated for TECL
+2025-10-11 16:33:00,001 - main - INFO - Market is CLOSED, next open in 48.9 hours
+2025-10-11 16:33:00,270 - bot.api - INFO - Fetched 2 total transactions
+2025-10-11 16:33:00,271 - bot.api - INFO - Transaction types found: {'SWAP', 'DEPOSIT'}
+2025-10-11 16:33:00,509 - bot.api - INFO - Fetched 3 activities
+2025-10-11 16:33:00,509 - bot.api - INFO - Processed 0 complete trades
+2025-10-11 16:33:00,509 - main - INFO - Found 0 historic trades
+2025-10-11 16:33:01,132 - bot.api - INFO - Fetched 2 total transactions
+2025-10-11 16:33:01,132 - bot.api - INFO - Transaction types: {'SWAP', 'DEPOSIT'}
+2025-10-11 16:33:01,133 - main - INFO - Fetched 2 activities in single request
+2025-10-11 16:33:01,133 - main - INFO - Found activity types: {'UNKNOWN'}
+2025-10-11 16:33:01,133 - main - INFO - Found 2 account transactions over 7 days
+2025-10-11 16:33:06,675 - main - INFO - Running data update #13
+2025-10-11 16:33:07,403 - main - INFO - Account balance: $494.24
+2025-10-11 16:33:08,008 - main - INFO - Found 1 open positions
+2025-10-11 16:33:08,008 - main - INFO - Position fields: ['position', 'market']
+2025-10-11 16:33:08,008 - main - INFO - First position: {'position': {'contractSize': 1, 'createdDate': '2025-10-10T23:59:48.717', 'createdDateUTC': '2025-10-10T19:59:48.717', 'dealId': '005050cc-0001-54c4-0000-000080ad0087', 'dealReference': 'p_005050cc-0001-54c4-0000-000080ad0087', 'workingOrderId': '005050cc-0001-54c4-0000-000080ad0086', 'size': 20.8, 'leverage': 5, 'upl': -7.072, 'direction': 'BUY', 'level': 118.62, 'currency': 'USD', 'guaranteedStop': False, 'stopLevel': 113.93, 'trailingStop': False}, 'market': {'instrumentName': 'Direxion Daily Technology Bull 3X Shares', 'instrumentId': 22606835240490180, 'expiry': '-', 'epic': 'TECL', 'symbol': 'TECL', 'instrumentType': 'SHARES', 'marketStatus': 'CLOSED', 'lotSize': 1, 'percentageChange': -0.14, 'bid': 118.28, 'offer': 118.74, 'updateTime': '2025-10-10T23:59:59.322', 'updateTimeUTC': '2025-10-10T19:59:59.322', 'delayTime': 0, 'streamingPricesAvailable': True, 'scalingFactor': 1, 'marketModes': ['LONG_ONLY'], 'pipPosition': 2, 'tickSize': 0.01}}
+2025-10-11 16:33:08,592 - bot.api - INFO - Market data keys for TECL: ['instrument', 'dealingRules', 'snapshot']
+2025-10-11 16:33:08,592 - bot.api - INFO - Snapshot for TECL: bid=118.28, offer=118.74, high=None, low=None, percentageChange=-0.14
+2025-10-11 16:33:08,592 - bot.api - INFO - Instrument for TECL: name=Direxion Daily Technology Bull 3X Shares, type=SHARES, marketId=None, expiry=-, lotSize=1
+2025-10-11 16:33:08,592 - bot.api - INFO - Opening hours for TECL: {'mon': ['13:30 - 20:00'], 'tue': ['13:30 - 20:00'], 'wed': ['13:30 - 20:00'], 'thu': ['13:30 - 20:00'], 'fri': ['13:30 - 20:00'], 'sat': [], 'sun': [], 'zone': 'UTC'}
+2025-10-11 16:33:08,592 - bot.api - INFO - Dealing rules (top level): minDealSize={'unit': 'POINTS', 'value': 0.1}, maxDealSize={'unit': 'POINTS', 'value': 3250}, minSizeIncrement={'unit': 'POINTS', 'value': 0.1}
+2025-10-11 16:33:08,592 - main - INFO - Market data updated for TECL
+2025-10-11 16:33:08,592 - main - INFO - Market is CLOSED, next open in 48.9 hours
+2025-10-11 16:33:09,215 - bot.api - INFO - Fetched 2 total transactions
+2025-10-11 16:33:09,215 - bot.api - INFO - Transaction types found: {'SWAP', 'DEPOSIT'}
+2025-10-11 16:33:09,455 - bot.api - INFO - Fetched 3 activities
+2025-10-11 16:33:09,456 - bot.api - INFO - Processed 0 complete trades
+2025-10-11 16:33:09,456 - main - INFO - Found 0 historic trades
+2025-10-11 16:33:10,081 - bot.api - INFO - Fetched 2 total transactions
+2025-10-11 16:33:10,082 - bot.api - INFO - Transaction types: {'SWAP', 'DEPOSIT'}
+2025-10-11 16:33:10,082 - main - INFO - Fetched 2 activities in single request
+2025-10-11 16:33:10,083 - main - INFO - Found activity types: {'UNKNOWN'}
+2025-10-11 16:33:10,083 - main - INFO - Found 2 account transactions over 7 days
+2025-10-11 16:33:16,605 - main - INFO - Running data update #14
+2025-10-11 16:33:17,285 - main - INFO - Account balance: $494.24
+2025-10-11 16:33:17,847 - main - INFO - Found 1 open positions
+2025-10-11 16:33:17,848 - main - INFO - Position fields: ['position', 'market']
+2025-10-11 16:33:17,848 - main - INFO - First position: {'position': {'contractSize': 1, 'createdDate': '2025-10-10T23:59:48.717', 'createdDateUTC': '2025-10-10T19:59:48.717', 'dealId': '005050cc-0001-54c4-0000-000080ad0087', 'dealReference': 'p_005050cc-0001-54c4-0000-000080ad0087', 'workingOrderId': '005050cc-0001-54c4-0000-000080ad0086', 'size': 20.8, 'leverage': 5, 'upl': -7.072, 'direction': 'BUY', 'level': 118.62, 'currency': 'USD', 'guaranteedStop': False, 'stopLevel': 113.93, 'trailingStop': False}, 'market': {'instrumentName': 'Direxion Daily Technology Bull 3X Shares', 'instrumentId': 22606835240490180, 'expiry': '-', 'epic': 'TECL', 'symbol': 'TECL', 'instrumentType': 'SHARES', 'marketStatus': 'CLOSED', 'lotSize': 1, 'percentageChange': -0.14, 'bid': 118.28, 'offer': 118.74, 'updateTime': '2025-10-10T23:59:59.322', 'updateTimeUTC': '2025-10-10T19:59:59.322', 'delayTime': 0, 'streamingPricesAvailable': True, 'scalingFactor': 1, 'marketModes': ['LONG_ONLY'], 'pipPosition': 2, 'tickSize': 0.01}}
+2025-10-11 16:33:19,987 - bot.api - INFO - Market data keys for TECL: ['instrument', 'dealingRules', 'snapshot']
+2025-10-11 16:33:19,987 - bot.api - INFO - Snapshot for TECL: bid=118.28, offer=118.74, high=None, low=None, percentageChange=-0.14
+2025-10-11 16:33:19,987 - bot.api - INFO - Instrument for TECL: name=Direxion Daily Technology Bull 3X Shares, type=SHARES, marketId=None, expiry=-, lotSize=1
+2025-10-11 16:33:19,987 - bot.api - INFO - Opening hours for TECL: {'mon': ['13:30 - 20:00'], 'tue': ['13:30 - 20:00'], 'wed': ['13:30 - 20:00'], 'thu': ['13:30 - 20:00'], 'fri': ['13:30 - 20:00'], 'sat': [], 'sun': [], 'zone': 'UTC'}
+2025-10-11 16:33:19,988 - bot.api - INFO - Dealing rules (top level): minDealSize={'unit': 'POINTS', 'value': 0.1}, maxDealSize={'unit': 'POINTS', 'value': 3250}, minSizeIncrement={'unit': 'POINTS', 'value': 0.1}
+2025-10-11 16:33:19,988 - main - INFO - Market data updated for TECL
+2025-10-11 16:33:19,988 - main - INFO - Market is CLOSED, next open in 48.9 hours
+2025-10-11 16:33:20,243 - bot.api - INFO - Fetched 2 total transactions
+2025-10-11 16:33:20,243 - bot.api - INFO - Transaction types found: {'SWAP', 'DEPOSIT'}
+2025-10-11 16:33:20,478 - bot.api - INFO - Fetched 3 activities
+2025-10-11 16:33:20,478 - bot.api - INFO - Processed 0 complete trades
+2025-10-11 16:33:20,479 - main - INFO - Found 0 historic trades
+2025-10-11 16:33:21,117 - bot.api - INFO - Fetched 2 total transactions
+2025-10-11 16:33:21,117 - bot.api - INFO - Transaction types: {'SWAP', 'DEPOSIT'}
+2025-10-11 16:33:21,118 - main - INFO - Fetched 2 activities in single request
+2025-10-11 16:33:21,118 - main - INFO - Found activity types: {'UNKNOWN'}
+2025-10-11 16:33:21,118 - main - INFO - Found 2 account transactions over 7 days
+2025-10-11 16:33:27,074 - main - INFO - Running data update #15
+2025-10-11 16:33:28,040 - main - INFO - Account balance: $494.24
+2025-10-11 16:33:28,597 - main - INFO - Found 1 open positions
+2025-10-11 16:33:28,597 - main - INFO - Position fields: ['position', 'market']
+2025-10-11 16:33:28,597 - main - INFO - First position: {'position': {'contractSize': 1, 'createdDate': '2025-10-10T23:59:48.717', 'createdDateUTC': '2025-10-10T19:59:48.717', 'dealId': '005050cc-0001-54c4-0000-000080ad0087', 'dealReference': 'p_005050cc-0001-54c4-0000-000080ad0087', 'workingOrderId': '005050cc-0001-54c4-0000-000080ad0086', 'size': 20.8, 'leverage': 5, 'upl': -7.072, 'direction': 'BUY', 'level': 118.62, 'currency': 'USD', 'guaranteedStop': False, 'stopLevel': 113.93, 'trailingStop': False}, 'market': {'instrumentName': 'Direxion Daily Technology Bull 3X Shares', 'instrumentId': 22606835240490180, 'expiry': '-', 'epic': 'TECL', 'symbol': 'TECL', 'instrumentType': 'SHARES', 'marketStatus': 'CLOSED', 'lotSize': 1, 'percentageChange': -0.14, 'bid': 118.28, 'offer': 118.74, 'updateTime': '2025-10-10T23:59:59.322', 'updateTimeUTC': '2025-10-10T19:59:59.322', 'delayTime': 0, 'streamingPricesAvailable': True, 'scalingFactor': 1, 'marketModes': ['LONG_ONLY'], 'pipPosition': 2, 'tickSize': 0.01}}
+2025-10-11 16:33:29,157 - bot.api - INFO - Market data keys for TECL: ['instrument', 'dealingRules', 'snapshot']
+2025-10-11 16:33:29,157 - bot.api - INFO - Snapshot for TECL: bid=118.28, offer=118.74, high=None, low=None, percentageChange=-0.14
+2025-10-11 16:33:29,157 - bot.api - INFO - Instrument for TECL: name=Direxion Daily Technology Bull 3X Shares, type=SHARES, marketId=None, expiry=-, lotSize=1
+2025-10-11 16:33:29,157 - bot.api - INFO - Opening hours for TECL: {'mon': ['13:30 - 20:00'], 'tue': ['13:30 - 20:00'], 'wed': ['13:30 - 20:00'], 'thu': ['13:30 - 20:00'], 'fri': ['13:30 - 20:00'], 'sat': [], 'sun': [], 'zone': 'UTC'}
+2025-10-11 16:33:29,157 - bot.api - INFO - Dealing rules (top level): minDealSize={'unit': 'POINTS', 'value': 0.1}, maxDealSize={'unit': 'POINTS', 'value': 3250}, minSizeIncrement={'unit': 'POINTS', 'value': 0.1}
+2025-10-11 16:33:29,157 - main - INFO - Market data updated for TECL
+2025-10-11 16:33:29,158 - main - INFO - Market is CLOSED, next open in 48.9 hours
+2025-10-11 16:33:29,782 - bot.api - INFO - Fetched 2 total transactions
+2025-10-11 16:33:29,783 - bot.api - INFO - Transaction types found: {'SWAP', 'DEPOSIT'}
+2025-10-11 16:33:30,019 - bot.api - INFO - Fetched 3 activities
+2025-10-11 16:33:30,020 - bot.api - INFO - Processed 0 complete trades
+2025-10-11 16:33:30,020 - main - INFO - Found 0 historic trades
+2025-10-11 16:33:30,271 - bot.api - INFO - Fetched 2 total transactions
+2025-10-11 16:33:30,271 - bot.api - INFO - Transaction types: {'SWAP', 'DEPOSIT'}
+2025-10-11 16:33:30,272 - main - INFO - Fetched 2 activities in single request
+2025-10-11 16:33:30,272 - main - INFO - Found activity types: {'UNKNOWN'}
+2025-10-11 16:33:30,272 - main - INFO - Found 2 account transactions over 7 days
+2025-10-11 16:33:35,883 - main - INFO - Running data update #16
+2025-10-11 16:33:36,863 - main - INFO - Account balance: $494.24
+2025-10-11 16:33:37,587 - main - INFO - Found 1 open positions
+2025-10-11 16:33:37,587 - main - INFO - Position fields: ['position', 'market']
+2025-10-11 16:33:37,587 - main - INFO - First position: {'position': {'contractSize': 1, 'createdDate': '2025-10-10T23:59:48.717', 'createdDateUTC': '2025-10-10T19:59:48.717', 'dealId': '005050cc-0001-54c4-0000-000080ad0087', 'dealReference': 'p_005050cc-0001-54c4-0000-000080ad0087', 'workingOrderId': '005050cc-0001-54c4-0000-000080ad0086', 'size': 20.8, 'leverage': 5, 'upl': -7.072, 'direction': 'BUY', 'level': 118.62, 'currency': 'USD', 'guaranteedStop': False, 'stopLevel': 113.93, 'trailingStop': False}, 'market': {'instrumentName': 'Direxion Daily Technology Bull 3X Shares', 'instrumentId': 22606835240490180, 'expiry': '-', 'epic': 'TECL', 'symbol': 'TECL', 'instrumentType': 'SHARES', 'marketStatus': 'CLOSED', 'lotSize': 1, 'percentageChange': -0.14, 'bid': 118.28, 'offer': 118.74, 'updateTime': '2025-10-10T23:59:59.322', 'updateTimeUTC': '2025-10-10T19:59:59.322', 'delayTime': 0, 'streamingPricesAvailable': True, 'scalingFactor': 1, 'marketModes': ['LONG_ONLY'], 'pipPosition': 2, 'tickSize': 0.01}}
+2025-10-11 16:33:38,583 - bot.api - INFO - Market data keys for TECL: ['instrument', 'dealingRules', 'snapshot']
+2025-10-11 16:33:38,583 - bot.api - INFO - Snapshot for TECL: bid=118.28, offer=118.74, high=None, low=None, percentageChange=-0.14
+2025-10-11 16:33:38,583 - bot.api - INFO - Instrument for TECL: name=Direxion Daily Technology Bull 3X Shares, type=SHARES, marketId=None, expiry=-, lotSize=1
+2025-10-11 16:33:38,583 - bot.api - INFO - Opening hours for TECL: {'mon': ['13:30 - 20:00'], 'tue': ['13:30 - 20:00'], 'wed': ['13:30 - 20:00'], 'thu': ['13:30 - 20:00'], 'fri': ['13:30 - 20:00'], 'sat': [], 'sun': [], 'zone': 'UTC'}
+2025-10-11 16:33:38,584 - bot.api - INFO - Dealing rules (top level): minDealSize={'unit': 'POINTS', 'value': 0.1}, maxDealSize={'unit': 'POINTS', 'value': 3250}, minSizeIncrement={'unit': 'POINTS', 'value': 0.1}
+2025-10-11 16:33:38,584 - main - INFO - Market data updated for TECL
+2025-10-11 16:33:38,584 - main - INFO - Market is CLOSED, next open in 48.9 hours
+2025-10-11 16:33:38,844 - bot.api - INFO - Fetched 2 total transactions
+2025-10-11 16:33:38,845 - bot.api - INFO - Transaction types found: {'SWAP', 'DEPOSIT'}
+2025-10-11 16:33:39,087 - bot.api - INFO - Fetched 3 activities
+2025-10-11 16:33:39,088 - bot.api - INFO - Processed 0 complete trades
+2025-10-11 16:33:39,088 - main - INFO - Found 0 historic trades
+2025-10-11 16:33:39,364 - bot.api - INFO - Fetched 2 total transactions
+2025-10-11 16:33:39,365 - bot.api - INFO - Transaction types: {'SWAP', 'DEPOSIT'}
+2025-10-11 16:33:39,365 - main - INFO - Fetched 2 activities in single request
+2025-10-11 16:33:39,366 - main - INFO - Found activity types: {'UNKNOWN'}
+2025-10-11 16:33:39,366 - main - INFO - Found 2 account transactions over 7 days
+2025-10-11 16:33:44,954 - main - INFO - Running data update #17
+2025-10-11 16:33:45,990 - main - INFO - Account balance: $494.24
+2025-10-11 16:33:46,542 - main - INFO - Found 1 open positions
+2025-10-11 16:33:46,542 - main - INFO - Position fields: ['position', 'market']
+2025-10-11 16:33:46,542 - main - INFO - First position: {'position': {'contractSize': 1, 'createdDate': '2025-10-10T23:59:48.717', 'createdDateUTC': '2025-10-10T19:59:48.717', 'dealId': '005050cc-0001-54c4-0000-000080ad0087', 'dealReference': 'p_005050cc-0001-54c4-0000-000080ad0087', 'workingOrderId': '005050cc-0001-54c4-0000-000080ad0086', 'size': 20.8, 'leverage': 5, 'upl': -7.072, 'direction': 'BUY', 'level': 118.62, 'currency': 'USD', 'guaranteedStop': False, 'stopLevel': 113.93, 'trailingStop': False}, 'market': {'instrumentName': 'Direxion Daily Technology Bull 3X Shares', 'instrumentId': 22606835240490180, 'expiry': '-', 'epic': 'TECL', 'symbol': 'TECL', 'instrumentType': 'SHARES', 'marketStatus': 'CLOSED', 'lotSize': 1, 'percentageChange': -0.14, 'bid': 118.28, 'offer': 118.74, 'updateTime': '2025-10-10T23:59:59.322', 'updateTimeUTC': '2025-10-10T19:59:59.322', 'delayTime': 0, 'streamingPricesAvailable': True, 'scalingFactor': 1, 'marketModes': ['LONG_ONLY'], 'pipPosition': 2, 'tickSize': 0.01}}
+2025-10-11 16:33:47,531 - bot.api - INFO - Market data keys for TECL: ['instrument', 'dealingRules', 'snapshot']
+2025-10-11 16:33:47,532 - bot.api - INFO - Snapshot for TECL: bid=118.28, offer=118.74, high=None, low=None, percentageChange=-0.14
+2025-10-11 16:33:47,532 - bot.api - INFO - Instrument for TECL: name=Direxion Daily Technology Bull 3X Shares, type=SHARES, marketId=None, expiry=-, lotSize=1
+2025-10-11 16:33:47,532 - bot.api - INFO - Opening hours for TECL: {'mon': ['13:30 - 20:00'], 'tue': ['13:30 - 20:00'], 'wed': ['13:30 - 20:00'], 'thu': ['13:30 - 20:00'], 'fri': ['13:30 - 20:00'], 'sat': [], 'sun': [], 'zone': 'UTC'}
+2025-10-11 16:33:47,532 - bot.api - INFO - Dealing rules (top level): minDealSize={'unit': 'POINTS', 'value': 0.1}, maxDealSize={'unit': 'POINTS', 'value': 3250}, minSizeIncrement={'unit': 'POINTS', 'value': 0.1}
+2025-10-11 16:33:47,532 - main - INFO - Market data updated for TECL
+2025-10-11 16:33:47,532 - main - INFO - Market is CLOSED, next open in 48.9 hours
+2025-10-11 16:33:47,786 - bot.api - INFO - Fetched 2 total transactions
+2025-10-11 16:33:47,787 - bot.api - INFO - Transaction types found: {'SWAP', 'DEPOSIT'}
+2025-10-11 16:33:48,028 - bot.api - INFO - Fetched 3 activities
+2025-10-11 16:33:48,029 - bot.api - INFO - Processed 0 complete trades
+2025-10-11 16:33:48,030 - main - INFO - Found 0 historic trades
+2025-10-11 16:33:48,838 - bot.api - INFO - Fetched 2 total transactions
+2025-10-11 16:33:48,838 - bot.api - INFO - Transaction types: {'SWAP', 'DEPOSIT'}
+2025-10-11 16:33:48,839 - main - INFO - Fetched 2 activities in single request
+2025-10-11 16:33:48,839 - main - INFO - Found activity types: {'UNKNOWN'}
+2025-10-11 16:33:48,839 - main - INFO - Found 2 account transactions over 7 days
+2025-10-11 16:33:54,752 - main - INFO - Running data update #18
+2025-10-11 16:33:55,376 - main - INFO - Account balance: $494.24
+2025-10-11 16:33:55,956 - main - INFO - Found 1 open positions
+2025-10-11 16:33:55,956 - main - INFO - Position fields: ['position', 'market']
+2025-10-11 16:33:55,956 - main - INFO - First position: {'position': {'contractSize': 1, 'createdDate': '2025-10-10T23:59:48.717', 'createdDateUTC': '2025-10-10T19:59:48.717', 'dealId': '005050cc-0001-54c4-0000-000080ad0087', 'dealReference': 'p_005050cc-0001-54c4-0000-000080ad0087', 'workingOrderId': '005050cc-0001-54c4-0000-000080ad0086', 'size': 20.8, 'leverage': 5, 'upl': -7.072, 'direction': 'BUY', 'level': 118.62, 'currency': 'USD', 'guaranteedStop': False, 'stopLevel': 113.93, 'trailingStop': False}, 'market': {'instrumentName': 'Direxion Daily Technology Bull 3X Shares', 'instrumentId': 22606835240490180, 'expiry': '-', 'epic': 'TECL', 'symbol': 'TECL', 'instrumentType': 'SHARES', 'marketStatus': 'CLOSED', 'lotSize': 1, 'percentageChange': -0.14, 'bid': 118.28, 'offer': 118.74, 'updateTime': '2025-10-10T23:59:59.322', 'updateTimeUTC': '2025-10-10T19:59:59.322', 'delayTime': 0, 'streamingPricesAvailable': True, 'scalingFactor': 1, 'marketModes': ['LONG_ONLY'], 'pipPosition': 2, 'tickSize': 0.01}}
+2025-10-11 16:33:56,577 - bot.api - INFO - Market data keys for TECL: ['instrument', 'dealingRules', 'snapshot']
+2025-10-11 16:33:56,577 - bot.api - INFO - Snapshot for TECL: bid=118.28, offer=118.74, high=None, low=None, percentageChange=-0.14
+2025-10-11 16:33:56,578 - bot.api - INFO - Instrument for TECL: name=Direxion Daily Technology Bull 3X Shares, type=SHARES, marketId=None, expiry=-, lotSize=1
+2025-10-11 16:33:56,578 - bot.api - INFO - Opening hours for TECL: {'mon': ['13:30 - 20:00'], 'tue': ['13:30 - 20:00'], 'wed': ['13:30 - 20:00'], 'thu': ['13:30 - 20:00'], 'fri': ['13:30 - 20:00'], 'sat': [], 'sun': [], 'zone': 'UTC'}
+2025-10-11 16:33:56,578 - bot.api - INFO - Dealing rules (top level): minDealSize={'unit': 'POINTS', 'value': 0.1}, maxDealSize={'unit': 'POINTS', 'value': 3250}, minSizeIncrement={'unit': 'POINTS', 'value': 0.1}
+2025-10-11 16:33:56,578 - main - INFO - Market data updated for TECL
+2025-10-11 16:33:56,578 - main - INFO - Market is CLOSED, next open in 48.9 hours
+2025-10-11 16:33:57,255 - bot.api - INFO - Fetched 2 total transactions
+2025-10-11 16:33:57,255 - bot.api - INFO - Transaction types found: {'SWAP', 'DEPOSIT'}
+2025-10-11 16:33:57,489 - bot.api - INFO - Fetched 3 activities
+2025-10-11 16:33:57,490 - bot.api - INFO - Processed 0 complete trades
+2025-10-11 16:33:57,490 - main - INFO - Found 0 historic trades
+2025-10-11 16:33:58,136 - bot.api - INFO - Fetched 2 total transactions
+2025-10-11 16:33:58,136 - bot.api - INFO - Transaction types: {'SWAP', 'DEPOSIT'}
+2025-10-11 16:33:58,137 - main - INFO - Fetched 2 activities in single request
+2025-10-11 16:33:58,137 - main - INFO - Found activity types: {'UNKNOWN'}
+2025-10-11 16:33:58,137 - main - INFO - Found 2 account transactions over 7 days
+2025-10-11 16:34:04,035 - main - INFO - Running data update #19
+2025-10-11 16:34:04,635 - main - INFO - Account balance: $494.24
+2025-10-11 16:34:05,176 - main - INFO - Found 1 open positions
+2025-10-11 16:34:05,177 - main - INFO - Position fields: ['position', 'market']
+2025-10-11 16:34:05,177 - main - INFO - First position: {'position': {'contractSize': 1, 'createdDate': '2025-10-10T23:59:48.717', 'createdDateUTC': '2025-10-10T19:59:48.717', 'dealId': '005050cc-0001-54c4-0000-000080ad0087', 'dealReference': 'p_005050cc-0001-54c4-0000-000080ad0087', 'workingOrderId': '005050cc-0001-54c4-0000-000080ad0086', 'size': 20.8, 'leverage': 5, 'upl': -7.072, 'direction': 'BUY', 'level': 118.62, 'currency': 'USD', 'guaranteedStop': False, 'stopLevel': 113.93, 'trailingStop': False}, 'market': {'instrumentName': 'Direxion Daily Technology Bull 3X Shares', 'instrumentId': 22606835240490180, 'expiry': '-', 'epic': 'TECL', 'symbol': 'TECL', 'instrumentType': 'SHARES', 'marketStatus': 'CLOSED', 'lotSize': 1, 'percentageChange': -0.14, 'bid': 118.28, 'offer': 118.74, 'updateTime': '2025-10-10T23:59:59.322', 'updateTimeUTC': '2025-10-10T19:59:59.322', 'delayTime': 0, 'streamingPricesAvailable': True, 'scalingFactor': 1, 'marketModes': ['LONG_ONLY'], 'pipPosition': 2, 'tickSize': 0.01}}
+2025-10-11 16:34:05,733 - bot.api - INFO - Market data keys for TECL: ['instrument', 'dealingRules', 'snapshot']
+2025-10-11 16:34:05,733 - bot.api - INFO - Snapshot for TECL: bid=118.28, offer=118.74, high=None, low=None, percentageChange=-0.14
+2025-10-11 16:34:05,733 - bot.api - INFO - Instrument for TECL: name=Direxion Daily Technology Bull 3X Shares, type=SHARES, marketId=None, expiry=-, lotSize=1
+2025-10-11 16:34:05,733 - bot.api - INFO - Opening hours for TECL: {'mon': ['13:30 - 20:00'], 'tue': ['13:30 - 20:00'], 'wed': ['13:30 - 20:00'], 'thu': ['13:30 - 20:00'], 'fri': ['13:30 - 20:00'], 'sat': [], 'sun': [], 'zone': 'UTC'}
+2025-10-11 16:34:05,733 - bot.api - INFO - Dealing rules (top level): minDealSize={'unit': 'POINTS', 'value': 0.1}, maxDealSize={'unit': 'POINTS', 'value': 3250}, minSizeIncrement={'unit': 'POINTS', 'value': 0.1}
+2025-10-11 16:34:05,733 - main - INFO - Market data updated for TECL
+2025-10-11 16:34:05,733 - main - INFO - Market is CLOSED, next open in 48.9 hours
+2025-10-11 16:34:06,385 - bot.api - INFO - Fetched 2 total transactions
+2025-10-11 16:34:06,385 - bot.api - INFO - Transaction types found: {'SWAP', 'DEPOSIT'}
+2025-10-11 16:34:06,623 - bot.api - INFO - Fetched 3 activities
+2025-10-11 16:34:06,624 - bot.api - INFO - Processed 0 complete trades
+2025-10-11 16:34:06,624 - main - INFO - Found 0 historic trades
+2025-10-11 16:34:07,029 - bot.api - INFO - Fetched 2 total transactions
+2025-10-11 16:34:07,029 - bot.api - INFO - Transaction types: {'SWAP', 'DEPOSIT'}
+2025-10-11 16:34:07,031 - main - INFO - Fetched 2 activities in single request
+2025-10-11 16:34:07,031 - main - INFO - Found activity types: {'UNKNOWN'}
+2025-10-11 16:34:07,031 - main - INFO - Found 2 account transactions over 7 days
+2025-10-11 16:34:12,577 - main - INFO - Running data update #20
+2025-10-11 16:34:13,178 - main - INFO - Account balance: $494.24
+2025-10-11 16:34:14,133 - main - INFO - Found 1 open positions
+2025-10-11 16:34:14,133 - main - INFO - Position fields: ['position', 'market']
+2025-10-11 16:34:14,134 - main - INFO - First position: {'position': {'contractSize': 1, 'createdDate': '2025-10-10T23:59:48.717', 'createdDateUTC': '2025-10-10T19:59:48.717', 'dealId': '005050cc-0001-54c4-0000-000080ad0087', 'dealReference': 'p_005050cc-0001-54c4-0000-000080ad0087', 'workingOrderId': '005050cc-0001-54c4-0000-000080ad0086', 'size': 20.8, 'leverage': 5, 'upl': -7.072, 'direction': 'BUY', 'level': 118.62, 'currency': 'USD', 'guaranteedStop': False, 'stopLevel': 113.93, 'trailingStop': False}, 'market': {'instrumentName': 'Direxion Daily Technology Bull 3X Shares', 'instrumentId': 22606835240490180, 'expiry': '-', 'epic': 'TECL', 'symbol': 'TECL', 'instrumentType': 'SHARES', 'marketStatus': 'CLOSED', 'lotSize': 1, 'percentageChange': -0.14, 'bid': 118.28, 'offer': 118.74, 'updateTime': '2025-10-10T23:59:59.322', 'updateTimeUTC': '2025-10-10T19:59:59.322', 'delayTime': 0, 'streamingPricesAvailable': True, 'scalingFactor': 1, 'marketModes': ['LONG_ONLY'], 'pipPosition': 2, 'tickSize': 0.01}}
+2025-10-11 16:34:15,045 - bot.api - INFO - Market data keys for TECL: ['instrument', 'dealingRules', 'snapshot']
+2025-10-11 16:34:15,045 - bot.api - INFO - Snapshot for TECL: bid=118.28, offer=118.74, high=None, low=None, percentageChange=-0.14
+2025-10-11 16:34:15,045 - bot.api - INFO - Instrument for TECL: name=Direxion Daily Technology Bull 3X Shares, type=SHARES, marketId=None, expiry=-, lotSize=1
+2025-10-11 16:34:15,046 - bot.api - INFO - Opening hours for TECL: {'mon': ['13:30 - 20:00'], 'tue': ['13:30 - 20:00'], 'wed': ['13:30 - 20:00'], 'thu': ['13:30 - 20:00'], 'fri': ['13:30 - 20:00'], 'sat': [], 'sun': [], 'zone': 'UTC'}
+2025-10-11 16:34:15,046 - bot.api - INFO - Dealing rules (top level): minDealSize={'unit': 'POINTS', 'value': 0.1}, maxDealSize={'unit': 'POINTS', 'value': 3250}, minSizeIncrement={'unit': 'POINTS', 'value': 0.1}
+2025-10-11 16:34:15,046 - main - INFO - Market data updated for TECL
+2025-10-11 16:34:15,046 - main - INFO - Market is CLOSED, next open in 48.9 hours
+2025-10-11 16:34:15,293 - bot.api - INFO - Fetched 2 total transactions
+2025-10-11 16:34:15,293 - bot.api - INFO - Transaction types found: {'SWAP', 'DEPOSIT'}
+2025-10-11 16:34:15,529 - bot.api - INFO - Fetched 3 activities
+2025-10-11 16:34:15,530 - bot.api - INFO - Processed 0 complete trades
+2025-10-11 16:34:15,530 - main - INFO - Found 0 historic trades
+2025-10-11 16:34:15,787 - bot.api - INFO - Fetched 2 total transactions
+2025-10-11 16:34:15,787 - bot.api - INFO - Transaction types: {'SWAP', 'DEPOSIT'}
+2025-10-11 16:34:15,790 - main - INFO - Fetched 2 activities in single request
+2025-10-11 16:34:15,790 - main - INFO - Found activity types: {'UNKNOWN'}
+2025-10-11 16:34:15,790 - main - INFO - Found 2 account transactions over 7 days
+2025-10-11 16:34:21,687 - main - INFO - Running data update #21
+2025-10-11 16:34:22,706 - main - INFO - Account balance: $494.24
+2025-10-11 16:34:23,654 - main - INFO - Found 1 open positions
+2025-10-11 16:34:23,654 - main - INFO - Position fields: ['position', 'market']
+2025-10-11 16:34:23,654 - main - INFO - First position: {'position': {'contractSize': 1, 'createdDate': '2025-10-10T23:59:48.717', 'createdDateUTC': '2025-10-10T19:59:48.717', 'dealId': '005050cc-0001-54c4-0000-000080ad0087', 'dealReference': 'p_005050cc-0001-54c4-0000-000080ad0087', 'workingOrderId': '005050cc-0001-54c4-0000-000080ad0086', 'size': 20.8, 'leverage': 5, 'upl': -7.072, 'direction': 'BUY', 'level': 118.62, 'currency': 'USD', 'guaranteedStop': False, 'stopLevel': 113.93, 'trailingStop': False}, 'market': {'instrumentName': 'Direxion Daily Technology Bull 3X Shares', 'instrumentId': 22606835240490180, 'expiry': '-', 'epic': 'TECL', 'symbol': 'TECL', 'instrumentType': 'SHARES', 'marketStatus': 'CLOSED', 'lotSize': 1, 'percentageChange': -0.14, 'bid': 118.28, 'offer': 118.74, 'updateTime': '2025-10-10T23:59:59.322', 'updateTimeUTC': '2025-10-10T19:59:59.322', 'delayTime': 0, 'streamingPricesAvailable': True, 'scalingFactor': 1, 'marketModes': ['LONG_ONLY'], 'pipPosition': 2, 'tickSize': 0.01}}
+2025-10-11 16:34:24,613 - bot.api - INFO - Market data keys for TECL: ['instrument', 'dealingRules', 'snapshot']
+2025-10-11 16:34:24,614 - bot.api - INFO - Snapshot for TECL: bid=118.28, offer=118.74, high=None, low=None, percentageChange=-0.14
+2025-10-11 16:34:24,614 - bot.api - INFO - Instrument for TECL: name=Direxion Daily Technology Bull 3X Shares, type=SHARES, marketId=None, expiry=-, lotSize=1
+2025-10-11 16:34:24,614 - bot.api - INFO - Opening hours for TECL: {'mon': ['13:30 - 20:00'], 'tue': ['13:30 - 20:00'], 'wed': ['13:30 - 20:00'], 'thu': ['13:30 - 20:00'], 'fri': ['13:30 - 20:00'], 'sat': [], 'sun': [], 'zone': 'UTC'}
+2025-10-11 16:34:24,614 - bot.api - INFO - Dealing rules (top level): minDealSize={'unit': 'POINTS', 'value': 0.1}, maxDealSize={'unit': 'POINTS', 'value': 3250}, minSizeIncrement={'unit': 'POINTS', 'value': 0.1}
+2025-10-11 16:34:24,614 - main - INFO - Market data updated for TECL
+2025-10-11 16:34:24,614 - main - INFO - Market is CLOSED, next open in 48.9 hours
+2025-10-11 16:34:24,865 - bot.api - INFO - Fetched 2 total transactions
+2025-10-11 16:34:24,866 - bot.api - INFO - Transaction types found: {'SWAP', 'DEPOSIT'}
+2025-10-11 16:34:25,117 - bot.api - INFO - Fetched 3 activities
+2025-10-11 16:34:25,118 - bot.api - INFO - Processed 0 complete trades
+2025-10-11 16:34:25,118 - main - INFO - Found 0 historic trades
+2025-10-11 16:34:25,368 - bot.api - INFO - Fetched 2 total transactions
+2025-10-11 16:34:25,368 - bot.api - INFO - Transaction types: {'SWAP', 'DEPOSIT'}
+2025-10-11 16:34:25,369 - main - INFO - Fetched 2 activities in single request
+2025-10-11 16:34:25,369 - main - INFO - Found activity types: {'UNKNOWN'}
+2025-10-11 16:34:25,369 - main - INFO - Found 2 account transactions over 7 days
+2025-10-11 16:34:30,948 - main - INFO - Running data update #22
+2025-10-11 16:34:31,599 - main - INFO - Account balance: $494.24
+2025-10-11 16:34:32,172 - main - INFO - Found 1 open positions
+2025-10-11 16:34:32,172 - main - INFO - Position fields: ['position', 'market']
+2025-10-11 16:34:32,173 - main - INFO - First position: {'position': {'contractSize': 1, 'createdDate': '2025-10-10T23:59:48.717', 'createdDateUTC': '2025-10-10T19:59:48.717', 'dealId': '005050cc-0001-54c4-0000-000080ad0087', 'dealReference': 'p_005050cc-0001-54c4-0000-000080ad0087', 'workingOrderId': '005050cc-0001-54c4-0000-000080ad0086', 'size': 20.8, 'leverage': 5, 'upl': -7.072, 'direction': 'BUY', 'level': 118.62, 'currency': 'USD', 'guaranteedStop': False, 'stopLevel': 113.93, 'trailingStop': False}, 'market': {'instrumentName': 'Direxion Daily Technology Bull 3X Shares', 'instrumentId': 22606835240490180, 'expiry': '-', 'epic': 'TECL', 'symbol': 'TECL', 'instrumentType': 'SHARES', 'marketStatus': 'CLOSED', 'lotSize': 1, 'percentageChange': -0.14, 'bid': 118.28, 'offer': 118.74, 'updateTime': '2025-10-10T23:59:59.322', 'updateTimeUTC': '2025-10-10T19:59:59.322', 'delayTime': 0, 'streamingPricesAvailable': True, 'scalingFactor': 1, 'marketModes': ['LONG_ONLY'], 'pipPosition': 2, 'tickSize': 0.01}}
+2025-10-11 16:34:33,112 - bot.api - INFO - Market data keys for TECL: ['instrument', 'dealingRules', 'snapshot']
+2025-10-11 16:34:33,112 - bot.api - INFO - Snapshot for TECL: bid=118.28, offer=118.74, high=None, low=None, percentageChange=-0.14
+2025-10-11 16:34:33,112 - bot.api - INFO - Instrument for TECL: name=Direxion Daily Technology Bull 3X Shares, type=SHARES, marketId=None, expiry=-, lotSize=1
+2025-10-11 16:34:33,112 - bot.api - INFO - Opening hours for TECL: {'mon': ['13:30 - 20:00'], 'tue': ['13:30 - 20:00'], 'wed': ['13:30 - 20:00'], 'thu': ['13:30 - 20:00'], 'fri': ['13:30 - 20:00'], 'sat': [], 'sun': [], 'zone': 'UTC'}
+2025-10-11 16:34:33,112 - bot.api - INFO - Dealing rules (top level): minDealSize={'unit': 'POINTS', 'value': 0.1}, maxDealSize={'unit': 'POINTS', 'value': 3250}, minSizeIncrement={'unit': 'POINTS', 'value': 0.1}
+2025-10-11 16:34:33,112 - main - INFO - Market data updated for TECL
+2025-10-11 16:34:33,113 - main - INFO - Market is CLOSED, next open in 48.9 hours
+2025-10-11 16:34:33,739 - bot.api - INFO - Fetched 2 total transactions
+2025-10-11 16:34:33,739 - bot.api - INFO - Transaction types found: {'SWAP', 'DEPOSIT'}
+2025-10-11 16:34:33,980 - bot.api - INFO - Fetched 3 activities
+2025-10-11 16:34:33,981 - bot.api - INFO - Processed 0 complete trades
+2025-10-11 16:34:33,981 - main - INFO - Found 0 historic trades
+2025-10-11 16:34:34,233 - bot.api - INFO - Fetched 2 total transactions
+2025-10-11 16:34:34,233 - bot.api - INFO - Transaction types: {'SWAP', 'DEPOSIT'}
+2025-10-11 16:34:34,234 - main - INFO - Fetched 2 activities in single request
+2025-10-11 16:34:34,234 - main - INFO - Found activity types: {'UNKNOWN'}
+2025-10-11 16:34:34,234 - main - INFO - Found 2 account transactions over 7 days
+2025-10-11 16:34:39,740 - main - INFO - Running data update #23
+2025-10-11 16:34:40,456 - main - INFO - Account balance: $494.24
+2025-10-11 16:34:41,075 - main - INFO - Found 1 open positions
+2025-10-11 16:34:41,075 - main - INFO - Position fields: ['position', 'market']
+2025-10-11 16:34:41,075 - main - INFO - First position: {'position': {'contractSize': 1, 'createdDate': '2025-10-10T23:59:48.717', 'createdDateUTC': '2025-10-10T19:59:48.717', 'dealId': '005050cc-0001-54c4-0000-000080ad0087', 'dealReference': 'p_005050cc-0001-54c4-0000-000080ad0087', 'workingOrderId': '005050cc-0001-54c4-0000-000080ad0086', 'size': 20.8, 'leverage': 5, 'upl': -7.072, 'direction': 'BUY', 'level': 118.62, 'currency': 'USD', 'guaranteedStop': False, 'stopLevel': 113.93, 'trailingStop': False}, 'market': {'instrumentName': 'Direxion Daily Technology Bull 3X Shares', 'instrumentId': 22606835240490180, 'expiry': '-', 'epic': 'TECL', 'symbol': 'TECL', 'instrumentType': 'SHARES', 'marketStatus': 'CLOSED', 'lotSize': 1, 'percentageChange': -0.14, 'bid': 118.28, 'offer': 118.74, 'updateTime': '2025-10-10T23:59:59.322', 'updateTimeUTC': '2025-10-10T19:59:59.322', 'delayTime': 0, 'streamingPricesAvailable': True, 'scalingFactor': 1, 'marketModes': ['LONG_ONLY'], 'pipPosition': 2, 'tickSize': 0.01}}
+2025-10-11 16:34:41,662 - bot.api - INFO - Market data keys for TECL: ['instrument', 'dealingRules', 'snapshot']
+2025-10-11 16:34:41,662 - bot.api - INFO - Snapshot for TECL: bid=118.28, offer=118.74, high=None, low=None, percentageChange=-0.14
+2025-10-11 16:34:41,662 - bot.api - INFO - Instrument for TECL: name=Direxion Daily Technology Bull 3X Shares, type=SHARES, marketId=None, expiry=-, lotSize=1
+2025-10-11 16:34:41,662 - bot.api - INFO - Opening hours for TECL: {'mon': ['13:30 - 20:00'], 'tue': ['13:30 - 20:00'], 'wed': ['13:30 - 20:00'], 'thu': ['13:30 - 20:00'], 'fri': ['13:30 - 20:00'], 'sat': [], 'sun': [], 'zone': 'UTC'}
+2025-10-11 16:34:41,663 - bot.api - INFO - Dealing rules (top level): minDealSize={'unit': 'POINTS', 'value': 0.1}, maxDealSize={'unit': 'POINTS', 'value': 3250}, minSizeIncrement={'unit': 'POINTS', 'value': 0.1}
+2025-10-11 16:34:41,663 - main - INFO - Market data updated for TECL
+2025-10-11 16:34:41,663 - main - INFO - Market is CLOSED, next open in 48.9 hours
+2025-10-11 16:34:41,906 - bot.api - INFO - Fetched 2 total transactions
+2025-10-11 16:34:41,907 - bot.api - INFO - Transaction types found: {'SWAP', 'DEPOSIT'}
+2025-10-11 16:34:42,171 - bot.api - INFO - Fetched 3 activities
+2025-10-11 16:34:42,172 - bot.api - INFO - Processed 0 complete trades
+2025-10-11 16:34:42,172 - main - INFO - Found 0 historic trades
+2025-10-11 16:34:42,794 - bot.api - INFO - Fetched 2 total transactions
+2025-10-11 16:34:42,794 - bot.api - INFO - Transaction types: {'SWAP', 'DEPOSIT'}
+2025-10-11 16:34:42,795 - main - INFO - Fetched 2 activities in single request
+2025-10-11 16:34:42,795 - main - INFO - Found activity types: {'UNKNOWN'}
+2025-10-11 16:34:42,795 - main - INFO - Found 2 account transactions over 7 days
+2025-10-11 16:34:48,343 - main - INFO - Running data update #24
+2025-10-11 16:34:48,958 - main - INFO - Account balance: $494.24
+2025-10-11 16:34:49,575 - main - INFO - Found 1 open positions
+2025-10-11 16:34:49,575 - main - INFO - Position fields: ['position', 'market']
+2025-10-11 16:34:49,575 - main - INFO - First position: {'position': {'contractSize': 1, 'createdDate': '2025-10-10T23:59:48.717', 'createdDateUTC': '2025-10-10T19:59:48.717', 'dealId': '005050cc-0001-54c4-0000-000080ad0087', 'dealReference': 'p_005050cc-0001-54c4-0000-000080ad0087', 'workingOrderId': '005050cc-0001-54c4-0000-000080ad0086', 'size': 20.8, 'leverage': 5, 'upl': -7.072, 'direction': 'BUY', 'level': 118.62, 'currency': 'USD', 'guaranteedStop': False, 'stopLevel': 113.93, 'trailingStop': False}, 'market': {'instrumentName': 'Direxion Daily Technology Bull 3X Shares', 'instrumentId': 22606835240490180, 'expiry': '-', 'epic': 'TECL', 'symbol': 'TECL', 'instrumentType': 'SHARES', 'marketStatus': 'CLOSED', 'lotSize': 1, 'percentageChange': -0.14, 'bid': 118.28, 'offer': 118.74, 'updateTime': '2025-10-10T23:59:59.322', 'updateTimeUTC': '2025-10-10T19:59:59.322', 'delayTime': 0, 'streamingPricesAvailable': True, 'scalingFactor': 1, 'marketModes': ['LONG_ONLY'], 'pipPosition': 2, 'tickSize': 0.01}}
+2025-10-11 16:34:50,156 - bot.api - INFO - Market data keys for TECL: ['instrument', 'dealingRules', 'snapshot']
+2025-10-11 16:34:50,156 - bot.api - INFO - Snapshot for TECL: bid=118.28, offer=118.74, high=None, low=None, percentageChange=-0.14
+2025-10-11 16:34:50,156 - bot.api - INFO - Instrument for TECL: name=Direxion Daily Technology Bull 3X Shares, type=SHARES, marketId=None, expiry=-, lotSize=1
+2025-10-11 16:34:50,156 - bot.api - INFO - Opening hours for TECL: {'mon': ['13:30 - 20:00'], 'tue': ['13:30 - 20:00'], 'wed': ['13:30 - 20:00'], 'thu': ['13:30 - 20:00'], 'fri': ['13:30 - 20:00'], 'sat': [], 'sun': [], 'zone': 'UTC'}
+2025-10-11 16:34:50,156 - bot.api - INFO - Dealing rules (top level): minDealSize={'unit': 'POINTS', 'value': 0.1}, maxDealSize={'unit': 'POINTS', 'value': 3250}, minSizeIncrement={'unit': 'POINTS', 'value': 0.1}
+2025-10-11 16:34:50,156 - main - INFO - Market data updated for TECL
+2025-10-11 16:34:50,156 - main - INFO - Market is CLOSED, next open in 48.9 hours
+2025-10-11 16:34:50,420 - bot.api - INFO - Fetched 2 total transactions
+2025-10-11 16:34:50,420 - bot.api - INFO - Transaction types found: {'SWAP', 'DEPOSIT'}
+2025-10-11 16:34:50,659 - bot.api - INFO - Fetched 3 activities
+2025-10-11 16:34:50,659 - bot.api - INFO - Processed 0 complete trades
+2025-10-11 16:34:50,659 - main - INFO - Found 0 historic trades
+2025-10-11 16:34:50,905 - bot.api - INFO - Fetched 2 total transactions
+2025-10-11 16:34:50,905 - bot.api - INFO - Transaction types: {'SWAP', 'DEPOSIT'}
+2025-10-11 16:34:50,907 - main - INFO - Fetched 2 activities in single request
+2025-10-11 16:34:50,907 - main - INFO - Found activity types: {'UNKNOWN'}
+2025-10-11 16:34:50,907 - main - INFO - Found 2 account transactions over 7 days
+2025-10-11 16:34:56,492 - main - INFO - Running data update #25
+2025-10-11 16:34:57,545 - main - INFO - Account balance: $494.24
+2025-10-11 16:34:58,476 - main - INFO - Found 1 open positions
+2025-10-11 16:34:58,476 - main - INFO - Position fields: ['position', 'market']
+2025-10-11 16:34:58,476 - main - INFO - First position: {'position': {'contractSize': 1, 'createdDate': '2025-10-10T23:59:48.717', 'createdDateUTC': '2025-10-10T19:59:48.717', 'dealId': '005050cc-0001-54c4-0000-000080ad0087', 'dealReference': 'p_005050cc-0001-54c4-0000-000080ad0087', 'workingOrderId': '005050cc-0001-54c4-0000-000080ad0086', 'size': 20.8, 'leverage': 5, 'upl': -7.072, 'direction': 'BUY', 'level': 118.62, 'currency': 'USD', 'guaranteedStop': False, 'stopLevel': 113.93, 'trailingStop': False}, 'market': {'instrumentName': 'Direxion Daily Technology Bull 3X Shares', 'instrumentId': 22606835240490180, 'expiry': '-', 'epic': 'TECL', 'symbol': 'TECL', 'instrumentType': 'SHARES', 'marketStatus': 'CLOSED', 'lotSize': 1, 'percentageChange': -0.14, 'bid': 118.28, 'offer': 118.74, 'updateTime': '2025-10-10T23:59:59.322', 'updateTimeUTC': '2025-10-10T19:59:59.322', 'delayTime': 0, 'streamingPricesAvailable': True, 'scalingFactor': 1, 'marketModes': ['LONG_ONLY'], 'pipPosition': 2, 'tickSize': 0.01}}
+2025-10-11 16:34:59,492 - bot.api - INFO - Market data keys for TECL: ['instrument', 'dealingRules', 'snapshot']
+2025-10-11 16:34:59,492 - bot.api - INFO - Snapshot for TECL: bid=118.28, offer=118.74, high=None, low=None, percentageChange=-0.14
+2025-10-11 16:34:59,492 - bot.api - INFO - Instrument for TECL: name=Direxion Daily Technology Bull 3X Shares, type=SHARES, marketId=None, expiry=-, lotSize=1
+2025-10-11 16:34:59,492 - bot.api - INFO - Opening hours for TECL: {'mon': ['13:30 - 20:00'], 'tue': ['13:30 - 20:00'], 'wed': ['13:30 - 20:00'], 'thu': ['13:30 - 20:00'], 'fri': ['13:30 - 20:00'], 'sat': [], 'sun': [], 'zone': 'UTC'}
+2025-10-11 16:34:59,492 - bot.api - INFO - Dealing rules (top level): minDealSize={'unit': 'POINTS', 'value': 0.1}, maxDealSize={'unit': 'POINTS', 'value': 3250}, minSizeIncrement={'unit': 'POINTS', 'value': 0.1}
+2025-10-11 16:34:59,492 - main - INFO - Market data updated for TECL
+2025-10-11 16:34:59,493 - main - INFO - Market is CLOSED, next open in 48.9 hours
+2025-10-11 16:34:59,768 - bot.api - INFO - Fetched 2 total transactions
+2025-10-11 16:34:59,768 - bot.api - INFO - Transaction types found: {'SWAP', 'DEPOSIT'}
+2025-10-11 16:35:00,022 - bot.api - INFO - Fetched 3 activities
+2025-10-11 16:35:00,022 - bot.api - INFO - Processed 0 complete trades
+2025-10-11 16:35:00,023 - main - INFO - Found 0 historic trades
+2025-10-11 16:35:00,283 - bot.api - INFO - Fetched 2 total transactions
+2025-10-11 16:35:00,283 - bot.api - INFO - Transaction types: {'SWAP', 'DEPOSIT'}
+2025-10-11 16:35:00,284 - main - INFO - Fetched 2 activities in single request
+2025-10-11 16:35:00,284 - main - INFO - Found activity types: {'UNKNOWN'}
+2025-10-11 16:35:00,284 - main - INFO - Found 2 account transactions over 7 days
+2025-10-11 16:35:05,851 - main - INFO - Running data update #26
+2025-10-11 16:35:06,493 - main - INFO - Account balance: $494.24
+2025-10-11 16:35:07,063 - main - INFO - Found 1 open positions
+2025-10-11 16:35:07,063 - main - INFO - Position fields: ['position', 'market']
+2025-10-11 16:35:07,063 - main - INFO - First position: {'position': {'contractSize': 1, 'createdDate': '2025-10-10T23:59:48.717', 'createdDateUTC': '2025-10-10T19:59:48.717', 'dealId': '005050cc-0001-54c4-0000-000080ad0087', 'dealReference': 'p_005050cc-0001-54c4-0000-000080ad0087', 'workingOrderId': '005050cc-0001-54c4-0000-000080ad0086', 'size': 20.8, 'leverage': 5, 'upl': -7.072, 'direction': 'BUY', 'level': 118.62, 'currency': 'USD', 'guaranteedStop': False, 'stopLevel': 113.93, 'trailingStop': False}, 'market': {'instrumentName': 'Direxion Daily Technology Bull 3X Shares', 'instrumentId': 22606835240490180, 'expiry': '-', 'epic': 'TECL', 'symbol': 'TECL', 'instrumentType': 'SHARES', 'marketStatus': 'CLOSED', 'lotSize': 1, 'percentageChange': -0.14, 'bid': 118.28, 'offer': 118.74, 'updateTime': '2025-10-10T23:59:59.322', 'updateTimeUTC': '2025-10-10T19:59:59.322', 'delayTime': 0, 'streamingPricesAvailable': True, 'scalingFactor': 1, 'marketModes': ['LONG_ONLY'], 'pipPosition': 2, 'tickSize': 0.01}}
+2025-10-11 16:35:08,003 - bot.api - INFO - Market data keys for TECL: ['instrument', 'dealingRules', 'snapshot']
+2025-10-11 16:35:08,003 - bot.api - INFO - Snapshot for TECL: bid=118.28, offer=118.74, high=None, low=None, percentageChange=-0.14
+2025-10-11 16:35:08,003 - bot.api - INFO - Instrument for TECL: name=Direxion Daily Technology Bull 3X Shares, type=SHARES, marketId=None, expiry=-, lotSize=1
+2025-10-11 16:35:08,003 - bot.api - INFO - Opening hours for TECL: {'mon': ['13:30 - 20:00'], 'tue': ['13:30 - 20:00'], 'wed': ['13:30 - 20:00'], 'thu': ['13:30 - 20:00'], 'fri': ['13:30 - 20:00'], 'sat': [], 'sun': [], 'zone': 'UTC'}
+2025-10-11 16:35:08,003 - bot.api - INFO - Dealing rules (top level): minDealSize={'unit': 'POINTS', 'value': 0.1}, maxDealSize={'unit': 'POINTS', 'value': 3250}, minSizeIncrement={'unit': 'POINTS', 'value': 0.1}
+2025-10-11 16:35:08,003 - main - INFO - Market data updated for TECL
+2025-10-11 16:35:08,003 - main - INFO - Market is CLOSED, next open in 48.9 hours
+2025-10-11 16:35:08,625 - bot.api - INFO - Fetched 2 total transactions
+2025-10-11 16:35:08,626 - bot.api - INFO - Transaction types found: {'SWAP', 'DEPOSIT'}
+2025-10-11 16:35:08,861 - bot.api - INFO - Fetched 3 activities
+2025-10-11 16:35:08,862 - bot.api - INFO - Processed 0 complete trades
+2025-10-11 16:35:08,862 - main - INFO - Found 0 historic trades
+2025-10-11 16:35:09,130 - bot.api - INFO - Fetched 2 total transactions
+2025-10-11 16:35:09,130 - bot.api - INFO - Transaction types: {'SWAP', 'DEPOSIT'}
+2025-10-11 16:35:09,131 - main - INFO - Fetched 2 activities in single request
+2025-10-11 16:35:09,131 - main - INFO - Found activity types: {'UNKNOWN'}
+2025-10-11 16:35:09,131 - main - INFO - Found 2 account transactions over 7 days
+2025-10-11 16:35:15,121 - main - INFO - Running data update #27
+2025-10-11 16:35:15,874 - main - INFO - Account balance: $494.24
+2025-10-11 16:35:16,462 - main - INFO - Found 1 open positions
+2025-10-11 16:35:16,462 - main - INFO - Position fields: ['position', 'market']
+2025-10-11 16:35:16,462 - main - INFO - First position: {'position': {'contractSize': 1, 'createdDate': '2025-10-10T23:59:48.717', 'createdDateUTC': '2025-10-10T19:59:48.717', 'dealId': '005050cc-0001-54c4-0000-000080ad0087', 'dealReference': 'p_005050cc-0001-54c4-0000-000080ad0087', 'workingOrderId': '005050cc-0001-54c4-0000-000080ad0086', 'size': 20.8, 'leverage': 5, 'upl': -7.072, 'direction': 'BUY', 'level': 118.62, 'currency': 'USD', 'guaranteedStop': False, 'stopLevel': 113.93, 'trailingStop': False}, 'market': {'instrumentName': 'Direxion Daily Technology Bull 3X Shares', 'instrumentId': 22606835240490180, 'expiry': '-', 'epic': 'TECL', 'symbol': 'TECL', 'instrumentType': 'SHARES', 'marketStatus': 'CLOSED', 'lotSize': 1, 'percentageChange': -0.14, 'bid': 118.28, 'offer': 118.74, 'updateTime': '2025-10-10T23:59:59.322', 'updateTimeUTC': '2025-10-10T19:59:59.322', 'delayTime': 0, 'streamingPricesAvailable': True, 'scalingFactor': 1, 'marketModes': ['LONG_ONLY'], 'pipPosition': 2, 'tickSize': 0.01}}
+2025-10-11 16:35:17,406 - bot.api - INFO - Market data keys for TECL: ['instrument', 'dealingRules', 'snapshot']
+2025-10-11 16:35:17,406 - bot.api - INFO - Snapshot for TECL: bid=118.28, offer=118.74, high=None, low=None, percentageChange=-0.14
+2025-10-11 16:35:17,406 - bot.api - INFO - Instrument for TECL: name=Direxion Daily Technology Bull 3X Shares, type=SHARES, marketId=None, expiry=-, lotSize=1
+2025-10-11 16:35:17,406 - bot.api - INFO - Opening hours for TECL: {'mon': ['13:30 - 20:00'], 'tue': ['13:30 - 20:00'], 'wed': ['13:30 - 20:00'], 'thu': ['13:30 - 20:00'], 'fri': ['13:30 - 20:00'], 'sat': [], 'sun': [], 'zone': 'UTC'}
+2025-10-11 16:35:17,406 - bot.api - INFO - Dealing rules (top level): minDealSize={'unit': 'POINTS', 'value': 0.1}, maxDealSize={'unit': 'POINTS', 'value': 3250}, minSizeIncrement={'unit': 'POINTS', 'value': 0.1}
+2025-10-11 16:35:17,406 - main - INFO - Market data updated for TECL
+2025-10-11 16:35:17,407 - main - INFO - Market is CLOSED, next open in 48.9 hours
+2025-10-11 16:35:17,656 - bot.api - INFO - Fetched 2 total transactions
+2025-10-11 16:35:17,657 - bot.api - INFO - Transaction types found: {'SWAP', 'DEPOSIT'}
+2025-10-11 16:35:17,898 - bot.api - INFO - Fetched 3 activities
+2025-10-11 16:35:17,899 - bot.api - INFO - Processed 0 complete trades
+2025-10-11 16:35:17,899 - main - INFO - Found 0 historic trades
+2025-10-11 16:35:18,531 - bot.api - INFO - Fetched 2 total transactions
+2025-10-11 16:35:18,531 - bot.api - INFO - Transaction types: {'SWAP', 'DEPOSIT'}
+2025-10-11 16:35:18,531 - main - INFO - Fetched 2 activities in single request
+2025-10-11 16:35:18,531 - main - INFO - Found activity types: {'UNKNOWN'}
+2025-10-11 16:35:18,532 - main - INFO - Found 2 account transactions over 7 days
+2025-10-11 16:35:24,080 - main - INFO - Running data update #28
+2025-10-11 16:35:24,690 - main - INFO - Account balance: $494.24
+2025-10-11 16:35:25,322 - main - INFO - Found 1 open positions
+2025-10-11 16:35:25,322 - main - INFO - Position fields: ['position', 'market']
+2025-10-11 16:35:25,322 - main - INFO - First position: {'position': {'contractSize': 1, 'createdDate': '2025-10-10T23:59:48.717', 'createdDateUTC': '2025-10-10T19:59:48.717', 'dealId': '005050cc-0001-54c4-0000-000080ad0087', 'dealReference': 'p_005050cc-0001-54c4-0000-000080ad0087', 'workingOrderId': '005050cc-0001-54c4-0000-000080ad0086', 'size': 20.8, 'leverage': 5, 'upl': -7.072, 'direction': 'BUY', 'level': 118.62, 'currency': 'USD', 'guaranteedStop': False, 'stopLevel': 113.93, 'trailingStop': False}, 'market': {'instrumentName': 'Direxion Daily Technology Bull 3X Shares', 'instrumentId': 22606835240490180, 'expiry': '-', 'epic': 'TECL', 'symbol': 'TECL', 'instrumentType': 'SHARES', 'marketStatus': 'CLOSED', 'lotSize': 1, 'percentageChange': -0.14, 'bid': 118.28, 'offer': 118.74, 'updateTime': '2025-10-10T23:59:59.322', 'updateTimeUTC': '2025-10-10T19:59:59.322', 'delayTime': 0, 'streamingPricesAvailable': True, 'scalingFactor': 1, 'marketModes': ['LONG_ONLY'], 'pipPosition': 2, 'tickSize': 0.01}}
+2025-10-11 16:35:25,906 - bot.api - INFO - Market data keys for TECL: ['instrument', 'dealingRules', 'snapshot']
+2025-10-11 16:35:25,907 - bot.api - INFO - Snapshot for TECL: bid=118.28, offer=118.74, high=None, low=None, percentageChange=-0.14
+2025-10-11 16:35:25,907 - bot.api - INFO - Instrument for TECL: name=Direxion Daily Technology Bull 3X Shares, type=SHARES, marketId=None, expiry=-, lotSize=1
+2025-10-11 16:35:25,907 - bot.api - INFO - Opening hours for TECL: {'mon': ['13:30 - 20:00'], 'tue': ['13:30 - 20:00'], 'wed': ['13:30 - 20:00'], 'thu': ['13:30 - 20:00'], 'fri': ['13:30 - 20:00'], 'sat': [], 'sun': [], 'zone': 'UTC'}
+2025-10-11 16:35:25,907 - bot.api - INFO - Dealing rules (top level): minDealSize={'unit': 'POINTS', 'value': 0.1}, maxDealSize={'unit': 'POINTS', 'value': 3250}, minSizeIncrement={'unit': 'POINTS', 'value': 0.1}
+2025-10-11 16:35:25,907 - main - INFO - Market data updated for TECL
+2025-10-11 16:35:25,907 - main - INFO - Market is CLOSED, next open in 48.9 hours
+2025-10-11 16:35:26,183 - bot.api - INFO - Fetched 2 total transactions
+2025-10-11 16:35:26,183 - bot.api - INFO - Transaction types found: {'SWAP', 'DEPOSIT'}
+2025-10-11 16:35:26,501 - bot.api - INFO - Fetched 3 activities
+2025-10-11 16:35:26,502 - bot.api - INFO - Processed 0 complete trades
+2025-10-11 16:35:26,502 - main - INFO - Found 0 historic trades
+2025-10-11 16:35:26,803 - bot.api - INFO - Fetched 2 total transactions
+2025-10-11 16:35:26,804 - bot.api - INFO - Transaction types: {'SWAP', 'DEPOSIT'}
+2025-10-11 16:35:26,805 - main - INFO - Fetched 2 activities in single request
+2025-10-11 16:35:26,805 - main - INFO - Found activity types: {'UNKNOWN'}
+2025-10-11 16:35:26,806 - main - INFO - Found 2 account transactions over 7 days
+2025-10-11 16:35:31,628 - bot.settings - INFO - TradingBotSettings.set_value(section=STRATEGY, key=strategy_mode, value=test7_with_protection)
+2025-10-11 16:35:31,630 - bot.settings - INFO - Settings saved to file
+2025-10-11 16:35:31,630 - bot.settings - INFO - TradingBotSettings.set_value(section=STRATEGY, key=enable_crash_protection, value=True)
+2025-10-11 16:35:31,631 - bot.settings - INFO - Settings saved to file
+2025-10-11 16:35:31,632 - bot.settings - INFO - Settings saved to file
+2025-10-11 16:35:32,759 - main - INFO - Running data update #29
+2025-10-11 16:35:33,355 - main - INFO - Account balance: $494.24
+2025-10-11 16:35:33,926 - main - INFO - Found 1 open positions
+2025-10-11 16:35:33,926 - main - INFO - Position fields: ['position', 'market']
+2025-10-11 16:35:33,926 - main - INFO - First position: {'position': {'contractSize': 1, 'createdDate': '2025-10-10T23:59:48.717', 'createdDateUTC': '2025-10-10T19:59:48.717', 'dealId': '005050cc-0001-54c4-0000-000080ad0087', 'dealReference': 'p_005050cc-0001-54c4-0000-000080ad0087', 'workingOrderId': '005050cc-0001-54c4-0000-000080ad0086', 'size': 20.8, 'leverage': 5, 'upl': -7.072, 'direction': 'BUY', 'level': 118.62, 'currency': 'USD', 'guaranteedStop': False, 'stopLevel': 113.93, 'trailingStop': False}, 'market': {'instrumentName': 'Direxion Daily Technology Bull 3X Shares', 'instrumentId': 22606835240490180, 'expiry': '-', 'epic': 'TECL', 'symbol': 'TECL', 'instrumentType': 'SHARES', 'marketStatus': 'CLOSED', 'lotSize': 1, 'percentageChange': -0.14, 'bid': 118.28, 'offer': 118.74, 'updateTime': '2025-10-10T23:59:59.322', 'updateTimeUTC': '2025-10-10T19:59:59.322', 'delayTime': 0, 'streamingPricesAvailable': True, 'scalingFactor': 1, 'marketModes': ['LONG_ONLY'], 'pipPosition': 2, 'tickSize': 0.01}}
+2025-10-11 16:35:34,492 - bot.api - INFO - Market data keys for TECL: ['instrument', 'dealingRules', 'snapshot']
+2025-10-11 16:35:34,493 - bot.api - INFO - Snapshot for TECL: bid=118.28, offer=118.74, high=None, low=None, percentageChange=-0.14
+2025-10-11 16:35:34,493 - bot.api - INFO - Instrument for TECL: name=Direxion Daily Technology Bull 3X Shares, type=SHARES, marketId=None, expiry=-, lotSize=1
+2025-10-11 16:35:34,493 - bot.api - INFO - Opening hours for TECL: {'mon': ['13:30 - 20:00'], 'tue': ['13:30 - 20:00'], 'wed': ['13:30 - 20:00'], 'thu': ['13:30 - 20:00'], 'fri': ['13:30 - 20:00'], 'sat': [], 'sun': [], 'zone': 'UTC'}
+2025-10-11 16:35:34,493 - bot.api - INFO - Dealing rules (top level): minDealSize={'unit': 'POINTS', 'value': 0.1}, maxDealSize={'unit': 'POINTS', 'value': 3250}, minSizeIncrement={'unit': 'POINTS', 'value': 0.1}
+2025-10-11 16:35:34,493 - main - INFO - Market data updated for TECL
+2025-10-11 16:35:34,493 - main - INFO - Market is CLOSED, next open in 48.9 hours
+2025-10-11 16:35:34,744 - bot.api - INFO - Fetched 2 total transactions
+2025-10-11 16:35:34,745 - bot.api - INFO - Transaction types found: {'SWAP', 'DEPOSIT'}
+2025-10-11 16:35:34,985 - bot.api - INFO - Fetched 3 activities
+2025-10-11 16:35:34,987 - bot.api - INFO - Processed 0 complete trades
+2025-10-11 16:35:34,987 - main - INFO - Found 0 historic trades
+2025-10-11 16:35:35,232 - bot.api - INFO - Fetched 2 total transactions
+2025-10-11 16:35:35,232 - bot.api - INFO - Transaction types: {'SWAP', 'DEPOSIT'}
+2025-10-11 16:35:35,233 - main - INFO - Fetched 2 activities in single request
+2025-10-11 16:35:35,233 - main - INFO - Found activity types: {'UNKNOWN'}
+2025-10-11 16:35:35,233 - main - INFO - Found 2 account transactions over 7 days
+2025-10-11 16:35:37,321 - bot.settings - INFO - TradingBotSettings.set_value(section=STRATEGY, key=strategy_mode, value=test7_with_protection)
+2025-10-11 16:35:37,323 - bot.settings - INFO - Settings saved to file
+2025-10-11 16:35:37,323 - bot.settings - INFO - TradingBotSettings.set_value(section=STRATEGY, key=enable_crash_protection, value=True)
+2025-10-11 16:35:37,324 - bot.settings - INFO - Settings saved to file
+2025-10-11 16:35:37,325 - bot.settings - INFO - Settings saved to file
+2025-10-11 16:35:40,817 - main - INFO - Running data update #30
+2025-10-11 16:35:41,774 - main - INFO - Account balance: $494.24
+2025-10-11 16:35:42,720 - main - INFO - Found 1 open positions
+2025-10-11 16:35:42,721 - main - INFO - Position fields: ['position', 'market']
+2025-10-11 16:35:42,721 - main - INFO - First position: {'position': {'contractSize': 1, 'createdDate': '2025-10-10T23:59:48.717', 'createdDateUTC': '2025-10-10T19:59:48.717', 'dealId': '005050cc-0001-54c4-0000-000080ad0087', 'dealReference': 'p_005050cc-0001-54c4-0000-000080ad0087', 'workingOrderId': '005050cc-0001-54c4-0000-000080ad0086', 'size': 20.8, 'leverage': 5, 'upl': -7.072, 'direction': 'BUY', 'level': 118.62, 'currency': 'USD', 'guaranteedStop': False, 'stopLevel': 113.93, 'trailingStop': False}, 'market': {'instrumentName': 'Direxion Daily Technology Bull 3X Shares', 'instrumentId': 22606835240490180, 'expiry': '-', 'epic': 'TECL', 'symbol': 'TECL', 'instrumentType': 'SHARES', 'marketStatus': 'CLOSED', 'lotSize': 1, 'percentageChange': -0.14, 'bid': 118.28, 'offer': 118.74, 'updateTime': '2025-10-10T23:59:59.322', 'updateTimeUTC': '2025-10-10T19:59:59.322', 'delayTime': 0, 'streamingPricesAvailable': True, 'scalingFactor': 1, 'marketModes': ['LONG_ONLY'], 'pipPosition': 2, 'tickSize': 0.01}}
+2025-10-11 16:35:43,266 - bot.api - INFO - Market data keys for TECL: ['instrument', 'dealingRules', 'snapshot']
+2025-10-11 16:35:43,266 - bot.api - INFO - Snapshot for TECL: bid=118.28, offer=118.74, high=None, low=None, percentageChange=-0.14
+2025-10-11 16:35:43,266 - bot.api - INFO - Instrument for TECL: name=Direxion Daily Technology Bull 3X Shares, type=SHARES, marketId=None, expiry=-, lotSize=1
+2025-10-11 16:35:43,266 - bot.api - INFO - Opening hours for TECL: {'mon': ['13:30 - 20:00'], 'tue': ['13:30 - 20:00'], 'wed': ['13:30 - 20:00'], 'thu': ['13:30 - 20:00'], 'fri': ['13:30 - 20:00'], 'sat': [], 'sun': [], 'zone': 'UTC'}
+2025-10-11 16:35:43,266 - bot.api - INFO - Dealing rules (top level): minDealSize={'unit': 'POINTS', 'value': 0.1}, maxDealSize={'unit': 'POINTS', 'value': 3250}, minSizeIncrement={'unit': 'POINTS', 'value': 0.1}
+2025-10-11 16:35:43,266 - main - INFO - Market data updated for TECL
+2025-10-11 16:35:43,266 - main - INFO - Market is CLOSED, next open in 48.9 hours
+2025-10-11 16:35:43,879 - bot.api - INFO - Fetched 2 total transactions
+2025-10-11 16:35:43,879 - bot.api - INFO - Transaction types found: {'SWAP', 'DEPOSIT'}
+2025-10-11 16:35:44,113 - bot.api - INFO - Fetched 3 activities
+2025-10-11 16:35:44,114 - bot.api - INFO - Processed 0 complete trades
+2025-10-11 16:35:44,114 - main - INFO - Found 0 historic trades
+2025-10-11 16:35:44,742 - bot.api - INFO - Fetched 2 total transactions
+2025-10-11 16:35:44,742 - bot.api - INFO - Transaction types: {'SWAP', 'DEPOSIT'}
+2025-10-11 16:35:44,743 - main - INFO - Fetched 2 activities in single request
+2025-10-11 16:35:44,743 - main - INFO - Found activity types: {'UNKNOWN'}
+2025-10-11 16:35:44,743 - main - INFO - Found 2 account transactions over 7 days
+2025-10-11 16:35:50,351 - main - INFO - Running data update #31
+2025-10-11 16:35:50,980 - main - INFO - Account balance: $494.24
+2025-10-11 16:35:51,958 - main - INFO - Found 1 open positions
+2025-10-11 16:35:51,958 - main - INFO - Position fields: ['position', 'market']
+2025-10-11 16:35:51,958 - main - INFO - First position: {'position': {'contractSize': 1, 'createdDate': '2025-10-10T23:59:48.717', 'createdDateUTC': '2025-10-10T19:59:48.717', 'dealId': '005050cc-0001-54c4-0000-000080ad0087', 'dealReference': 'p_005050cc-0001-54c4-0000-000080ad0087', 'workingOrderId': '005050cc-0001-54c4-0000-000080ad0086', 'size': 20.8, 'leverage': 5, 'upl': -7.072, 'direction': 'BUY', 'level': 118.62, 'currency': 'USD', 'guaranteedStop': False, 'stopLevel': 113.93, 'trailingStop': False}, 'market': {'instrumentName': 'Direxion Daily Technology Bull 3X Shares', 'instrumentId': 22606835240490180, 'expiry': '-', 'epic': 'TECL', 'symbol': 'TECL', 'instrumentType': 'SHARES', 'marketStatus': 'CLOSED', 'lotSize': 1, 'percentageChange': -0.14, 'bid': 118.28, 'offer': 118.74, 'updateTime': '2025-10-10T23:59:59.322', 'updateTimeUTC': '2025-10-10T19:59:59.322', 'delayTime': 0, 'streamingPricesAvailable': True, 'scalingFactor': 1, 'marketModes': ['LONG_ONLY'], 'pipPosition': 2, 'tickSize': 0.01}}
+2025-10-11 16:35:52,537 - bot.api - INFO - Market data keys for TECL: ['instrument', 'dealingRules', 'snapshot']
+2025-10-11 16:35:52,537 - bot.api - INFO - Snapshot for TECL: bid=118.28, offer=118.74, high=None, low=None, percentageChange=-0.14
+2025-10-11 16:35:52,537 - bot.api - INFO - Instrument for TECL: name=Direxion Daily Technology Bull 3X Shares, type=SHARES, marketId=None, expiry=-, lotSize=1
+2025-10-11 16:35:52,537 - bot.api - INFO - Opening hours for TECL: {'mon': ['13:30 - 20:00'], 'tue': ['13:30 - 20:00'], 'wed': ['13:30 - 20:00'], 'thu': ['13:30 - 20:00'], 'fri': ['13:30 - 20:00'], 'sat': [], 'sun': [], 'zone': 'UTC'}
+2025-10-11 16:35:52,537 - bot.api - INFO - Dealing rules (top level): minDealSize={'unit': 'POINTS', 'value': 0.1}, maxDealSize={'unit': 'POINTS', 'value': 3250}, minSizeIncrement={'unit': 'POINTS', 'value': 0.1}
+2025-10-11 16:35:52,537 - main - INFO - Market data updated for TECL
+2025-10-11 16:35:52,537 - main - INFO - Market is CLOSED, next open in 48.9 hours
+2025-10-11 16:35:52,819 - bot.api - INFO - Fetched 2 total transactions
+2025-10-11 16:35:52,819 - bot.api - INFO - Transaction types found: {'SWAP', 'DEPOSIT'}
+2025-10-11 16:35:53,099 - bot.api - INFO - Fetched 3 activities
+2025-10-11 16:35:53,100 - bot.api - INFO - Processed 0 complete trades
+2025-10-11 16:35:53,101 - main - INFO - Found 0 historic trades
+2025-10-11 16:35:53,383 - bot.api - INFO - Fetched 2 total transactions
+2025-10-11 16:35:53,383 - bot.api - INFO - Transaction types: {'SWAP', 'DEPOSIT'}
+2025-10-11 16:35:53,384 - main - INFO - Fetched 2 activities in single request
+2025-10-11 16:35:53,384 - main - INFO - Found activity types: {'UNKNOWN'}
+2025-10-11 16:35:53,384 - main - INFO - Found 2 account transactions over 7 days
+2025-10-11 16:35:55,478 - uvicorn.error - ERROR - Exception in ASGI application
+Traceback (most recent call last):
+  File "C:\Users\gilbe\AppData\Local\Programs\Python\Python311\Lib\asyncio\runners.py", line 190, in run
+    return runner.run(main)
+           ^^^^^^^^^^^^^^^^
+  File "C:\Users\gilbe\AppData\Local\Programs\Python\Python311\Lib\asyncio\runners.py", line 118, in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\gilbe\AppData\Local\Programs\Python\Python311\Lib\asyncio\base_events.py", line 641, in run_until_complete
+    self.run_forever()
+  File "C:\Users\gilbe\AppData\Local\Programs\Python\Python311\Lib\asyncio\windows_events.py", line 321, in run_forever
+    super().run_forever()
+  File "C:\Users\gilbe\AppData\Local\Programs\Python\Python311\Lib\asyncio\base_events.py", line 608, in run_forever
+    self._run_once()
+  File "C:\Users\gilbe\AppData\Local\Programs\Python\Python311\Lib\asyncio\base_events.py", line 1936, in _run_once
+    handle._run()
+  File "C:\Users\gilbe\AppData\Local\Programs\Python\Python311\Lib\asyncio\events.py", line 84, in _run
+    self._context.run(self._callback, *self._args)
+  File "C:\CapitalTwo\.venv\Lib\site-packages\uvicorn\server.py", line 68, in serve
+    with self.capture_signals():
+  File "C:\Users\gilbe\AppData\Local\Programs\Python\Python311\Lib\contextlib.py", line 144, in __exit__
+    next(self.gen)
+  File "C:\CapitalTwo\.venv\Lib\site-packages\uvicorn\server.py", line 328, in capture_signals
+    signal.raise_signal(captured_signal)
+  File "C:\Users\gilbe\AppData\Local\Programs\Python\Python311\Lib\asyncio\runners.py", line 157, in _on_sigint
+    raise KeyboardInterrupt()
+KeyboardInterrupt
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\CapitalTwo\.venv\Lib\site-packages\uvicorn\protocols\websockets\websockets_impl.py", line 244, in run_asgi
+    result = await self.app(self.scope, self.asgi_receive, self.asgi_send)  # type: ignore[func-returns-value]
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\CapitalTwo\.venv\Lib\site-packages\uvicorn\middleware\proxy_headers.py", line 70, in __call__
+    return await self.app(scope, receive, send)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\CapitalTwo\.venv\Lib\site-packages\fastapi\applications.py", line 1054, in __call__
+    await super().__call__(scope, receive, send)
+  File "C:\CapitalTwo\.venv\Lib\site-packages\starlette\applications.py", line 112, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "C:\CapitalTwo\.venv\Lib\site-packages\starlette\middleware\errors.py", line 152, in __call__
+    await self.app(scope, receive, send)
+  File "C:\CapitalTwo\.venv\Lib\site-packages\starlette\middleware\exceptions.py", line 62, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "C:\CapitalTwo\.venv\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "C:\CapitalTwo\.venv\Lib\site-packages\starlette\routing.py", line 714, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "C:\CapitalTwo\.venv\Lib\site-packages\starlette\routing.py", line 734, in app
+    await route.handle(scope, receive, send)
+  File "C:\CapitalTwo\.venv\Lib\site-packages\starlette\routing.py", line 362, in handle
+    await self.app(scope, receive, send)
+  File "C:\CapitalTwo\.venv\Lib\site-packages\starlette\routing.py", line 95, in app
+    await wrap_app_handling_exceptions(app, session)(scope, receive, send)
+  File "C:\CapitalTwo\.venv\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "C:\CapitalTwo\.venv\Lib\site-packages\starlette\routing.py", line 93, in app
+    await func(session)
+  File "C:\CapitalTwo\.venv\Lib\site-packages\fastapi\routing.py", line 383, in app
+    await dependant.call(**solved_result.values)
+  File "C:\CapitalTwo\main.py", line 151, in websocket_endpoint
+    await asyncio.sleep(1) # Send updates every second
+    ^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\gilbe\AppData\Local\Programs\Python\Python311\Lib\asyncio\tasks.py", line 649, in sleep
+    return await future
+           ^^^^^^^^^^^^
+asyncio.exceptions.CancelledError
+2025-10-11 16:35:55,878 - main - INFO - Stopping app...
+2025-10-11 16:35:55,920 - uvicorn.error - ERROR - Traceback (most recent call last):
+  File "C:\Users\gilbe\AppData\Local\Programs\Python\Python311\Lib\asyncio\runners.py", line 190, in run
+    return runner.run(main)
+           ^^^^^^^^^^^^^^^^
+  File "C:\Users\gilbe\AppData\Local\Programs\Python\Python311\Lib\asyncio\runners.py", line 118, in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\gilbe\AppData\Local\Programs\Python\Python311\Lib\asyncio\base_events.py", line 641, in run_until_complete
+    self.run_forever()
+  File "C:\Users\gilbe\AppData\Local\Programs\Python\Python311\Lib\asyncio\windows_events.py", line 321, in run_forever
+    super().run_forever()
+  File "C:\Users\gilbe\AppData\Local\Programs\Python\Python311\Lib\asyncio\base_events.py", line 608, in run_forever
+    self._run_once()
+  File "C:\Users\gilbe\AppData\Local\Programs\Python\Python311\Lib\asyncio\base_events.py", line 1936, in _run_once
+    handle._run()
+  File "C:\Users\gilbe\AppData\Local\Programs\Python\Python311\Lib\asyncio\events.py", line 84, in _run
+    self._context.run(self._callback, *self._args)
+  File "C:\CapitalTwo\.venv\Lib\site-packages\uvicorn\server.py", line 68, in serve
+    with self.capture_signals():
+  File "C:\Users\gilbe\AppData\Local\Programs\Python\Python311\Lib\contextlib.py", line 144, in __exit__
+    next(self.gen)
+  File "C:\CapitalTwo\.venv\Lib\site-packages\uvicorn\server.py", line 328, in capture_signals
+    signal.raise_signal(captured_signal)
+  File "C:\Users\gilbe\AppData\Local\Programs\Python\Python311\Lib\asyncio\runners.py", line 157, in _on_sigint
+    raise KeyboardInterrupt()
+KeyboardInterrupt
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\CapitalTwo\.venv\Lib\site-packages\starlette\routing.py", line 699, in lifespan
+    await receive()
+  File "C:\CapitalTwo\.venv\Lib\site-packages\uvicorn\lifespan\on.py", line 137, in receive
+    return await self.receive_queue.get()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\gilbe\AppData\Local\Programs\Python\Python311\Lib\asyncio\queues.py", line 158, in get
+    await getter
+asyncio.exceptions.CancelledError
+

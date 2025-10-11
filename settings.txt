@@ -25,9 +25,10 @@ override_strategy_sl = False
 
 [ENV_ACCOUNTS]
 demo = 290950804147613982
+live = 290795266196460740
 
 [STRATEGY]
-strategy_mode = test6_with_protection
+strategy_mode = test7_with_protection
 enable_crash_protection = True
 
 [ALPHA_VANTAGE]
@@ -50,4 +51,7 @@ end_date = 2025-10-10
 start_balance = 500
 monthly_top_up = 100
 invest_pct = 0.99
+
+[API_CONFIG]
+environment = live
 
