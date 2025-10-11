@@ -29,8 +29,6 @@ demo = 290950804147613982
 [STRATEGY]
 strategy_mode = test6_with_protection
 enable_crash_protection = True
-start_balance = 500.0
-monthly_top_up = 100.0
 
 [ALPHA_VANTAGE]
 api_key = OCQ5ZK0K035MOEHM

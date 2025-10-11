@@ -77,8 +77,8 @@ def main():
     
     start_date = settings.get('TESTING', 'start_date', '2024-01-01')
     end_date = settings.get('TESTING', 'end_date', '2025-10-03')
-    start_balance = float(settings.get('STRATEGY', 'start_balance', 500))
-    monthly_top_up = float(settings.get('STRATEGY', 'monthly_top_up', 100))
+    start_balance = float(settings.get('FINANCE', 'start_balance', '500'))
+    monthly_top_up = float(settings.get('FINANCE', 'monthly_top_up', '100'))
     
     print(f"Test period: {start_date} to {end_date}")
     print(f"Start balance: ${start_balance}")

@@ -1,4 +1,5 @@
 @echo off
+chcp 65001 >nul
 setlocal ENABLEDELAYEDEXPANSION
 
 REM Change to the directory of this script

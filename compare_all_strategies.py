@@ -26,8 +26,9 @@ def run_elite_backtest(df, strategy_mode='all_signals', enable_protection=True):
     
     # Start with settings
     settings = TradingBotSettings()
-    balance = float(settings.get('STRATEGY', 'start_balance', 500.0))
-    monthly_top_up = float(settings.get('STRATEGY', 'monthly_top_up', 100.0))
+    # Use FINANCE section consistently
+    balance = float(settings.get('FINANCE', 'start_balance', '500.0'))
+    monthly_top_up = float(settings.get('FINANCE', 'monthly_top_up', '100.0'))
     invest_pct = 0.99
     
     trades = []

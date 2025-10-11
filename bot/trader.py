@@ -129,8 +129,8 @@ class TradingBot:
             # Get initial market info
             self.market_info = await self.api.get_market_info(self.epic)
 
-            # Start continuous data download
-            self.downloader_task = asyncio.create_task(self.continuous_download())
+            # Skip continuous Capital.com data download - we use Alpha Vantage for analysis
+            # self.downloader_task = asyncio.create_task(self.continuous_download())
             
             # Start keepalive
             self.keepalive_task = asyncio.create_task(self.keepalive_loop())
@@ -565,15 +565,12 @@ class TradingBot:
         
         # Prepare data AND perform maintenance at T-120s (2 minutes before close)
         if is_open and time_until_close <= 120 and time_until_close > 115 and not hasattr(self, '_data_prepared_today'):
-            logger.info(f"T-120s: Preparing data and performing maintenance for market close (time_until_close={time_until_close:.1f}s)")
+            logger.info(f"T-120s: Refreshing Alpha Vantage data for market close analysis (time_until_close={time_until_close:.1f}s)")
             
-            # First, perform data maintenance (download 1000 candles for quality check)
-            try:
-                await self.maintain_data_at_market_close()
-            except Exception as e:
-                logger.error(f"Error during data maintenance at T-120s: {e}")
+            # We only use Alpha Vantage for analysis - no Capital.com data needed
+            # Skip maintain_data_at_market_close() - that downloads Capital.com data
             
-            # Then prepare data for analysis
+            # Refresh Alpha Vantage data and prepare for analysis
             await self.prepare_data_before_close()
             self._data_prepared_today = True
         

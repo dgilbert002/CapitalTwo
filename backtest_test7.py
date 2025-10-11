@@ -101,9 +101,10 @@ def run_mode(df: pd.DataFrame, mode: str, crash_protection: bool, invest_pct=0.9
 def main():
     s = TradingBotSettings('settings.txt')
     df = load_av_df(s)
-    start_balance = float(s.get('STRATEGY','start_balance','500.0')) if s.has_section('STRATEGY') else 500.0
-    invest_pct = float(s.get('STRATEGY','invest_pct','0.99')) if s.has_section('STRATEGY') else 0.99
-    monthly_top_up = float(s.get('STRATEGY','monthly_top_up','100.0')) if s.has_section('STRATEGY') else 100.0
+    # Use FINANCE section like all other scripts
+    start_balance = float(s.get('FINANCE','start_balance','500.0')) if s.has_section('FINANCE') else 500.0
+    invest_pct = float(s.get('FINANCE','invest_pct','0.99')) if s.has_section('FINANCE') else 0.99
+    monthly_top_up = float(s.get('FINANCE','monthly_top_up','100.0')) if s.has_section('FINANCE') else 100.0
 
     print(f"Loaded {len(df):,} candles")
 
