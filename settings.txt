@@ -42,9 +42,14 @@ table_name = TECL_av_5min
 
 [DATA]
 start_date = 2024-01-01
-end_date = 2025-10-03
+end_date = 2025-10-10
 
 [TESTING]
 start_date = 2024-01-01
-end_date = 2025-10-03
+end_date = 2025-10-10
+
+[FINANCE]
+start_balance = 500
+monthly_top_up = 100
+invest_pct = 0.99
 

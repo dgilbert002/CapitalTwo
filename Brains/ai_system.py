@@ -73,6 +73,12 @@ class HybridIntelligentSystem:
                 'leverage': 5.0, 'fast_period': 8, 'slow_period': 18, 
                 'signal_period': 4, 'threshold': -0.05, 'stop_loss_pct': 4.0,
                 'win_rate': 70.7, 'final_balance': 119960.31, 'sharpe_ratio': 2.8
+            },
+            # Experimental variant for comparison
+            'macd_histogram_negative_v2': {
+                'leverage': 5.0, 'fast_period': 5, 'slow_period': 18,
+                'signal_period': 4, 'threshold': -0.10, 'stop_loss_pct': 5.5,
+                'win_rate': 75.9, 'final_balance': 134549.42, 'sharpe_ratio': 2.93
             }
         }
 
@@ -220,6 +226,20 @@ class HybridIntelligentSystem:
                 )
             except Exception:
                 pass
+
+        # MACD Histogram Negative V2 (experimental)
+        fired['macd_histogram_negative_v2'] = False
+        if 'macd_histogram_negative_v2' in conds:
+            try:
+                fired['macd_histogram_negative_v2'] = conds['macd_histogram_negative'](
+                    hist, idx,
+                    fast_period=self.STRATEGIES['macd_histogram_negative_v2']['fast_period'],
+                    slow_period=self.STRATEGIES['macd_histogram_negative_v2']['slow_period'],
+                    signal_period=self.STRATEGIES['macd_histogram_negative_v2']['signal_period'],
+                    threshold=self.STRATEGIES['macd_histogram_negative_v2']['threshold']
+                )
+            except Exception:
+                pass
         
         # Convert numpy booleans to regular Python booleans for JSON serialization
         return {k: bool(v) for k, v in fired.items()}
@@ -243,7 +263,7 @@ class HybridIntelligentSystem:
         """Enhanced multi-strategy OR logic analysis with proven strategy support"""
         
         # Use proven strategy if configured
-        if self.strategy_mode in ['all_signals', 'two_rsi_only', 'test6', 'test6_no_protection', 'test6_with_protection']:
+        if self.strategy_mode in ['all_signals', 'two_rsi_only', 'test6', 'test6_no_protection', 'test6_with_protection', 'test7', 'test7_no_protection', 'test7_with_protection']:
             # Ensure date column exists for crash protection
             if 'date' not in historical_data.columns:
                 historical_data['date'] = pd.to_datetime(historical_data['timestamp']).dt.date

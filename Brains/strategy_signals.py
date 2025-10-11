@@ -82,6 +82,18 @@ SIGNAL_CONFIGS = {
         'signal_period': 4,
         'threshold': -0.05,
         'win_rate': 70.7  # High priority!
+    },
+    # Experimental variant - MACD histogram with tighter/earlier settings
+    'macd_histogram_negative_v2': {
+        'leverage': 5.0,
+        'stop_loss_pct': 5.5,
+        'fast_period': 5,
+        'slow_period': 18,
+        'signal_period': 4,
+        'threshold': -0.10,
+        'win_rate': 75.9,           # From TSV
+        'final_balance': 134549.42, # From TSV
+        'sharpe_ratio': 2.93        # From TSV
     }
 }
 
@@ -264,10 +276,15 @@ def check_all_signals(df: pd.DataFrame, strategy_mode: str = 'all_signals') -> D
     elif strategy_mode == 'two_rsi_only':
         signals_to_check = ['rsi_oversold', 'rsi_bullish_cross_50']
     elif strategy_mode in ['test6', 'test6_no_protection', 'test6_with_protection']:
-        # All 8 signals for Test6
-        signals_to_check = ['rsi_oversold', 'rsi_bullish_cross_50', 'bb_lower_break', 
-                           'price_above_vwap', 'roc_below_threshold', 'macd_positive',
-                           'keltner_lower_break', 'macd_histogram_negative']
+        # Test6: original 8 signals (NO v2)
+        signals_to_check = ['rsi_oversold', 'rsi_bullish_cross_50', 'bb_lower_break',
+                            'price_above_vwap', 'roc_below_threshold', 'macd_positive',
+                            'keltner_lower_break', 'macd_histogram_negative']
+    elif strategy_mode in ['test7', 'test7_no_protection', 'test7_with_protection']:
+        # Test7: Test6 + experimental MACD histogram negative v2 (9 signals)
+        signals_to_check = ['rsi_oversold', 'rsi_bullish_cross_50', 'bb_lower_break',
+                            'price_above_vwap', 'roc_below_threshold', 'macd_positive',
+                            'keltner_lower_break', 'macd_histogram_negative', 'macd_histogram_negative_v2']
     else:
         return {}  # No signals for other modes
     
@@ -293,6 +310,9 @@ def check_all_signals(df: pd.DataFrame, strategy_mode: str = 'all_signals') -> D
         elif signal == 'keltner_lower_break':
             fired = check_keltner_lower_break(df, idx, config['period'], config['multiplier'])
         elif signal == 'macd_histogram_negative':
+            fired = check_macd_histogram_negative(df, idx, config['fast_period'], config['slow_period'],
+                                                 config['signal_period'], config['threshold'])
+        elif signal == 'macd_histogram_negative_v2':
             fired = check_macd_histogram_negative(df, idx, config['fast_period'], config['slow_period'],
                                                  config['signal_period'], config['threshold'])
         else:
