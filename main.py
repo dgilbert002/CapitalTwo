@@ -16,8 +16,8 @@ from log_manager import log_manager, setup_logging, set_log_level
 
 def configure_logging():
     """Configure unified logging for app, API, and server into log.txt."""
-    # Use the session-based log manager - this sets up logging handlers
-    logger = setup_logging("INFO")
+    # Use the session-based log manager - starts in production mode (WARNING)
+    logger = setup_logging("WARNING")
     
     formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 

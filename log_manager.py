@@ -133,8 +133,8 @@ class SessionLogManager:
 # Global instance
 log_manager = SessionLogManager()
 
-def setup_logging(log_level: str = "INFO") -> logging.Logger:
-    """Setup logging with the session manager"""
+def setup_logging(log_level: str = "WARNING") -> logging.Logger:
+    """Setup logging with the session manager - defaults to production mode (WARNING)"""
     # Start new session
     log_file = log_manager.start_new_session()
     
@@ -155,12 +155,20 @@ def set_log_level(debug_mode: bool):
     """Change log level based on debug mode toggle"""
     level = logging.DEBUG if debug_mode else logging.WARNING
     
+    # Update root logger first
+    logging.root.setLevel(level)
+    
     # Update all handlers
     for handler in logging.root.handlers:
         handler.setLevel(level)
     
-    # Update root logger
-    logging.root.setLevel(level)
+    # Update all existing loggers
+    for logger_name in logging.root.manager.loggerDict:
+        logger = logging.getLogger(logger_name)
+        logger.setLevel(level)
     
-    # Log the change
-    logging.info(f"Log level changed to: {'DEBUG/INFO' if debug_mode else 'ERROR/WARNING'}")
+    # Log the change (this will only appear if level allows it)
+    if debug_mode:
+        logging.info(f"Log level changed to: DEBUG/INFO")
+    else:
+        logging.warning(f"Log level changed to: ERROR/WARNING only")

@@ -6,7 +6,7 @@ import warnings
 import talib
 warnings.filterwarnings('ignore')
 
-print("🎯 FOCUSED STRATEGY OPTIMIZER")
+print("FOCUSED STRATEGY OPTIMIZER")
 print("=" * 80)
 print("Focused optimization on key parameters:")
 print("• Best leverage levels (2x, 3x, 4x)")
@@ -640,7 +640,7 @@ def main():
     
     # Display results
     print(f"\n" + "="*100)
-    print(f"🎯 FOCUSED STRATEGY OPTIMIZATION RESULTS")
+    print(f"FOCUSED STRATEGY OPTIMIZATION RESULTS")
     print(f"="*100)
     
     print(f"📊 ALL STRATEGIES (Top 15):")
