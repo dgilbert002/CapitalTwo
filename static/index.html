@@ -169,6 +169,25 @@
         .disconnected { background-color: #f21361; }
         .tab-btn { cursor: pointer; padding: 8px 14px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.06); background: #12163a; color: #cfd6ff; }
         .tab-btn.active { background: #1e255f; }
+        /* Debug toggle styling */
+        #debugToggle {
+            width: 44px;
+            height: 22px;
+            vertical-align: middle;
+            cursor: pointer;
+        }
+        
+        #debugToggle:checked {
+            background-color: #ffc107;
+            border-color: #ffc107;
+        }
+        
+        .form-check-label[for="debugToggle"] {
+            vertical-align: middle;
+            font-size: 0.9rem;
+            cursor: pointer;
+            user-select: none;
+        }
     </style>
 </head>
 <body>
@@ -200,6 +219,12 @@
                                 </p>
                             </div>
                             <div class="col-md-6 text-end">
+                                <div class="form-check form-switch d-inline-block me-3">
+                                    <input class="form-check-input" type="checkbox" id="debugToggle" title="Toggle Debug Logging">
+                                    <label class="form-check-label" for="debugToggle">
+                                        <i class="fas fa-bug"></i> Debug
+                                    </label>
+                                </div>
                                 <button class="btn btn-sm btn-success" id="btnStart"><i class="fas fa-play"></i> Start Bot</button>
                                 <button class="btn btn-sm btn-danger ms-2" id="btnStop" style="display:none;"><i class="fas fa-stop"></i> Stop Bot</button>
                                 <button class="btn btn-sm btn-warning ms-2" id="btnSimulate" title="Simulate Market Close"><i class="fas fa-vial"></i> Simulate</button>
@@ -211,8 +236,31 @@
                         </div>
                     </div>
 
-            <div class="row">
-                <div class="col-lg-6">
+            <!-- Balance Row -->
+            <div class="row mb-3">
+                <div class="col-12">
+                    <div class="metric-card">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="metric-label">Account Balance</div>
+                                <div class="metric-value" id="balance">$0.00</div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="metric-label">Available Funds</div>
+                                <div class="metric-value" id="available">$0.00</div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="metric-label">Total P&L</div>
+                                <div class="metric-value" id="pnl">$0.00</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Environment/Account and Market Info Row -->
+            <div class="row mb-3">
+                <div class="col-lg-4">
                     <div class="metric-card">
                         <div class="row g-3">
                             <div class="col-md-6">
@@ -221,7 +269,7 @@
                                     <option value="demo">Demo</option>
                                     <option value="live">Live</option>
                                 </select>
-                </div>
+                            </div>
                             <div class="col-md-6">
                                 <label class="metric-label mb-1"><i class="fas fa-user"></i> Account</label>
                                 <select id="accountSelect" class="form-select">
@@ -229,204 +277,80 @@
                                 </select>
                             </div>
                         </div>
-                        <small class="text-muted">Changes apply immediately and are saved to settings.txt.</small>
-            </div>
-
-                    <div class="metric-card">
-                        <div class="row">
-                            <div class="col-md-4">
-                        <div class="metric-label">Account Balance</div>
-                        <div class="metric-value" id="balance">$0.00</div>
-                    </div>
-                            <div class="col-md-4">
-                        <div class="metric-label">Available Funds</div>
-                        <div class="metric-value" id="available">$0.00</div>
-                    </div>
-                            <div class="col-md-4">
-                        <div class="metric-label">Total P&L</div>
-                        <div class="metric-value" id="pnl">$0.00</div>
-                    </div>
-                </div>
-                    </div>
-                    
-                    <!-- Strategy Mode Selection - PROVEN RESULTS MATRIX -->
-                    <div class="metric-card mb-3">
-                        <h6 class="text-muted mb-3"><i class="fas fa-chart-line"></i> Strategy Mode - Proven Results</h6>
-                        <div class="alert alert-info mb-3" style="font-size: 0.9em;">
-                            <i class="fas fa-info-circle"></i> <strong>Important:</strong> The $699k and $486k results INCLUDE crash protection. Select the exact configuration you want:
-                        </div>
-                        <div class="strategy-mode-selection">
-                            <div class="form-check mb-2">
-                                <input class="form-check-input" type="radio" name="strategyMode" value="all_with_protection" id="allWithProtection" checked>
-                                <label class="form-check-label" for="allWithProtection">
-                                    <strong>All 6 Signals WITH Protection</strong> ✅
-                                    <br><span class="text-success">→ $699,074 (57.2% WR, -96.9% DD)</span>
-                                </label>
-                            </div>
-                            <div class="form-check mb-2">
-                                <input class="form-check-input" type="radio" name="strategyMode" value="all_no_protection" id="allNoProtection">
-                                <label class="form-check-label" for="allNoProtection">
-                                    <strong>All 6 Signals NO Protection</strong>
-                                    <br><span class="text-warning">→ $376,004 (56.1% WR, -98.7% DD)</span>
-                                </label>
-                            </div>
-                            <div class="form-check mb-2">
-                                <input class="form-check-input" type="radio" name="strategyMode" value="two_rsi_protection" id="twoRsiProtection">
-                                <label class="form-check-label" for="twoRsiProtection">
-                                    <strong>Two RSI WITH Protection</strong> 🛡️
-                                    <br><span class="text-success">→ $485,948 (59.6% WR, -33.9% DD) <span class="badge bg-success">Lowest Risk</span></span>
-                                </label>
-                            </div>
-                            <div class="form-check mb-2">
-                                <input class="form-check-input" type="radio" name="strategyMode" value="two_rsi_no_protection" id="twoRsiNoProtection">
-                                <label class="form-check-label" for="twoRsiNoProtection">
-                                    <strong>Two RSI NO Protection</strong>
-                                    <br><span class="text-warning">→ $348,803 (58.1% WR, -68.5% DD)</span>
-                                </label>
-                            </div>
-                            <div class="form-check mb-2">
-                                <input class="form-check-input" type="radio" name="strategyMode" value="test6_no_protection" id="test6NoProtection">
-                                <label class="form-check-label" for="test6NoProtection">
-                                    <strong>Test6 - 8 Signals NO Protection</strong> 🚀
-                                    <br><span class="text-info">→ $509,453 (8 strategies including Keltner & MACD Histogram)</span>
-                                </label>
-                            </div>
-                            <div class="form-check mb-2">
-                                <input class="form-check-input" type="radio" name="strategyMode" value="test6_with_protection" id="test6WithProtection">
-                                <label class="form-check-label" for="test6WithProtection">
-                                    <strong>Test6 - 8 Signals WITH Protection</strong> 🏆
-                                    <br><span class="text-primary fw-bold">→ $958,260 <span class="badge bg-primary">BEST PERFORMER!</span></span>
-                                </label>
-                            </div>
-                            <div class="form-check mb-2">
-                                <input class="form-check-input" type="radio" name="strategyMode" value="test7_no_protection" id="test7NoProtection">
-                                <label class="form-check-label" for="test7NoProtection">
-                                    <strong>Test7 - 9 Signals NO Protection</strong>
-                                    <br><span class="text-info">(Test6 + MACD v2)</span>
-                                </label>
-                            </div>
-                            <div class="form-check mb-2">
-                                <input class="form-check-input" type="radio" name="strategyMode" value="test7_with_protection" id="test7WithProtection">
-                                <label class="form-check-label" for="test7WithProtection">
-                                    <strong>Test7 - 9 Signals WITH Protection</strong>
-                                    <br><span class="text-primary">(Test6 + MACD v2)</span>
-                                </label>
-                            </div>
-                            <div class="form-check mb-2">
-                                <input class="form-check-input" type="radio" name="strategyMode" value="enhanced" id="enhanced">
-                                <label class="form-check-label" for="enhanced">
-                                    <strong>Enhanced</strong> - Current AI system
-                                </label>
+                        <hr class="my-2">
+                        <div class="mt-2">
+                            <small class="text-muted">Active Strategy:</small>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <strong id="activeStrategyDisplay" class="text-info">Not Set</strong>
+                                <button class="btn btn-sm btn-outline-primary" onclick="showStrategyModal()">
+                                    <i class="fas fa-edit"></i> Change
+                                </button>
                             </div>
                         </div>
-                        <div class="mt-3">
-                            <button onclick="showStrategyDetails()" class="btn btn-info btn-sm me-2">
-                                <i class="fas fa-info-circle"></i> View Strategy Details
-                            </button>
-                            <button onclick="saveStrategySettings()" class="btn btn-primary btn-sm">
-                            <i class="fas fa-save"></i> Save Strategy Settings
-                        </button>
-                    </div>
-                    
-                    <!-- Stop Loss Configuration -->
-                    <div class="metric-card">
-                        <h6 class="text-muted mb-3"><i class="fas fa-shield-alt"></i> Stop Loss Configuration</h6>
-                        <div class="form-check mb-2">
-                            <input class="form-check-input" type="checkbox" id="overrideStrategySL">
-                            <label class="form-check-label" for="overrideStrategySL">
-                                Override Strategy Stop Loss
-                            </label>
+                        <hr class="my-2">
+                        <div class="mt-2">
+                            <small class="text-muted">Stop Loss:</small>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <strong id="activeStopLossDisplay" class="text-warning">Not Set</strong>
+                                <button class="btn btn-sm btn-outline-warning" onclick="showStopLossModal()">
+                                    <i class="fas fa-edit"></i> Configure
+                                </button>
+                            </div>
                         </div>
-                        <div class="form-check mb-2">
-                            <input class="form-check-input" type="radio" name="stopLossType" id="slNormal" value="normal" checked>
-                            <label class="form-check-label" for="slNormal">Normal SL (%)</label>
-                            <input type="number" class="form-control form-control-sm mt-1" id="slNormalValue" 
-                                   placeholder="2.0" step="0.1" style="width: 100px;">
-                    </div>
-                        <div class="form-check mb-2">
-                            <input class="form-check-input" type="radio" name="stopLossType" id="slTrailing" value="trailing">
-                            <label class="form-check-label" for="slTrailing">Trailing SL</label>
-                            <div class="d-flex gap-2 mt-1">
-                                <input type="text" class="form-control form-control-sm" id="slThresholds" 
-                                       placeholder="Thresholds: 5,10,15" disabled style="width: 140px;">
-                                <input type="text" class="form-control form-control-sm" id="slAdjustments" 
-                                       placeholder="Adjust: 2,5,8" disabled style="width: 120px;">
-                </div>
-            </div>
-                        <div class="form-check mb-2">
-                            <input class="form-check-input" type="radio" name="stopLossType" id="slStaggered" value="staggered">
-                            <label class="form-check-label" for="slStaggered">Staggered SL</label>
-                            <div class="d-flex gap-2 mt-1">
-                                <input type="text" class="form-control form-control-sm" id="slWhenAt" 
-                                       placeholder="When: 2,4,5,7,10" disabled style="width: 140px;">
-                                <input type="text" class="form-control form-control-sm" id="slUse" 
-                                       placeholder="Use: 0,1,2,4,6" disabled style="width: 120px;">
                     </div>
                 </div>
-                        <button class="btn btn-sm btn-primary mt-2" id="btnSaveStopLoss">
-                            <i class="fas fa-save"></i> Save SL Settings
-                        </button>
-                    </div>
-                </div>
-                <div class="col-lg-6">
-                    <div class="metric-card">
+                <div class="col-lg-8">
+                    <div class="metric-card h-100">
                         <h5 class="mb-3"><i class="fas fa-globe"></i> Market Information</h5>
                         <div class="row">
-                            <div class="col-6">
-                                <h6 class="text-muted">Market Details</h6>
-                                <p class="mb-1"><strong>EPIC:</strong> <span id="epic">-</span></p>
-                                <p class="mb-1"><strong>Name:</strong> <span id="epicName">-</span></p>
-                                <p class="mb-1"><strong>Bid/Ask:</strong> <span id="bidAsk">-</span></p>
-                                <p class="mb-1"><strong>Spread:</strong> <span id="epicSpread">-</span></p>
-                                <p class="mb-1"><strong>Change:</strong> <span id="percentChange">-</span>%</p>
-                                <div class="mb-1">
-                                    <strong>Leverage:</strong>
-                                    <span id="leverageDisplay">-</span>x
-                                    <div class="mt-2">
-                                        <small class="text-muted">Account Preference</small>
-                                        <div class="d-flex gap-2 align-items-center">
-                                            <select id="leveragePicker" class="form-select form-select-sm bg-dark text-light border-secondary" style="max-width: 140px;">
-                                                <option value="">Loading...</option>
-                                            </select>
-                                            <button class="btn btn-sm btn-outline-info" id="btnApplyLeverage" disabled>
-                                                <i class="fas fa-save"></i>
-                                            </button>
-                                        </div>
-                                        <small id="leverageHelp" class="text-muted"></small>
-                                    </div>
-                                </div>
+                            <div class="col-md-3">
+                                <p class="mb-1 small"><strong>EPIC:</strong> <span id="epic">-</span></p>
+                                <p class="mb-1 small"><strong>Name:</strong> <span id="epicName" style="font-size: 0.85em;">-</span></p>
+                                <p class="mb-1 small"><strong>Category:</strong> <span id="categoryDisplay">-</span></p>
                             </div>
-                            <div class="col-6">
-                                <h6 class="text-muted">Market Hours</h6>
-                                <p class="mb-1"><strong>Status:</strong> <span id="marketStatus">-</span></p>
-                                <p class="mb-1"><strong>Next:</strong> <span id="nextEvent">-</span></p>
-                                <p class="mb-1"><strong>Market Time:</strong> <span id="marketTime">-</span></p>
-                                <p class="mb-1"><strong>UAE Time:</strong> <span id="uaeTime">-</span></p>
-                                <div class="mt-2"><span class="metric-label">Countdown</span> <span class="countdown" id="countdown">--:--:--</span></div>
+                            <div class="col-md-3">
+                                <p class="mb-1 small"><strong>Bid/Ask:</strong> <span id="bidAsk">-</span></p>
+                                <p class="mb-1 small"><strong>Spread:</strong> <span id="epicSpread">-</span></p>
+                                <p class="mb-1 small"><strong>Change:</strong> <span id="percentChange">-</span>%</p>
+                            </div>
+                            <div class="col-md-3">
+                                <p class="mb-1 small"><strong>Status:</strong> <span id="marketStatus">-</span></p>
+                                <p class="mb-1 small"><strong>Next:</strong> <span id="nextEvent" style="font-size: 0.85em;">-</span></p>
+                                <p class="mb-1 small"><strong>Countdown:</strong> <span id="countdown" class="countdown">-</span></p>
+                            </div>
+                            <div class="col-md-3">
+                                <p class="mb-1 small"><strong>Leverage:</strong> <span id="leverageDisplay">-</span>x</p>
+                                <select id="leveragePicker" class="form-select form-select-sm" style="font-size: 0.85em;">
+                                    <option value="">Loading...</option>
+                                </select>
+                                <button class="btn btn-sm btn-outline-info mt-1" id="btnApplyLeverage" disabled style="font-size: 0.85em;">
+                                    <i class="fas fa-save"></i> Apply
+                                </button>
                             </div>
                         </div>
-                        <hr>
-                        <div class="row mt-3">
+                        <div class="row mt-2">
                             <div class="col-12">
-                                <h6 class="text-muted">Trading Rules</h6>
-                                <div class="row">
-                                    <div class="col-6">
-                                        <p class="mb-1"><small><strong>Min Size:</strong> <span id="minDealSize">-</span></small></p>
-                                        <p class="mb-1"><small><strong>Max Size:</strong> <span id="maxDealSize">-</span></small></p>
-                                    </div>
-                                    <div class="col-6">
-                                        <p class="mb-1"><small><strong>Size Increment:</strong> <span id="minSizeIncrement">-</span></small></p>
-                                        <p class="mb-1"><small><strong>Lot Size:</strong> <span id="lotSize">-</span></small></p>
-                                    </div>
-                                </div>
+                                <small class="text-muted">
+                                    <strong>Market Time (UTC):</strong> <span id="marketTime">-</span> | 
+                                    <strong>UAE Time:</strong> <span id="uaeTime">-</span>
+                                </small>
+                                <small class="text-muted d-block">
+                                    <strong>Min Size:</strong> <span id="minDealSize">-</span> |
+                                    <strong>Max Size:</strong> <span id="maxDealSize">-</span>
+                                </small>
+                                <span id="category" style="display:none;">-</span>
+                                <span id="minStop" style="display:none;">-</span>
+                                <span id="maxStop" style="display:none;">-</span>
+                                <span id="minSizeIncrement" style="display:none;">-</span>
+                                <span id="lotSize" style="display:none;">-</span>
+                                <small id="leverageHelp" class="text-muted d-block"></small>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            
-
+            <!-- Open Positions and Tabs Row -->
             <div class="row">
                 <div class="col-12">
                     <div class="positions-table">
@@ -484,7 +408,7 @@
                                     </tr>
                                 </tbody>
                             </table>
-                        </div>
+                    </div>
                         <div class="table-responsive" id="transactionsPanel" style="display:none;">
                             <table class="table table-hover mb-0" id="transactionsTableElement">
                                 <thead id="transactionsTableHeader">
@@ -865,6 +789,14 @@
                     radioValue = 'test6_with_protection';
                 } else if (strategyMode === 'test6' && crashProtection === false) {
                     radioValue = 'test6_no_protection';
+                } else if (strategyMode === 'test7_no_protection') {
+                    radioValue = 'test7_no_protection';
+                } else if (strategyMode === 'test7_with_protection') {
+                    radioValue = 'test7_with_protection';
+                } else if (strategyMode === 'test7' && crashProtection === true) {
+                    radioValue = 'test7_with_protection';
+                } else if (strategyMode === 'test7' && crashProtection === false) {
+                    radioValue = 'test7_no_protection';
                 } else if (strategyMode === 'enhanced') {
                     radioValue = 'enhanced';
                 }
@@ -875,6 +807,8 @@
                     radioButton.checked = true;
                     console.log(`Loaded saved strategy: ${strategyMode}, Protection: ${crashProtection}, Radio: ${radioValue}`);
                     strategySettingsLoaded = true; // Mark as loaded
+                    // Update the display
+                    updateActiveStrategyDisplay();
                 }
             } catch (error) {
                 console.error('Error loading saved strategy settings:', error);
@@ -1078,6 +1012,14 @@
                     elements.epicName.textContent = mi.instrument.name;
                 }
                 
+                // Update category display from market info
+                if (mi.instrument && mi.instrument.type) {
+                    const categoryHidden = document.getElementById('category');
+                    const categoryDisplay = document.getElementById('categoryDisplay');
+                    if (categoryHidden) categoryHidden.textContent = mi.instrument.type;
+                    if (categoryDisplay) categoryDisplay.textContent = mi.instrument.type;
+                }
+                
                 // Update market status from market_info
                 if (mi.marketStatus) {
                     // Override with actual market status if different
@@ -1190,6 +1132,10 @@
             // Update last update time - removed as element doesn't exist
             // elements.lastUpdate.textContent = new Date().toLocaleTimeString();
             // Removed frequent leverage refresh; now handled only on init and explicit updates
+            
+            // Update active strategy and stop loss displays
+            updateActiveStrategyDisplay();
+            updateActiveStopLossDisplay();
         }
 
         // ===== Leverage UI logic =====
@@ -2207,8 +2153,8 @@
             });
         });
         
-        // Save Stop Loss Settings
-        document.getElementById('btnSaveStopLoss').addEventListener('click', async () => {
+        // Save Stop Loss Settings - Modified for modal
+        async function saveStopLossSettings() {
             const selectedType = document.querySelector('input[name="stopLossType"]:checked').value;
             const overrideStrategySL = document.getElementById('overrideStrategySL').checked;
             
@@ -2237,10 +2183,53 @@
             } catch (e) {
                 showNotification('Error saving settings: ' + e.message, 'error');
             }
-        });
+            updateActiveStopLossDisplay();
+        }
 
+        // Initialize displays on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set initial display values
+            const strategyDisplay = document.getElementById('activeStrategyDisplay');
+            const stopLossDisplay = document.getElementById('activeStopLossDisplay');
+            
+            if (strategyDisplay) {
+                strategyDisplay.textContent = 'Connecting...';
+            }
+            if (stopLossDisplay) {
+                stopLossDisplay.textContent = 'Connecting...';
+            }
+        });
+        
         // Initialize WebSocket connection
         connectWebSocket();
+        
+        // Debug toggle handler
+        document.getElementById('debugToggle').addEventListener('change', async (e) => {
+            const debugMode = e.target.checked;
+            
+            try {
+                const response = await fetch('/api/log/level', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({debug_mode: debugMode})
+                });
+                
+                const data = await response.json();
+                if (data.success) {
+                    showNotification(
+                        `Logging: ${debugMode ? 'Debug Mode (All Logs)' : 'Production Mode (Errors/Warnings)'}`, 
+                        debugMode ? 'info' : 'warning'
+                    );
+                } else {
+                    showNotification('Failed to change log level', 'error');
+                    e.target.checked = !debugMode; // Revert toggle
+                }
+            } catch (error) {
+                console.error('Error changing log level:', error);
+                showNotification('Error changing log level', 'error');
+                e.target.checked = !debugMode; // Revert toggle
+            }
+        });
         
         // Strategy settings will be loaded when WebSocket sends data
         
@@ -2248,6 +2237,61 @@
         function showStrategyDetails() {
             const modal = new bootstrap.Modal(document.getElementById('strategyDetailsModal'));
             modal.show();
+        }
+        
+        // Show strategy selection modal
+        function showStrategyModal() {
+            const modal = new bootstrap.Modal(document.getElementById('strategySelectionModal'));
+            modal.show();
+        }
+        
+        // Show stop loss configuration modal
+        function showStopLossModal() {
+            const modal = new bootstrap.Modal(document.getElementById('stopLossModal'));
+            modal.show();
+        }
+        
+        // Update active strategy display
+        function updateActiveStrategyDisplay() {
+            const strategyMode = document.querySelector('input[name="strategyMode"]:checked');
+            const display = document.getElementById('activeStrategyDisplay');
+            if (strategyMode && display) {
+                const label = strategyMode.parentElement.querySelector('strong');
+                if (label) {
+                    display.textContent = label.textContent;
+                } else {
+                    display.textContent = strategyMode.value;
+                }
+            } else if (display) {
+                display.textContent = 'Not Set';
+            }
+        }
+        
+        // Update active stop loss display
+        function updateActiveStopLossDisplay() {
+            const slType = document.querySelector('input[name="stopLossType"]:checked');
+            const display = document.getElementById('activeStopLossDisplay');
+            if (slType && display) {
+                let text = '';
+                if (slType.value === 'normal') {
+                    const value = document.getElementById('slNormalValue').value || '2.0';
+                    text = `Normal ${value}%`;
+                } else if (slType.value === 'trailing') {
+                    text = 'Trailing SL';
+                } else if (slType.value === 'staggered') {
+                    text = 'Staggered SL';
+                }
+                display.textContent = text;
+            }
+        }
+        
+        // Update category display
+        function updateCategoryDisplay() {
+            const categoryHidden = document.getElementById('category');
+            const categoryDisplay = document.getElementById('categoryDisplay');
+            if (categoryHidden && categoryDisplay && categoryHidden.textContent !== '-') {
+                categoryDisplay.textContent = categoryHidden.textContent;
+            }
         }
     </script>
     
@@ -2448,6 +2492,149 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Strategy Selection Modal -->
+    <div class="modal fade" id="strategySelectionModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fas fa-chart-line"></i> Select Trading Strategy</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="alert alert-info mb-3">
+                        <i class="fas fa-info-circle"></i> Select your preferred trading strategy. Each has different risk/reward profiles.
+                    </div>
+                    <div class="strategy-mode-selection">
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="radio" name="strategyMode" value="all_with_protection" id="allWithProtection" checked>
+                            <label class="form-check-label" for="allWithProtection">
+                                <strong>All 6 Signals WITH Protection</strong> ✅
+                                <br><span class="text-muted small">Uses RSI, Bollinger, VWAP, ROC, MACD with crash protection</span>
+                            </label>
+                        </div>
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="radio" name="strategyMode" value="all_no_protection" id="allNoProtection">
+                            <label class="form-check-label" for="allNoProtection">
+                                <strong>All 6 Signals NO Protection</strong>
+                                <br><span class="text-muted small">Same signals but trades through market crashes</span>
+                            </label>
+                        </div>
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="radio" name="strategyMode" value="two_rsi_protection" id="twoRsiProtection">
+                            <label class="form-check-label" for="twoRsiProtection">
+                                <strong>Two RSI WITH Protection</strong> 🛡️
+                                <br><span class="text-muted small">Simplified strategy, lowest risk</span>
+                            </label>
+                        </div>
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="radio" name="strategyMode" value="two_rsi_no_protection" id="twoRsiNoProtection">
+                            <label class="form-check-label" for="twoRsiNoProtection">
+                                <strong>Two RSI NO Protection</strong>
+                                <br><span class="text-muted small">RSI only, no crash protection</span>
+                            </label>
+                        </div>
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="radio" name="strategyMode" value="test6_no_protection" id="test6NoProtection">
+                            <label class="form-check-label" for="test6NoProtection">
+                                <strong>Test6 - 8 Signals NO Protection</strong> 🚀
+                                <br><span class="text-muted small">Adds Keltner Channel and MACD Histogram</span>
+                            </label>
+                        </div>
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="radio" name="strategyMode" value="test6_with_protection" id="test6WithProtection">
+                            <label class="form-check-label" for="test6WithProtection">
+                                <strong>Test6 - 8 Signals WITH Protection</strong> 🏆
+                                <br><span class="text-muted small">8 signals with crash protection</span>
+                            </label>
+                        </div>
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="radio" name="strategyMode" value="test7_no_protection" id="test7NoProtection">
+                            <label class="form-check-label" for="test7NoProtection">
+                                <strong>Test7 - 9 Signals NO Protection</strong>
+                                <br><span class="text-muted small">Test6 plus optimized MACD v2</span>
+                            </label>
+                        </div>
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="radio" name="strategyMode" value="test7_with_protection" id="test7WithProtection">
+                            <label class="form-check-label" for="test7WithProtection">
+                                <strong>Test7 - 9 Signals WITH Protection</strong>
+                                <br><span class="text-muted small">Most comprehensive with protection</span>
+                            </label>
+                        </div>
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="radio" name="strategyMode" value="enhanced" id="enhanced">
+                            <label class="form-check-label" for="enhanced">
+                                <strong>Enhanced AI System</strong>
+                                <br><span class="text-muted small">Dynamic confidence-based trading</span>
+                            </label>
+                        </div>
+                    </div>
+                    <button onclick="showStrategyDetails()" class="btn btn-info btn-sm mt-2">
+                        <i class="fas fa-info-circle"></i> View Strategy Details
+                    </button>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="saveStrategySettings(); bootstrap.Modal.getInstance(document.getElementById('strategySelectionModal')).hide(); updateActiveStrategyDisplay();">
+                        <i class="fas fa-save"></i> Save Strategy
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Stop Loss Configuration Modal -->
+    <div class="modal fade" id="stopLossModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fas fa-shield-alt"></i> Stop Loss Configuration</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-check mb-3">
+                        <input class="form-check-input" type="checkbox" id="overrideStrategySL">
+                        <label class="form-check-label" for="overrideStrategySL">
+                            Override Strategy Stop Loss
+                        </label>
+                    </div>
+                    <div class="form-check mb-3">
+                        <input class="form-check-input" type="radio" name="stopLossType" id="slNormal" value="normal" checked>
+                        <label class="form-check-label" for="slNormal">Normal Stop Loss (%)</label>
+                        <input type="number" class="form-control form-control-sm mt-1" id="slNormalValue" 
+                               placeholder="2.0" step="0.1" style="width: 100px;">
+                    </div>
+                    <div class="form-check mb-3">
+                        <input class="form-check-input" type="radio" name="stopLossType" id="slTrailing" value="trailing">
+                        <label class="form-check-label" for="slTrailing">Trailing Stop Loss</label>
+                        <div class="d-flex gap-2 mt-1">
+                            <input type="text" class="form-control form-control-sm" id="slThresholds" 
+                                   placeholder="Thresholds: 5,10,15" disabled style="width: 140px;">
+                            <input type="text" class="form-control form-control-sm" id="slAdjustments" 
+                                   placeholder="Adjust: 2,5,8" disabled style="width: 120px;">
+                        </div>
+                    </div>
+                    <div class="form-check mb-3">
+                        <input class="form-check-input" type="radio" name="stopLossType" id="slStaggered" value="staggered">
+                        <label class="form-check-label" for="slStaggered">Staggered Stop Loss</label>
+                        <div class="d-flex gap-2 mt-1">
+                            <input type="text" class="form-control form-control-sm" id="slWhenAt" 
+                                   placeholder="When: 2,4,5,7,10" disabled style="width: 140px;">
+                            <input type="text" class="form-control form-control-sm" id="slUse" 
+                                   placeholder="Use: 0,1,2,4,6" disabled style="width: 120px;">
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="btnSaveStopLoss" onclick="saveStopLossSettings(); bootstrap.Modal.getInstance(document.getElementById('stopLossModal')).hide();">
+                        <i class="fas fa-save"></i> Save Configuration
+                    </button>
                 </div>
             </div>
         </div>

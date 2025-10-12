@@ -12,14 +12,12 @@ from fastapi.responses import HTMLResponse, Response
 
 from bot.trader import TradingBot
 from bot.settings import TradingBotSettings
+from log_manager import log_manager, setup_logging, set_log_level
 
 def configure_logging():
     """Configure unified logging for app, API, and server into log.txt."""
-    log_file = 'log.txt'
-    
-    # Truncate log file on startup for fresh logs
-    with open(log_file, 'w') as f:
-        f.write('')
+    # Use the session-based log manager - this sets up logging handlers
+    logger = setup_logging("INFO")
     
     formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 
@@ -53,25 +51,13 @@ def configure_logging():
                 # Fail-open for safety on console
                 return True
 
+    # Apply the console filter to existing handlers
     root = logging.getLogger()
-    root.setLevel(logging.INFO)
-
-    # Avoid duplicate handlers if reloaded
-    for h in list(root.handlers):
-        root.removeHandler(h)
-
-    file_handler = logging.FileHandler(log_file)
-    file_handler.setLevel(logging.INFO)
-    file_handler.setFormatter(formatter)
-
-    # Console: only actionable logs via filter, suppress general INFO noise
-    stream_handler = logging.StreamHandler()
-    stream_handler.setLevel(logging.INFO)
-    stream_handler.setFormatter(formatter)
-    stream_handler.addFilter(ConsoleActionFilter())
-
-    root.addHandler(file_handler)
-    root.addHandler(stream_handler)
+    
+    # Find and update the stream handler with our filter
+    for handler in root.handlers:
+        if isinstance(handler, logging.StreamHandler) and not isinstance(handler, logging.FileHandler):
+            handler.addFilter(ConsoleActionFilter())
 
     # Apply sane defaults to framework loggers:
     # - File: keep at INFO via root handler above
@@ -716,6 +702,31 @@ async def get_config():
         "selected_account_id": selected,
         "is_connected": app_state.is_connected
     }
+
+@app.post("/api/log/level")
+async def set_log_level_endpoint(payload: dict = Body(...)):
+    """Toggle between debug (all logs) and production (errors/warnings only) mode"""
+    try:
+        debug_mode = payload.get('debug_mode', False)
+        set_log_level(debug_mode)
+        
+        level = "DEBUG/INFO" if debug_mode else "ERROR/WARNING"
+        logger.info(f"Log level changed to: {level}")
+        
+        return {"success": True, "message": f"Log level set to {level}"}
+    except Exception as e:
+        logger.error(f"Error setting log level: {e}")
+        return {"success": False, "error": str(e)}
+
+@app.get("/api/log/sessions")
+async def get_log_sessions():
+    """Get list of available log sessions"""
+    try:
+        sessions = log_manager.get_session_logs()
+        return {"success": True, "sessions": sessions}
+    except Exception as e:
+        logger.error(f"Error getting log sessions: {e}")
+        return {"success": False, "error": str(e)}
 
 @app.post("/api/strategy/settings")
 async def save_strategy_settings(payload: dict = Body(...)):
