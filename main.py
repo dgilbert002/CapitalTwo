@@ -3,10 +3,13 @@ import json
 import logging
 import os
 import signal
+import sqlite3
 import base64
 from datetime import datetime, timedelta
 
 import uvicorn
+import pandas as pd
+import pytz
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect, Body
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse, Response
@@ -675,35 +678,23 @@ async def brains_preview():
         if not market_info:
             return {"ok": False, "error": "no_market_info"}
 
-        # Build candles DataFrame similar to bot path; ensure latest candles
-        from bot.database import DatabaseManager
-        from bot.data_downloader import DataDownloader
-        from Brains.ai_system import HybridIntelligentSystem
-        import pandas as pd
-        db = DatabaseManager(app_state.settings.get('DATABASE', 'path', 'database.db'))
-        # Attempt to top-up recent candles to ensure we have the previous closed 5m bar
-        try:
-            downloader = DataDownloader(app_state.api, db)
-            await downloader.download_and_store_candles(epic, app_state.api.ResolutionType.MINUTE_5, 50)
-        except Exception:
-            pass
-        candles = db.get_candles(epic, limit=200)
-        if not candles or len(candles) < 50:
+        # Ensure Alpha Vantage dataset is current by reusing the bot helper
+        if app_state.bot:
+            await app_state.bot.refresh_alpha_vantage_data()
+            df = app_state.bot._load_alpha_vantage_dataframe(limit=500)
+        else:
+            # Temporary bot instance for shared helper usage
+            from bot.trader import TradingBot
+            temp_bot = TradingBot(app_state.settings)
+            temp_bot.api = app_state.api
+            temp_bot.api_connected = True
+            await temp_bot.refresh_alpha_vantage_data()
+            df = temp_bot._load_alpha_vantage_dataframe(limit=500)
+
+        if df is None or len(df) < 50:
             return {"ok": False, "error": "insufficient_history"}
 
-        df = pd.DataFrame(candles, columns=['epic', 'timestamp', 'open', 'high', 'low', 'close', 'volume'])
-        if 'epic' in df.columns:
-            df = df.drop(columns=['epic'])
-        df = df.rename(columns={
-            'open': 'openPrice',
-            'high': 'highPrice',
-            'low': 'lowPrice',
-            'close': 'closePrice',
-            'volume': 'lastTradedVolume'
-        })
-        df['timestamp'] = pd.to_datetime(df['timestamp'], utc=True)
-        df = df.sort_values('timestamp').reset_index(drop=True)
-
+        from Brains.ai_system import HybridIntelligentSystem
         ai = HybridIntelligentSystem()
         
         # Load current strategy settings
@@ -774,7 +765,7 @@ async def brains_preview():
             if app_state.current_account and app_state.current_account.get('balance'):
                 available = float(app_state.current_account['balance'].get('available', 0) or 0)
             invest_pct = app_state.settings.getfloat('BOT_CONFIG', 'investment_pct', 99) / 100
-            leverage = app_state.settings.getfloat('BOT_CONFIG', 'leverage', 1)
+            leverage = strategy_leverage if strategy_leverage is not None else app_state.settings.getfloat('BOT_CONFIG', 'leverage', 1)
             raw_contracts = (available * invest_pct * leverage) / entry_price
             # Clamp and floor to increment
             tsz = raw_contracts

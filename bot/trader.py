@@ -4,17 +4,17 @@ Trading Bot with Timer-Based Strategy and Legacy-Style Improvements
 
 import asyncio
 import logging
+import sqlite3
 from datetime import datetime, time, timedelta
 from typing import Dict, List, Optional
-import pytz
-from bot.api import CapitalComAPI
-from bot.database import DatabaseManager
-from bot.data_downloader import DataDownloader
-from bot.settings import TradingBotSettings
-from bot.market_time import MarketTimeManager
-from Brains.ai_system import HybridIntelligentSystem
-from capitalcom.client import ResolutionType
+
 import pandas as pd
+import pytz
+
+from bot.api import CapitalComAPI
+from bot.market_time import MarketTimeManager
+from bot.settings import TradingBotSettings
+from Brains.ai_system import HybridIntelligentSystem
 
 logger = logging.getLogger(__name__)
 
@@ -23,10 +23,10 @@ class TradingBot:
         """Initialize the trading bot with improved features"""
         self.settings = settings
         self.api = CapitalComAPI(settings, environment=settings.get('API_CONFIG', 'environment', 'demo'))
-        self.db = DatabaseManager(settings.get('DATABASE', 'path', 'database.db'))
-        # Provide alias for compatibility with shutdown paths expecting db_manager
-        self.db_manager = self.db
-        self.downloader = DataDownloader(self.api, self.db)
+        self.epic = settings.get('BOT_CONFIG', 'epic', 'TECL')
+        self.av_db_path = settings.get('ALPHA_VANTAGE', 'database', 'database_av.db')
+        default_table = f"{self.epic}_av_5min"
+        self.av_table = settings.get('ALPHA_VANTAGE', 'table_name', default_table)
         self.market_timer = MarketTimeManager(settings)
         self.ai_system = HybridIntelligentSystem()
         
@@ -66,7 +66,6 @@ class TradingBot:
         self.last_trade_date = None
         
         # Market data
-        self.epic = settings.get('BOT_CONFIG', 'epic', 'TECL')
         self.market_info = None
         self.current_account = None
         
@@ -79,7 +78,6 @@ class TradingBot:
         
         # Tasks
         self.keepalive_task = None
-        self.downloader_task = None
         
         logger.info(f"Trading bot initialized for {self.epic}")
 
@@ -129,9 +127,6 @@ class TradingBot:
             # Get initial market info
             self.market_info = await self.api.get_market_info(self.epic)
 
-            # Skip continuous Capital.com data download - we use Alpha Vantage for analysis
-            # self.downloader_task = asyncio.create_task(self.continuous_download())
-            
             # Start keepalive
             self.keepalive_task = asyncio.create_task(self.keepalive_loop())
             
@@ -1093,177 +1088,22 @@ class TradingBot:
             await asyncio.sleep(30)
     
     async def maintain_data_at_market_close(self):
-        """Download latest 1000 candles and perform quality checks (called at T-120s)"""
-        try:
-            # Check if API is ready
-            if not self.api_connected or not hasattr(self.api, 'client') or not self.api.client:
-                logger.warning("API not ready for data maintenance, skipping")
-                return
-            
-            self.record_action({
-                'event': 'data_maintenance_start',
-                'epic': self.epic,
-                'timestamp': datetime.now().isoformat(),
-                'timing': 'T-120s before close'
-            })
-            
-            logger.info("Starting market close data maintenance...")
-            
-            # Download latest 1000 candles
-            price_data = await self.api.get_historical_prices(
-                self.epic, 
-                ResolutionType.MINUTE_5, 
-                1000
-            )
-            
-            if not price_data or "prices" not in price_data:
-                self.record_action({
-                    'event': 'data_maintenance_error',
-                    'error': 'No price data received from API',
-                    'epic': self.epic
-                })
-                logger.error("No price data received for maintenance")
-                return False
-            
-            candles = price_data["prices"]
-            logger.info(f"Downloaded {len(candles)} candles for maintenance")
-            
-            # Store candles (handles deduplication automatically)
-            stored_count = 0
-            for candle in candles:
-                try:
-                    candle_data = {
-                        "timestamp": candle["snapshotTimeUTC"],
-                        "open": float(candle["openPrice"]["bid"]),
-                        "high": float(candle["highPrice"]["bid"]),
-                        "low": float(candle["lowPrice"]["bid"]),
-                        "close": float(candle["closePrice"]["bid"]),
-                        "volume": float(candle.get("lastTradedVolume", 0))
-                    }
-                    
-                    self.db.store_candle(self.epic, candle_data)
-                    stored_count += 1
-                    
-                except Exception as e:
-                    logger.warning(f"Error processing candle during maintenance: {e}")
-                    continue
-            
-            # Perform quality checks
-            quality_result = await self._perform_data_quality_check()
-            
-            # Record maintenance results
-            maintenance_result = {
-                'event': 'data_maintenance_complete',
-                'epic': self.epic,
-                'candles_downloaded': len(candles),
-                'candles_stored': stored_count,
-                'quality_check': quality_result,
-                'timestamp': datetime.now().isoformat()
-            }
-            
-            self.record_action(maintenance_result)
-            
-            logger.info(f"Data maintenance complete: {stored_count} candles stored, quality: {quality_result}")
-            return True
-            
-        except Exception as e:
-            error_msg = f"Data maintenance error: {e}"
-            logger.error(error_msg)
-            self.record_action({
-                'event': 'data_maintenance_error',
-                'error': error_msg,
-                'epic': self.epic,
-                'timestamp': datetime.now().isoformat()
-            })
-            return False
+        """Removed Capital.com maintenance – Alpha Vantage handles analysis data."""
+        logger.info("Skipping Capital.com data maintenance (Alpha Vantage used for analysis)")
+        return True
     
     async def _perform_data_quality_check(self):
         """Perform quality checks on the latest 1000 candles"""
         try:
-            # Get the latest 1000 candles
-            latest_candles = self.db.get_candles(self.epic, limit=1000)
-            
-            if not latest_candles:
-                return {
-                    'status': 'ERROR',
-                    'message': 'No candles found for quality check',
-                    'total_candles': 0,
-                    'duplicates': 0,
-                    'gaps': 0,
-                    'coverage_pct': 0
-                }
-            
-            # Check for duplicates
-            timestamps = [candle[1] for candle in latest_candles]  # timestamp is at index 1
-            unique_timestamps = set(timestamps)
-            duplicates = len(timestamps) - len(unique_timestamps)
-            
-            # Check for gaps
-            sorted_candles = sorted(latest_candles, key=lambda x: x[1])
-            gaps = 0
-            missing_candles = 0
-            
-            for i in range(1, len(sorted_candles)):
-                prev_timestamp = sorted_candles[i-1][1]
-                curr_timestamp = sorted_candles[i][1]
-                
-                # Parse timestamps
-                if isinstance(prev_timestamp, str):
-                    prev_time = datetime.fromisoformat(prev_timestamp.replace('Z', '+00:00'))
-                else:
-                    prev_time = prev_timestamp
-                    
-                if isinstance(curr_timestamp, str):
-                    curr_time = datetime.fromisoformat(curr_timestamp.replace('Z', '+00:00'))
-                else:
-                    curr_time = curr_timestamp
-                
-                time_diff = (curr_time - prev_time).total_seconds()
-                if time_diff > 300:  # More than 5 minutes
-                    gaps += 1
-                    missing_candles += int(time_diff / 300) - 1
-            
-            # Calculate coverage
-            if len(sorted_candles) >= 2:
-                first_time = sorted_candles[0][1]
-                last_time = sorted_candles[-1][1]
-                
-                if isinstance(first_time, str):
-                    first_dt = datetime.fromisoformat(first_time.replace('Z', '+00:00'))
-                else:
-                    first_dt = first_time
-                    
-                if isinstance(last_time, str):
-                    last_dt = datetime.fromisoformat(last_time.replace('Z', '+00:00'))
-                else:
-                    last_dt = last_time
-                
-                total_hours = (last_dt - first_dt).total_seconds() / 3600
-                expected_candles = int(total_hours * 12)  # 12 candles per hour
-                coverage_pct = (len(latest_candles) / expected_candles) * 100 if expected_candles > 0 else 0
-            else:
-                coverage_pct = 100  # Single candle or no data
-            
-            # Determine status
-            if duplicates == 0 and gaps <= 5 and coverage_pct >= 15:  # Allow some gaps for market closures
-                status = 'EXCELLENT'
-            elif duplicates == 0 and gaps <= 20 and coverage_pct >= 10:
-                status = 'GOOD'
-            elif duplicates <= 5 and gaps <= 50:
-                status = 'FAIR'
-            else:
-                status = 'POOR'
-            
             return {
-                'status': status,
-                'message': f'Quality check: {status} - {len(latest_candles)} candles, {duplicates} duplicates, {gaps} gaps, {coverage_pct:.1f}% coverage',
-                'total_candles': len(latest_candles),
-                'duplicates': duplicates,
-                'gaps': gaps,
-                'missing_candles': missing_candles,
-                'coverage_pct': round(coverage_pct, 1)
+                'status': 'SKIPPED',
+                'message': 'Quality check skipped (Capital.com data no longer used)',
+                'total_candles': 0,
+                'duplicates': 0,
+                'gaps': 0,
+                'missing_candles': 0,
+                'coverage_pct': 0
             }
-            
         except Exception as e:
             logger.error(f"Error in quality check: {e}")
             return {
@@ -1280,22 +1120,19 @@ class TradingBot:
         try:
             import requests
             import pandas as pd
-            import sqlite3
             from datetime import datetime
-            
+
             # Get Alpha Vantage settings
             api_key = self.settings.get('ALPHA_VANTAGE', 'api_key')
             symbol = self.settings.get('ALPHA_VANTAGE', 'symbol', 'TECL')
             interval = self.settings.get('ALPHA_VANTAGE', 'interval', '5min')
-            db_path = self.settings.get('ALPHA_VANTAGE', 'database', 'database_av.db')
-            table_name = self.settings.get('ALPHA_VANTAGE', 'table_name', 'TECL_av_5min')
-            
+
             if not api_key:
                 logger.error("Alpha Vantage API key not configured")
                 return False
-            
+
             logger.info(f"Fetching latest {symbol} data from Alpha Vantage...")
-            
+
             # Make API request
             url = 'https://www.alphavantage.co/query'
             params = {
@@ -1306,54 +1143,54 @@ class TradingBot:
                 'extended_hours': 'true',
                 'outputsize': 'compact'  # Last 100 data points
             }
-            
+
             response = requests.get(url, params=params)
-            
+
             if response.status_code == 200:
                 data = response.json()
-                
+
                 # Check for errors
                 if 'Error Message' in data:
                     logger.error(f"Alpha Vantage API Error: {data['Error Message']}")
                     return False
-                
+
                 # Extract time series data
                 time_series_key = f'Time Series ({interval})'
                 if time_series_key not in data:
                     logger.error("No time series data in Alpha Vantage response")
                     return False
-                
+
                 # Convert to DataFrame
                 time_series = data[time_series_key]
                 df = pd.DataFrame.from_dict(time_series, orient='index')
                 df.index = pd.to_datetime(df.index)
                 df = df.reset_index()
                 df.columns = ['timestamp', 'open', 'high', 'low', 'close', 'volume']
-                
+
                 # Convert values to float
                 for col in ['open', 'high', 'low', 'close', 'volume']:
                     df[col] = pd.to_numeric(df[col])
-                
+
                 # Store in database
-                conn = sqlite3.connect(db_path)
+                conn = sqlite3.connect(self.av_db_path)
                 df['timestamp'] = df['timestamp'].astype(str)
-                
+
                 inserted = 0
                 for _, row in df.iterrows():
                     try:
                         insert_query = f"""
-                        INSERT OR REPLACE INTO {table_name} 
+                        INSERT OR REPLACE INTO {self.av_table} 
                         (timestamp, open, high, low, close, volume)
                         VALUES (?, ?, ?, ?, ?, ?)
                         """
                         conn.execute(insert_query, tuple(row))
                         inserted += 1
-                    except Exception as e:
+                    except Exception:
                         pass  # Skip duplicates
-                
+
                 conn.commit()
                 conn.close()
-                
+
                 logger.info(f"Alpha Vantage refresh complete: {inserted} new/updated candles")
                 return True
             else:
@@ -1363,6 +1200,45 @@ class TradingBot:
         except Exception as e:
             logger.error(f"Error refreshing Alpha Vantage data: {e}")
             return False
+    
+    def _load_alpha_vantage_dataframe(self, limit: int = 1000) -> Optional[pd.DataFrame]:
+        """Load Alpha Vantage candles from SQLite, converted to UTC and renamed."""
+        try:
+            limit_value = max(1, int(limit))
+            conn = sqlite3.connect(self.av_db_path)
+            query = f"""
+                SELECT timestamp, open, high, low, close, volume 
+                FROM {self.av_table} 
+                ORDER BY timestamp DESC 
+                LIMIT {limit_value}
+            """
+            rows = conn.execute(query).fetchall()
+        except Exception as e:
+            logger.error(f"Failed to load Alpha Vantage candles: {e}")
+            return None
+        finally:
+            try:
+                conn.close()
+            except Exception:
+                pass
+        
+        if not rows:
+            return None
+        
+        rows = list(reversed(rows))
+        df = pd.DataFrame(rows, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
+        df['timestamp'] = pd.to_datetime(df['timestamp'])
+        eastern = pytz.timezone('US/Eastern')
+        df['timestamp'] = df['timestamp'].dt.tz_localize(eastern).dt.tz_convert('UTC')
+        df = df.sort_values('timestamp').reset_index(drop=True)
+        df = df.rename(columns={
+            'open': 'openPrice',
+            'high': 'highPrice',
+            'low': 'lowPrice',
+            'close': 'closePrice',
+            'volume': 'lastTradedVolume'
+        })
+        return df
     
     async def prepare_data_before_close(self):
         """Download data and run Brains analysis 120 seconds before market close"""
@@ -1375,90 +1251,51 @@ class TradingBot:
             # Refresh Alpha Vantage data first
             await self.refresh_alpha_vantage_data()
             
-            # Use Alpha Vantage database for analysis
-            import sqlite3
-            av_db_path = self.settings.get('ALPHA_VANTAGE', 'database', 'database_av.db')
-            av_table = self.settings.get('ALPHA_VANTAGE', 'table_name', 'TECL_av_5min')
-            
-            # Get candles from Alpha Vantage database
-            conn = sqlite3.connect(av_db_path)
-            query = f"""
-                SELECT timestamp, open, high, low, close, volume 
-                FROM {av_table} 
-                ORDER BY timestamp DESC 
-                LIMIT 1000
-            """
-            cursor = conn.cursor()
-            cursor.execute(query)
-            candles = cursor.fetchall()
-            conn.close()
-            
-            # Convert to format expected by existing code
-            if candles:
-                # Reverse to get chronological order
-                candles = list(reversed(candles))
-                # Add epic column for compatibility
-                candles = [('TECL',) + candle for candle in candles]
-            if candles and len(candles) >= 100:
-                # Convert to DataFrame for AI system
-                df = pd.DataFrame(candles, columns=['epic', 'timestamp', 'open', 'high', 'low', 'close', 'volume'])
-                df = df.drop(columns=['epic'])
-                # Alpha Vantage timestamps are in Eastern Time
-                eastern = pytz.timezone('US/Eastern')
-                df['timestamp'] = pd.to_datetime(df['timestamp'])
-                # Localize to Eastern Time then convert to UTC for consistency
-                df['timestamp'] = df['timestamp'].dt.tz_localize(eastern).dt.tz_convert('UTC')
-                df = df.sort_values('timestamp').reset_index(drop=True)
-                
-                # Rename columns for Brains compatibility
-                df = df.rename(columns={
-                    'open': 'openPrice',
-                    'high': 'highPrice',
-                    'low': 'lowPrice',
-                    'close': 'closePrice',
-                    'volume': 'lastTradedVolume'
-                })
-                
-                # Calculate indicators and run Brains analysis
-                df_with_indicators = self.ai_system.calculate_technical_indicators(df.copy())
-                
-                # Pass the last row as a single-row DataFrame for analysis
-                day_data = df_with_indicators.iloc[[-1]].copy()
-                ai_analysis = self.ai_system.analyze_market_conditions(
-                    day_data,
-                    df_with_indicators,
-                    datetime.now()
-                )
-                
-                # Store analysis for T-15s use
-                self.pending_trade_analysis = ai_analysis
-                
-                # Log the analysis result
-                logger.info("="*60)
-                logger.info("T-120s BRAINS ANALYSIS COMPLETE")
-                logger.info(f"Signal: {ai_analysis.get('trade_signal', 'N/A')}")
-                logger.info(f"Confidence: {ai_analysis.get('confidence', 0):.1%}")
-                logger.info(f"Strategy: {ai_analysis.get('selected_strategy', 'N/A')}")
-                logger.info(f"Leverage: {ai_analysis.get('strategy_leverage', 'N/A')}x")
-                logger.info(f"Stop Loss: {ai_analysis.get('strategy_stop_loss', 'N/A')}%")
-                logger.info("Analysis stored for T-15s execution")
-                logger.info("="*60)
-                
-                self.record_action({
-                    'event': 'brains_analysis_t120',
-                    'candles_ready': len(df),
-                    'signal': ai_analysis.get('trade_signal'),
-                    'confidence': ai_analysis.get('confidence'),
-                    'strategy': ai_analysis.get('selected_strategy'),
-                    'timestamp': datetime.now().isoformat()
-                })
-            else:
-                logger.warning(f"Insufficient candles for analysis: {len(candles) if candles else 0}")
+            # Load candles from Alpha Vantage database
+            df = self._load_alpha_vantage_dataframe(limit=1000)
+            row_count = len(df) if df is not None else 0
+            if df is None or row_count < 100:
+                logger.warning(f"Insufficient candles for analysis: {row_count}")
                 self.record_action({
                     'event': 'data_preparation_error',
-                    'error': f'Insufficient candles: {len(candles) if candles else 0}'
+                    'error': f'Insufficient candles: {row_count}'
                 })
+                return
             
+            # Calculate indicators and run Brains analysis
+            df_with_indicators = self.ai_system.calculate_technical_indicators(df.copy())
+            
+            # Pass the last row as a single-row DataFrame for analysis
+            day_data = df_with_indicators.iloc[[-1]].copy()
+            ai_analysis = self.ai_system.analyze_market_conditions(
+                day_data,
+                df_with_indicators,
+                datetime.now()
+            )
+            
+            # Store analysis for T-15s use
+            self.pending_trade_analysis = ai_analysis
+            
+            # Log the analysis result
+            logger.info("="*60)
+            logger.info("T-120s BRAINS ANALYSIS COMPLETE")
+            logger.info(f"Signal: {ai_analysis.get('trade_signal', 'N/A')}")
+            logger.info(f"Confidence: {ai_analysis.get('confidence', 0):.1%}")
+            logger.info(f"Strategy: {ai_analysis.get('selected_strategy', 'N/A')}")
+            logger.info(f"Leverage: {ai_analysis.get('strategy_leverage', 'N/A')}x")
+            logger.info(f"Stop Loss: {ai_analysis.get('strategy_stop_loss', 'N/A')}%")
+            logger.info("Analysis stored for T-15s execution")
+            logger.info("="*60)
+            
+            self.record_action({
+                'event': 'brains_analysis_t120',
+                'candles_ready': row_count,
+                'signal': ai_analysis.get('trade_signal'),
+                'confidence': ai_analysis.get('confidence'),
+                'strategy': ai_analysis.get('selected_strategy'),
+                'timestamp': datetime.now().isoformat()
+            })
+        
         except Exception as e:
             logger.error(f"Error in T-120s preparation and analysis: {e}")
             self.record_action({
@@ -1584,6 +1421,3 @@ class TradingBot:
         logger.info("Trading bot stopped")
         if self.keepalive_task:
             self.keepalive_task.cancel()
-        if self.downloader_task:
-            self.downloader_task.cancel()
-        self.db.close()

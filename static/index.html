@@ -2109,8 +2109,9 @@
                     rows.push(`<tr><td colspan="2" class="text-center bg-primary text-white"><strong>Using Strategy: ${strategyDisplay}</strong></td></tr>`);
                 }
                 
+                const confidencePercent = (typeof d.confidence === 'number') ? (d.confidence * 100) : parseFloat(d.confidence) || 0;
                 rows.push(`<tr><td>Signal</td><td><strong>${d.trade_signal || '-'}</strong></td></tr>`);
-                rows.push(`<tr><td>Confidence</td><td>${(d.confidence*100||0).toFixed ? (d.confidence*100).toFixed(2) : d.confidence}%</td></tr>`);
+                rows.push(`<tr><td>Confidence</td><td>${confidencePercent.toFixed(2)}%</td></tr>`);
                 rows.push(`<tr><td>Strategy</td><td><strong>${data.selected_strategy || 'N/A'}</strong></td></tr>`);
                 
                 // Show fired signals with winning strategy highlighted
