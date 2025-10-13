@@ -1354,7 +1354,7 @@ class TradingBot:
                 conn.commit()
                 conn.close()
                 
-                logger.info(f"✅ Alpha Vantage refresh complete: {inserted} new/updated candles")
+                logger.info(f"Alpha Vantage refresh complete: {inserted} new/updated candles")
                 return True
             else:
                 logger.error(f"Alpha Vantage API request failed: {response.status_code}")

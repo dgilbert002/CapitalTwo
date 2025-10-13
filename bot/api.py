@@ -54,6 +54,11 @@ class CapitalComAPI:
     async def get_accounts(self) -> List[Dict]:
         """Get account information"""
         try:
+            if not self.client:
+                logger.warning("Client not initialized, attempting to authenticate")
+                if not await self.authenticate():
+                    return []
+            
             accounts_data = await self._run_sync(self.client.all_accounts)
             accounts = accounts_data.get("accounts", [])
             logger.debug(f"Accounts fetched: {len(accounts)}")
@@ -75,6 +80,11 @@ class CapitalComAPI:
     async def get_positions(self) -> List[Dict]:
         """Get open positions"""
         try:
+            if not self.client:
+                logger.warning("Client not initialized, attempting to authenticate")
+                if not await self.authenticate():
+                    return []
+            
             positions_data = await self._run_sync(self.client.all_positions)
             return positions_data.get("positions", [])
         except Exception as e:
@@ -84,6 +94,11 @@ class CapitalComAPI:
     async def get_market_info(self, epic: str) -> Optional[Dict]:
         """Get market information for an epic"""
         try:
+            if not self.client:
+                logger.warning("Client not initialized, attempting to authenticate")
+                if not await self.authenticate():
+                    return None
+            
             market_data = await self._run_sync(self.client.single_market, epic)
             if market_data:
                 # Log all top-level keys
@@ -183,6 +198,11 @@ class CapitalComAPI:
     async def get_trade_history(self, days: int = 7) -> List[Dict]:
         """Get complete trade history with entry and exit details"""
         try:
+            if not self.client:
+                logger.warning("Client not initialized, attempting to authenticate")
+                if not await self.authenticate():
+                    return []
+            
             # Use direct HTTP request to /history/transactions endpoint
             from datetime import datetime, timedelta
             import aiohttp

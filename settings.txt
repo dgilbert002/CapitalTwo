@@ -52,6 +52,15 @@ start_balance = 500
 monthly_top_up = 100
 invest_pct = 0.99
 
+[TIMERS]
+keepalive_minutes = 8
+websocket_update_sec = 5
+positions_update_market_open_sec = 5
+positions_update_market_closed_sec = 10
+accounts_update_market_open_sec = 5
+accounts_update_market_closed_sec = 10
+market_info_update_sec = 30
+
 [API_CONFIG]
-environment = live
+environment = demo
 

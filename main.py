@@ -4,6 +4,7 @@ import logging
 import os
 import signal
 import base64
+from datetime import datetime, timedelta
 
 import uvicorn
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect, Body
@@ -101,6 +102,10 @@ class AppState:
         self.is_connected = False
         self.bot = None  # Trading bot (starts stopped)
         self.update_task = None
+        # Market state tracking
+        self.last_market_state = None  # Track if market was open/closed
+        self.last_market_check = None  # Last time we checked market info
+        self.market_info_interval = 30  # Default 30 seconds
 
 app_state = AppState()
 
@@ -131,66 +136,216 @@ async def favicon():
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
     await websocket.accept()
+    
+    # Create task for sending updates
+    async def send_updates():
+        try:
+            countdown_timer = 0
+            while True:
+                # Calculate market event fresh each time for accurate countdown
+                market_event = {}
+                if app_state.market_info:
+                    from bot.market_time import MarketTimeManager
+                    mtm = MarketTimeManager(app_state.settings)
+                    market_event = mtm.get_next_market_event(app_state.market_info)
+                
+                # Send full update every 5 seconds, countdown-only update otherwise
+                if countdown_timer == 0:
+                    # Full data update every 5 seconds
+                    data = {
+                        "bot_name": app_state.settings.get("BOT_CONFIG", "bot_name", "AI Trading Bot"),
+                        "epic": app_state.settings.get("BOT_CONFIG", "epic", "TECL"),
+                        "leverage": app_state.settings.getfloat("BOT_CONFIG", "leverage", 1.0),
+                        "is_running": app_state.bot.is_running if app_state.bot else False,
+                        "account": app_state.current_account,
+                        "market_event": market_event,
+                        "market_info": app_state.market_info,
+                        "positions": app_state.positions,
+                        "trade_history": app_state.bot.trade_history if app_state.bot else [],
+                        "action_log": getattr(app_state.bot, 'action_log', []) if app_state.bot else [],
+                        "historic_trades": app_state.historic_trades,
+                        "account_transactions": app_state.account_transactions,
+                        "stop_loss_type": app_state.settings.get("BOT_CONFIG", "stop_loss_type", "normal"),
+                        "override_strategy_sl": app_state.settings.getboolean("BOT_CONFIG", "override_strategy_sl", False),
+                        "environment": app_state.api.environment if app_state.api else "demo",
+                        "is_connected": app_state.is_connected,
+                        # Add strategy settings for UI to load on page refresh
+                        "strategy_mode": app_state.settings.get("STRATEGY", "strategy_mode", "enhanced") if app_state.settings.has_section("STRATEGY") else "enhanced",
+                        "enable_crash_protection": app_state.settings.getboolean("STRATEGY", "enable_crash_protection", True) if app_state.settings.has_section("STRATEGY") else True
+                    }
+                else:
+                    # Countdown-only update (lightweight)
+                    data = {
+                        "countdown_only": True,
+                        "market_event": market_event
+                    }
+                
+                # Log what we're sending (first time only for debugging)
+                if not hasattr(websocket_endpoint, '_logged'):
+                    if app_state.current_account:
+                        balance_info = app_state.current_account.get('balance', {})
+                        logger.info(f"Account structure: accountName={app_state.current_account.get('accountName')}, balance_keys={list(balance_info.keys()) if balance_info else 'No balance'}")
+                        if balance_info:
+                            logger.info(f"Balance values: balance={balance_info.get('balance')}, available={balance_info.get('available')}, profitLoss={balance_info.get('profitLoss')}")
+                    websocket_endpoint._logged = True
+                
+                # Convert datetime objects to strings for JSON serialization
+                def serialize_datetime(obj):
+                    if hasattr(obj, 'isoformat'):
+                        return obj.isoformat()
+                    return str(obj)
+                
+                await websocket.send_text(json.dumps(data, default=serialize_datetime))
+                
+                # Increment countdown timer and reset at 5
+                countdown_timer = (countdown_timer + 1) % 5
+                await asyncio.sleep(1)  # Send updates every 1 second for smooth countdown
+        except WebSocketDisconnect:
+            logger.info("WebSocket disconnected in send_updates")
+            return
+        except ConnectionError:
+            logger.info("Connection closed in send_updates")
+            return
+        except Exception as e:
+            # Only log actual errors, not connection closures
+            if "websocket.send" not in str(e) and "websocket.close" not in str(e):
+                logger.error(f"Error in send_updates: {e}")
+            return
+    
+    # Create task for receiving messages
+    async def receive_messages():
+        try:
+            while True:
+                message = await websocket.receive_json()
+                command = message.get("command")
+                
+                if command == "fetch_trade_history":
+                    # Fetch trade history on demand
+                    if app_state.api:
+                        try:
+                            app_state.historic_trades = await app_state.api.get_trade_history(days=30)
+                            logger.info(f"On-demand: Fetched {len(app_state.historic_trades)} historic trades")
+                            await websocket.send_json({"type": "trade_history_updated", "count": len(app_state.historic_trades)})
+                        except Exception as e:
+                            logger.error(f"Error fetching trade history: {e}")
+                            await websocket.send_json({"type": "error", "message": str(e)})
+                
+                elif command == "fetch_account_transactions":
+                    # Fetch account transactions on demand
+                    if app_state.api:
+                        try:
+                            from datetime import datetime, timedelta
+                            to_date = datetime.utcnow()
+                            from_date = to_date - timedelta(days=30)
+                            
+                            activities = await app_state.api.get_account_activity(
+                                from_date=from_date.strftime('%Y-%m-%dT%H:%M:%S'),
+                                to_date=to_date.strftime('%Y-%m-%dT%H:%M:%S')
+                            )
+                            app_state.account_transactions = activities
+                            logger.info(f"On-demand: Fetched {len(activities)} account transactions")
+                            await websocket.send_json({"type": "account_transactions_updated", "count": len(activities)})
+                        except Exception as e:
+                            logger.error(f"Error fetching account transactions: {e}")
+                            await websocket.send_json({"type": "error", "message": str(e)})
+        except WebSocketDisconnect:
+            logger.info("WebSocket disconnected in receive_messages")
+            return
+        except ConnectionError:
+            logger.info("Connection closed in receive_messages")
+            return
+        except Exception as e:
+            # Only log actual errors, not connection closures
+            if "websocket" not in str(e).lower():
+                logger.error(f"Error in receive_messages: {e}")
+            return
+    
+    # Run both tasks concurrently
+    send_task = None
+    receive_task = None
     try:
-        logger.info("WebSocket connected")
-        while True:
-            await asyncio.sleep(1) # Send updates every second
-            
-            # Calculate market event fresh each time for accurate countdown
-            market_event = {}
-            if app_state.market_info:
-                from bot.market_time import MarketTimeManager
-                mtm = MarketTimeManager(app_state.settings)
-                market_event = mtm.get_next_market_event(app_state.market_info)
-            
-            data = {
-                "bot_name": app_state.settings.get("BOT_CONFIG", "bot_name", "AI Trading Bot"),
-                "epic": app_state.settings.get("BOT_CONFIG", "epic", "TECL"),
-                "leverage": app_state.settings.getfloat("BOT_CONFIG", "leverage", 1.0),
-                "is_running": app_state.bot.is_running if app_state.bot else False,
-                "account": app_state.current_account,
-                "market_event": market_event,
-                "market_info": app_state.market_info,
-            "positions": app_state.positions,
-            "trade_history": app_state.bot.trade_history if app_state.bot else [],
-            "action_log": getattr(app_state.bot, 'action_log', []) if app_state.bot else [],
-            "historic_trades": app_state.historic_trades,
-            "account_transactions": app_state.account_transactions,
-                "stop_loss_type": app_state.settings.get("BOT_CONFIG", "stop_loss_type", "normal"),
-                "override_strategy_sl": app_state.settings.getboolean("BOT_CONFIG", "override_strategy_sl", False),
-                "environment": app_state.api.environment if app_state.api else "demo",
-                "is_connected": app_state.is_connected,
-                # Add strategy settings for UI to load on page refresh
-                "strategy_mode": app_state.settings.get("STRATEGY", "strategy_mode", "enhanced") if app_state.settings.has_section("STRATEGY") else "enhanced",
-                "enable_crash_protection": app_state.settings.getboolean("STRATEGY", "enable_crash_protection", True) if app_state.settings.has_section("STRATEGY") else True
-            }
-            
-            # Log what we're sending (first time only for debugging)
-            if not hasattr(websocket_endpoint, '_logged'):
-                if app_state.current_account:
-                    balance_info = app_state.current_account.get('balance', {})
-                    logger.info(f"Account structure: accountName={app_state.current_account.get('accountName')}, balance_keys={list(balance_info.keys()) if balance_info else 'No balance'}")
-                    if balance_info:
-                        logger.info(f"Balance values: balance={balance_info.get('balance')}, available={balance_info.get('available')}, profitLoss={balance_info.get('profitLoss')}")
-                websocket_endpoint._logged = True
-            
-            # Convert datetime objects to strings for JSON serialization
-            def serialize_datetime(obj):
-                if hasattr(obj, 'isoformat'):
-                    return obj.isoformat()
-                return str(obj)
-            
-            await websocket.send_text(json.dumps(data, default=serialize_datetime))
-            
+        send_task = asyncio.create_task(send_updates())
+        receive_task = asyncio.create_task(receive_messages())
+        await asyncio.gather(send_task, receive_task, return_exceptions=True)
     except WebSocketDisconnect:
-        logger.info("WebSocket disconnected")
+        logger.info("WebSocket client disconnected")
     except Exception as e:
-        logger.error(f"WebSocket error: {e}")
+        if "websocket" not in str(e).lower():
+            logger.error(f"WebSocket error: {e}")
+    finally:
+        # Clean up tasks
+        if send_task and not send_task.done():
+            send_task.cancel()
+        if receive_task and not receive_task.done():
+            receive_task.cancel()
+        logger.debug("WebSocket connection closed")
+
+async def keepalive_task():
+    """Separate keepalive task that runs every 8 minutes"""
+    keepalive_interval = app_state.settings.getint("TIMERS", "keepalive_minutes", fallback=8) * 60
+    logger.info(f"Starting keepalive task (every {keepalive_interval}s)")
+    
+    last_auth_time = datetime.utcnow()
+    auth_backoff = 1  # Start with 1 second backoff
+    
+    while True:
+        try:
+            await asyncio.sleep(keepalive_interval)
+            
+            if app_state.api and app_state.is_connected:
+                try:
+                    # Try keepalive
+                    success = await app_state.api.keepalive()
+                    if success:
+                        logger.info("Keepalive successful")
+                        auth_backoff = 1  # Reset backoff on success
+                    else:
+                        logger.warning("Keepalive failed, attempting re-authentication")
+                        raise Exception("Keepalive failed")
+                        
+                except Exception as e:
+                    # Check if it's a 401 error
+                    if "401" in str(e) or "invalid.session" in str(e) or not success:
+                        logger.warning(f"Session expired, re-authenticating (backoff: {auth_backoff}s)")
+                        
+                        # Wait with exponential backoff
+                        await asyncio.sleep(auth_backoff)
+                        auth_backoff = min(auth_backoff * 2, 60)  # Max 60 second backoff
+                        
+                        # Re-authenticate
+                        try:
+                            await app_state.api.authenticate()
+                            app_state.is_connected = True
+                            last_auth_time = datetime.utcnow()
+                            logger.info("Re-authentication successful")
+                            auth_backoff = 1  # Reset backoff
+                            
+                            # Fetch current account after re-auth
+                            if app_state.api.current_account_id:
+                                accounts = await app_state.api.get_accounts()
+                                app_state.current_account = next(
+                                    (a for a in accounts if a.get("accountId") == app_state.api.current_account_id),
+                                    None
+                                )
+                        except Exception as auth_error:
+                            logger.error(f"Re-authentication failed: {auth_error}")
+                            app_state.is_connected = False
+                    else:
+                        logger.error(f"Keepalive error: {e}")
+                        
+        except Exception as e:
+            logger.error(f"Error in keepalive task: {e}")
+            await asyncio.sleep(30)  # Wait 30s before retrying on error
 
 async def continuous_data_update():
     """Continuously update account and market data for GUI (independent of bot)"""
     logger.info("Starting continuous data updates")
     update_count = 0
+    
+    # Get timer settings
+    market_open_interval = app_state.settings.getint("TIMERS", "positions_update_market_open_sec", fallback=5)
+    market_closed_interval = app_state.settings.getint("TIMERS", "positions_update_market_closed_sec", fallback=10)
+    
     while True:
         try:
             if app_state.api and app_state.is_connected:
@@ -207,123 +362,117 @@ async def continuous_data_update():
                         balance = updated.get('balance', {}).get('balance', 0)
                         logger.info(f"Account balance: ${balance}")
                 
-            # Update positions
-            app_state.positions = await app_state.api.get_positions()
-            logger.info(f"Found {len(app_state.positions)} open positions")
-            if app_state.positions:
-                # Log first position to see structure
-                logger.info(f"Position fields: {list(app_state.positions[0].keys())}")
-                logger.info(f"First position: {app_state.positions[0]}")
+                # Update positions
+                app_state.positions = await app_state.api.get_positions()
+                logger.info(f"Found {len(app_state.positions)} open positions")
+                if app_state.positions:
+                    # Log first position to see structure
+                    logger.info(f"Position fields: {list(app_state.positions[0].keys())}")
+                    logger.info(f"First position: {app_state.positions[0]}")
                 
-            # Update market info for configured epic
-            epic = app_state.settings.get("BOT_CONFIG", "epic", "TECL")
-            market_data = await app_state.api.get_market_info(epic)
-            if market_data:
-                app_state.market_info = market_data
-                logger.info(f"Market data updated for {epic}")
+                # Smart market info update - only when needed
+                epic = app_state.settings.get("BOT_CONFIG", "epic", "TECL")
+                market_info_interval = app_state.settings.getint("TIMERS", "market_info_update_sec", fallback=30)
+                current_time = datetime.utcnow()
                 
-                # Calculate market timing
-                from bot.market_time import MarketTimeManager
-                market_timer = MarketTimeManager(app_state.settings)
-                app_state.market_event = market_timer.get_next_market_event(market_data)
-                
-                # Log market status
+                should_update_market = False
+                reason = ""
+            
+                # Check if it's time for regular update
+                if app_state.last_market_check is None:
+                    should_update_market = True
+                    reason = "Initial market check"
+                elif (current_time - app_state.last_market_check).total_seconds() >= market_info_interval:
+                    should_update_market = True
+                    reason = f"Regular update (every {market_info_interval}s)"
+            
+                # Always update if market state might have changed (near open/close times)
                 if app_state.market_event:
-                    status = "OPEN" if app_state.market_event.get("is_open") else "CLOSED"
-                    next_event = app_state.market_event.get("next_event", "unknown")
-                    time_until = app_state.market_event.get("time_until_seconds", 0)
-                    hours_until = time_until / 3600
-                    logger.info(f"Market is {status}, next {next_event} in {hours_until:.1f} hours")
+                    time_until = app_state.market_event.get("time_until_seconds", float('inf'))
+                    if 0 < time_until < 300:  # Within 5 minutes of market open/close
+                        should_update_market = True
+                        reason = "Near market state change"
                 
-                # Update trade history
-                app_state.historic_trades = await app_state.api.get_trade_history(days=30)
-                logger.info(f"Found {len(app_state.historic_trades)} historic trades")
-                
-                # Get account transactions
-                app_state.account_transactions = []
-                try:
-                    # Get transactions from last 30 days to ensure we catch everything
-                    from datetime import datetime, timedelta
-                    to_date = datetime.utcnow()
-                    from_date = to_date - timedelta(days=30)
-                    
-                    # Use account_activity for more detailed transaction info
-                    # API might have a max range, so fetch in chunks
-                    all_activities = []
-                    
-                    # First try to get all at once
-                    try:
-                        activities = await app_state.api.get_account_activity(
-                            from_date=from_date.strftime('%Y-%m-%dT%H:%M:%S'),
-                            to_date=to_date.strftime('%Y-%m-%dT%H:%M:%S')
-                        )
-                        all_activities.extend(activities)
-                        logger.info(f"Fetched {len(activities)} activities in single request")
-                    except Exception as e:
-                        logger.warning(f"Single request failed, trying day by day: {e}")
-                        # Fall back to day by day
-                        for i in range(30):
-                            day_start = from_date + timedelta(days=i)
-                            day_end = day_start + timedelta(days=1)
-                            
-                            try:
-                                activities = await app_state.api.get_account_activity(
-                                    from_date=day_start.strftime('%Y-%m-%dT%H:%M:%S'),
-                                    to_date=day_end.strftime('%Y-%m-%dT%H:%M:%S')
-                                )
-                                all_activities.extend(activities)
-                            except Exception as e:
-                                logger.warning(f"Error fetching activities for {day_start.date()}: {e}")
-                    
-                    # Log all activity types found
-                    if all_activities:
-                        activity_types = set(a.get('type', 'UNKNOWN') for a in all_activities)
-                        logger.info(f"Found activity types: {activity_types}")
-                    
-                    # Don't filter - show all activities
-                    app_state.account_transactions = all_activities
-                    
-                    # Enrich transactions with trade history data
-                    if app_state.historic_trades:
-                        # Create a map of dealId to trade info
-                        trade_map = {}
-                        for trade in app_state.historic_trades:
-                            deal_id = trade.get('dealId')
-                            if deal_id:
-                                trade_map[deal_id] = trade
+                    # Also check for critical trading times (T-120s, T-30s, T-15s)
+                    # These are used by the bot for trading decisions
+                    next_event = app_state.market_event.get("next_event", "")
+                    if next_event == "close" and app_state.market_event.get("is_open"):
+                        # Market is open and will close soon
+                        seconds_to_close = time_until
                         
-                        # Enrich each transaction
-                        for transaction in app_state.account_transactions:
-                            deal_id = transaction.get('dealId') or transaction.get('reference')
-                            if deal_id and deal_id in trade_map:
-                                trade = trade_map[deal_id]
-                                # Add enriched fields
-                                transaction['enriched_epic'] = trade.get('epic', trade.get('instrumentName'))
-                                transaction['enriched_pnl'] = trade.get('pnl', trade.get('closePnL'))
-                                transaction['enriched_closeDate'] = trade.get('closeDateUtc', trade.get('closeDate'))
-                                transaction['enriched_reason'] = trade.get('closeReason', trade.get('note'))
-                                transaction['enriched_direction'] = trade.get('direction')
-                                transaction['enriched_size'] = trade.get('size')
-                    
-                    # Sort by date (newest first)
-                    app_state.account_transactions.sort(
-                        key=lambda x: x.get('dateUTC', x.get('date', '')), 
-                        reverse=True
-                    )
-                    
-                    logger.info(f"Found {len(app_state.account_transactions)} account transactions over 7 days")
-                except Exception as e:
-                    logger.error(f"Error fetching account transactions: {e}")
+                        # Check if we're at critical times (with 5s buffer for timing)
+                        if 115 <= seconds_to_close <= 125:  # T-120s
+                            should_update_market = True
+                            reason = "T-120s: Market data refresh for analysis"
+                        elif 25 <= seconds_to_close <= 35:  # T-30s
+                            should_update_market = True
+                            reason = "T-30s: Exit position timing"
+                        elif 10 <= seconds_to_close <= 20:  # T-15s
+                            should_update_market = True
+                            reason = "T-15s: Entry position timing"
+            
+                if should_update_market:
+                    market_data = await app_state.api.get_market_info(epic)
+                    if market_data:
+                        app_state.market_info = market_data
+                        app_state.last_market_check = current_time
+                        logger.info(f"Market data updated for {epic} - Reason: {reason}")
                 
-                # Keepalive
-                await app_state.api.keepalive()
+                    # Calculate market timing
+                    from bot.market_time import MarketTimeManager
+                    market_timer = MarketTimeManager(app_state.settings)
+                    new_market_event = market_timer.get_next_market_event(market_data)
+                
+                    if new_market_event:
+                        # Check if market state changed
+                        current_state = new_market_event.get("is_open")
+                        if app_state.last_market_state is not None and current_state != app_state.last_market_state:
+                            # Market state changed!
+                            if current_state:
+                                logger.warning("MARKET OPENED - Switching to higher frequency updates")
+                                # Could trigger additional actions here (e.g., refresh positions, check auth)
+                                if app_state.api:
+                                    # Ensure we're authenticated for market open
+                                    try:
+                                        await app_state.api.keepalive()
+                                        logger.info("Verified authentication at market open")
+                                    except:
+                                        logger.warning("Keepalive failed at market open, will retry on next cycle")
+                            else:
+                                logger.warning("MARKET CLOSED - Switching to lower frequency updates")
+                        
+                        # Update state tracking
+                        app_state.last_market_state = current_state
+                        app_state.market_event = new_market_event
+                        
+                        # Log market status
+                        status = "OPEN" if current_state else "CLOSED"
+                        next_event = new_market_event.get("next_event", "unknown")
+                        time_until = new_market_event.get("time_until_seconds", 0)
+                        hours_until = time_until / 3600
+                        logger.info(f"Market is {status}, next {next_event} in {hours_until:.1f} hours")
+                    
+                    # Trade history moved to on-demand (when tab clicked)
+                    # app_state.historic_trades = await app_state.api.get_trade_history(days=30)
+                    # logger.info(f"Found {len(app_state.historic_trades)} historic trades")
+                    
+                    # Account transactions moved to on-demand (when tab clicked)
+                    # Will be fetched via WebSocket command when Account Transactions tab is activated
+                    
+                    # Keepalive moved to separate timer (every 8 minutes)
             else:
                 logger.warning(f"Not updating - connected: {app_state.is_connected}, api: {app_state.api is not None}")
             
-            await asyncio.sleep(5)
+            # Determine update interval based on market state
+            if app_state.market_event and app_state.market_event.get("is_open"):
+                update_interval = market_open_interval
+            else:
+                update_interval = market_closed_interval
+            
+            await asyncio.sleep(update_interval)
         except Exception as e:
             logger.error(f"Data update error: {e}", exc_info=True)
-            await asyncio.sleep(5)
+            await asyncio.sleep(10)  # Wait 10s on error
 
 @app.on_event("startup")
 async def startup_event():
@@ -350,6 +499,9 @@ async def startup_event():
         
         # Start continuous data updates
         app_state.update_task = asyncio.create_task(continuous_data_update())
+        
+        # Start keepalive task
+        app_state.keepalive_task = asyncio.create_task(keepalive_task())
     else:
         logger.error("Failed to connect to Capital.com API")
 
@@ -358,9 +510,40 @@ async def shutdown_event():
     logger.info("Stopping app...")
     if app_state.update_task:
         app_state.update_task.cancel()
+    if hasattr(app_state, 'keepalive_task') and app_state.keepalive_task:
+        app_state.keepalive_task.cancel()
     if app_state.bot:
         app_state.bot.stop()
         app_state.bot.db_manager.close()
+
+@app.get("/market/refresh/{epic}")
+async def refresh_market_info(epic: str):
+    """On-demand market info refresh for bid/ask prices"""
+    if not app_state.api:
+        return {"ok": False, "error": "Not connected"}
+    
+    try:
+        market_data = await app_state.api.get_market_info(epic)
+        if market_data:
+            app_state.market_info = market_data
+            app_state.last_market_check = datetime.utcnow()
+            
+            # Extract bid/ask for immediate use
+            bid = market_data.get("snapshot", {}).get("bid")
+            ask = market_data.get("snapshot", {}).get("offer")
+            
+            logger.info(f"On-demand market refresh for {epic} - Bid: {bid}, Ask: {ask}")
+            return {
+                "ok": True,
+                "bid": bid,
+                "ask": ask,
+                "spread": ask - bid if bid and ask else None
+            }
+        else:
+            return {"ok": False, "error": "No market data"}
+    except Exception as e:
+        logger.error(f"Error refreshing market info: {e}")
+        return {"ok": False, "error": str(e)}
 
 @app.post("/bot/start")
 async def bot_start():
@@ -748,13 +931,13 @@ async def save_strategy_settings(payload: dict = Body(...)):
             
             # Log expected performance based on ACTUAL tested results
             if strategy_mode == 'all_signals' and enable_crash_protection:
-                logger.info("✅ Expected: $699,074 (57.2% WR, -96.9% DD) - PROVEN RESULT")
+                logger.info("Expected: $699,074 (57.2% WR, -96.9% DD) - PROVEN RESULT")
             elif strategy_mode == 'all_signals' and not enable_crash_protection:
-                logger.info("⚠️ Expected: $376,004 (56.1% WR, -98.7% DD) - NO PROTECTION")
+                logger.info("WARNING: Expected: $376,004 (56.1% WR, -98.7% DD) - NO PROTECTION")
             elif strategy_mode == 'two_rsi_only' and enable_crash_protection:
-                logger.info("🛡️ Expected: $485,948 (59.6% WR, -33.9% DD) - LOWEST RISK")
+                logger.info("Expected: $485,948 (59.6% WR, -33.9% DD) - LOWEST RISK")
             elif strategy_mode == 'two_rsi_only' and not enable_crash_protection:
-                logger.info("⚠️ Expected: $348,803 (58.1% WR, -68.5% DD) - NO PROTECTION")
+                logger.info("WARNING: Expected: $348,803 (58.1% WR, -68.5% DD) - NO PROTECTION")
         
         return {"success": True, "message": "Strategy settings saved"}
     except Exception as e:

@@ -33,7 +33,7 @@ class HybridIntelligentSystem:
         # Validate the proven strategy implementation on init
         try:
             validate_implementation()
-            print("✅ Proven $699k strategy validated and ready!")
+            print("Proven $699k strategy validated and ready!")
         except Exception as e:
             print(f"Warning: Strategy validation failed: {e}")
         

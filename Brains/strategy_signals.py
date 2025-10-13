@@ -512,7 +512,7 @@ def validate_implementation():
     assert CRASH_PROTECTION_CONFIG['rsi_bottom'] == 20, "RSI bottom must be 20"
     assert CRASH_PROTECTION_CONFIG['vol_spike'] == 1.5, "Volume spike must be 1.5x"
     
-    print("✅ All validations passed! Ready for $699k system!")
+    print("All validations passed! Ready for $699k system!")
     return True
 
 if __name__ == '__main__':

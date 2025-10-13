@@ -4,8 +4,6 @@ Log Manager - Session-based log rotation with 7-day retention
 import os
 import logging
 from datetime import datetime, timedelta
-import gzip
-import shutil
 from pathlib import Path
 from typing import Optional
 
@@ -29,57 +27,13 @@ class SessionLogManager:
         # Generate session ID with timestamp
         self.session_id = datetime.now().strftime("%Y%m%d_%H%M%S")
         
-        # Create new log file
+        # Create new log file in logs directory
         self.current_log_file = self.log_dir / f"session_{self.session_id}.log"
         
-        # Archive the previous log.txt if it exists
-        self.archive_current_log()
-        
-        # Create symlink or copy to log.txt for backward compatibility
-        log_txt = Path("log.txt")
-        if log_txt.exists():
-            log_txt.unlink()
-        
-        # On Windows, we'll copy instead of symlink for compatibility
-        if os.name == 'nt':
-            # Just create empty log.txt that will be written to
-            log_txt.touch()
-        else:
-            self.current_log_file.symlink_to(log_txt)
+        # Clean up old logs
+        self.cleanup_old_logs()
         
         return self.current_log_file
-    
-    def archive_current_log(self):
-        """Archive the current log.txt if it exists and has content"""
-        log_txt = Path("log.txt")
-        
-        if log_txt.exists() and log_txt.stat().st_size > 0:
-            # Get file modification time for naming
-            mod_time = datetime.fromtimestamp(log_txt.stat().st_mtime)
-            archive_name = self.log_dir / f"session_{mod_time.strftime('%Y%m%d_%H%M%S')}_archived.log"
-            
-            # Move and compress
-            shutil.move(str(log_txt), str(archive_name))
-            
-            # Compress the archived log
-            self.compress_log(archive_name)
-    
-    def compress_log(self, log_file: Path):
-        """Compress a log file using gzip"""
-        compressed_file = log_file.with_suffix('.log.gz')
-        
-        try:
-            with open(log_file, 'rb') as f_in:
-                with gzip.open(compressed_file, 'wb') as f_out:
-                    shutil.copyfileobj(f_in, f_out)
-            
-            # Remove original file after successful compression
-            log_file.unlink()
-            
-            return compressed_file
-        except Exception as e:
-            print(f"Error compressing log {log_file}: {e}")
-            return log_file
     
     def cleanup_old_logs(self):
         """Remove logs older than retention_days"""
@@ -88,17 +42,19 @@ class SessionLogManager:
         # Check all log files in the logs directory
         for log_file in self.log_dir.glob("session_*.log*"):
             try:
-                # Extract date from filename (session_YYYYMMDD_HHMMSS.log or .log.gz)
-                filename = log_file.stem.split('.')[0]  # Remove .log or .log.gz
-                date_str = filename.split('_')[1] + filename.split('_')[2]  # Get YYYYMMDDHHMMSS
-                
-                # Parse the date
-                file_date = datetime.strptime(date_str[:8], "%Y%m%d")
-                
-                # Remove if older than retention period
-                if file_date < cutoff_date:
-                    log_file.unlink()
-                    print(f"Removed old log: {log_file}")
+                # Extract date from filename (session_YYYYMMDD_HHMMSS.log)
+                filename = log_file.stem  # Gets 'session_YYYYMMDD_HHMMSS' from 'session_YYYYMMDD_HHMMSS.log'
+                parts = filename.split('_')
+                if len(parts) >= 3:
+                    date_str = parts[1]  # Get YYYYMMDD
+                    
+                    # Parse the date
+                    file_date = datetime.strptime(date_str, "%Y%m%d")
+                    
+                    # Remove if older than retention period
+                    if file_date < cutoff_date:
+                        log_file.unlink()
+                        print(f"Removed old log: {log_file}")
                     
             except (ValueError, IndexError) as e:
                 # Skip files that don't match expected format
@@ -143,11 +99,12 @@ def setup_logging(log_level: str = "WARNING") -> logging.Logger:
         level=getattr(logging, log_level.upper()),
         format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
         handlers=[
-            logging.FileHandler('log.txt'),  # Main log file
-            logging.FileHandler(log_file),   # Session log file
+            logging.FileHandler(log_file),   # Session log file in logs/ folder
             logging.StreamHandler()           # Console output
         ]
     )
+    
+    print(f"Logging to: {log_file}")
     
     return logging.getLogger(__name__)
 
