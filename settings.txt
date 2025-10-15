@@ -53,13 +53,31 @@ monthly_top_up = 100
 invest_pct = 0.99
 
 [TIMERS]
+# API Connection
 keepalive_minutes = 8
+auth_retry_wait_sec = 30
+auth_max_retry_wait_sec = 60
+error_retry_wait_sec = 5
+
+# WebSocket & Updates
 websocket_update_sec = 5
 positions_update_market_open_sec = 5
 positions_update_market_closed_sec = 10
 accounts_update_market_open_sec = 5
 accounts_update_market_closed_sec = 10
 market_info_update_sec = 30
+
+# Near Market Close Behavior
+near_close_threshold_sec = 150
+near_close_check_sec = 0.5
+near_close_data_threshold_sec = 300
+near_close_data_update_sec = 5
+
+# Main Loop Intervals
+normal_loop_sec = 1.0
+
+# Alpha Vantage
+alpha_vantage_cache_sec = 300
 
 [API_CONFIG]
 environment = demo

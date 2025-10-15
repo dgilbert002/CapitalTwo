@@ -218,6 +218,10 @@ class TradingBot:
     async def simulate_market_close(self):
         """Simulate market close - LEGACY STYLE: Just manipulate time! Returns step results."""
         try:
+            # Refresh Alpha Vantage data first
+            logger.info("Refreshing Alpha Vantage data before simulation...")
+            await self.refresh_alpha_vantage_data(force_refresh=True)
+            
             # Check if market is actually open first
             market_event = self.market_timer.get_next_market_event(self.market_info)
             if not market_event or not market_event.get('is_open'):
@@ -547,6 +551,15 @@ class TradingBot:
                     delattr(self, '_data_prepared_today')
                 logger.info("Market closed - flags reset for next session")
                 return
+        
+        # Refresh Alpha Vantage data on market open (once per session)
+        if is_open and not hasattr(self, '_market_open_refresh_done'):
+            logger.info("Market opened - refreshing Alpha Vantage data...")
+            await self.refresh_alpha_vantage_data(force_refresh=True)
+            self._market_open_refresh_done = True
+        elif not is_open and hasattr(self, '_market_open_refresh_done'):
+            # Reset flag when market closes
+            delattr(self, '_market_open_refresh_done')
             
         # Log countdown when within 60 seconds
         if time_until_close <= 60 and time_until_close > 0:
@@ -1002,7 +1015,7 @@ class TradingBot:
             return False
 
     async def run(self):
-        """Main trading loop"""
+        """Main trading loop with connection recovery"""
         self.is_running = True
         
         logger.info("="*60)
@@ -1015,53 +1028,111 @@ class TradingBot:
         logger.info("="*60)
         
         status_counter = 0
+        connection_error_count = 0
+        max_connection_errors = 5
         
         while self.is_running:
-            await self.update_data()
-
-            # Get market event
-            market_event = self.market_timer.get_next_market_event(self.market_info)
-            
-            # Debug log market event every 10 seconds
-            if status_counter % 10 == 0:
-                logger.debug(f"Market event: {market_event}")
-            
-            # Periodic status update
-            status_counter += 1
-            if status_counter >= 30:
+            try:
+                await self.update_data()
+                connection_error_count = 0  # Reset on successful update
+                
+                # Get market event
+                market_event = self.market_timer.get_next_market_event(self.market_info)
+                
+                # Debug log market event every 10 seconds
+                if status_counter % 10 == 0:
+                    logger.debug(f"Market event: {market_event}")
+                
+                # Periodic status update
+                status_counter += 1
+                if status_counter >= 30:
+                    if market_event and market_event.get('is_open'):
+                        time_until = int(market_event.get('time_until_close', 0))
+                        logger.info(f"Market OPEN - {time_until}s until close")
+                    elif market_event:
+                        hours = market_event.get('time_until_open', 0) / 3600
+                        logger.info(f"Market CLOSED - Opens in {hours:.1f} hours")
+                    status_counter = 0
+                
+                # Check trailing stop loss
+                if self.use_trailing_sl:
+                    positions = await self.api.get_positions()
+                    await self.check_and_trail_stop_loss(positions)
+                
+                # Execute strategy
+                await self.execute_timer_based_strategy(market_event)
+                
+                # Track closed trades every loop
+                await self.track_closed_trades()
+                
+                # Sleep less frequently near market close for better timer accuracy
                 if market_event and market_event.get('is_open'):
-                    time_until = int(market_event.get('time_until_close', 0))
-                    logger.info(f"Market OPEN - {time_until}s until close")
-                elif market_event:
-                    hours = market_event.get('time_until_open', 0) / 3600
-                    logger.info(f"Market CLOSED - Opens in {hours:.1f} hours")
-                status_counter = 0
-            
-            # Check trailing stop loss
-            if self.use_trailing_sl:
-                positions = await self.api.get_positions()
-                await self.check_and_trail_stop_loss(positions)
-            
-            # Execute strategy
-            await self.execute_timer_based_strategy(market_event)
-            
-            # Track closed trades every loop
-            await self.track_closed_trades()
-            
-            # Sleep less frequently near market close for better timer accuracy
-            if market_event and market_event.get('is_open'):
-                time_until_close = market_event.get('time_until_close', float('inf'))
-                if time_until_close <= 150:  # Within 2.5 minutes of close
-                    await asyncio.sleep(0.5)  # Check every 0.5 seconds
+                    time_until_close = market_event.get('time_until_close', float('inf'))
+                    # Get loop intervals from settings
+                    near_close_interval = self.settings.getfloat('TIMERS', 'near_close_check_sec', 0.5)
+                    normal_interval = self.settings.getfloat('TIMERS', 'normal_loop_sec', 1.0)
+                    near_close_threshold = self.settings.getint('TIMERS', 'near_close_threshold_sec', 150)
+                    
+                    if time_until_close <= near_close_threshold:  # Near market close
+                        await asyncio.sleep(near_close_interval)
+                    else:
+                        await asyncio.sleep(normal_interval)
                 else:
-                    await asyncio.sleep(1)
-            else:
-                await asyncio.sleep(1)
+                    # Market closed - use normal interval
+                    normal_interval = self.settings.getfloat('TIMERS', 'normal_loop_sec', 1.0)
+                    await asyncio.sleep(normal_interval)
+                    
+            except ConnectionError as e:
+                connection_error_count += 1
+                logger.error(f"Connection error in main loop ({connection_error_count}/{max_connection_errors}): {e}")
+                
+                if connection_error_count >= max_connection_errors:
+                    logger.error("Too many connection errors. Attempting to re-authenticate...")
+                    try:
+                        await self.api.authenticate()
+                        logger.info("Re-authentication successful")
+                        connection_error_count = 0
+                    except Exception as auth_error:
+                        logger.error(f"Re-authentication failed: {auth_error}")
+                        auth_retry_wait = self.settings.getint('TIMERS', 'auth_retry_wait_sec', 30)
+                        await asyncio.sleep(auth_retry_wait)  # Wait before retrying
+                else:
+                    error_retry_wait = self.settings.getint('TIMERS', 'error_retry_wait_sec', 5)
+                    await asyncio.sleep(error_retry_wait)  # Short wait before retry
+                    
+            except Exception as e:
+                logger.error(f"Error in main loop: {e}")
+                error_retry_wait = self.settings.getint('TIMERS', 'error_retry_wait_sec', 5)
+                await asyncio.sleep(error_retry_wait)  # Wait before continuing
     
     async def update_data(self):
-        """Update market data"""
+        """Update market data with caching based on settings"""
         try:
+            # Get update interval from settings
+            market_update_interval = self.settings.getint('TIMERS', 'market_info_update_sec', 30)
+            
+            now = datetime.now()
+            if hasattr(self, '_last_market_update'):
+                time_since = (now - self._last_market_update).total_seconds()
+                
+                # Check if we're near market open/close for more frequent updates
+                if self.market_info:
+                    event = self.market_timer.get_next_market_event(self.market_info)
+                    if event and event.get('is_open'):
+                        time_until_close = event.get('time_until_close', float('inf'))
+                        # Get thresholds from settings
+                        near_close_threshold = self.settings.getint('TIMERS', 'near_close_data_threshold_sec', 300)  # 5 minutes
+                        near_close_update_sec = self.settings.getint('TIMERS', 'near_close_data_update_sec', 5)
+                        
+                        # Update more frequently near close
+                        if time_until_close < near_close_threshold:
+                            if time_since < near_close_update_sec:
+                                return
+                        elif time_since < market_update_interval:
+                            return
+            
             self.market_info = await self.api.get_market_info(self.epic)
+            self._last_market_update = now
         except Exception as e:
             logger.error(f"Error updating data: {e}")
     
@@ -1079,13 +1150,62 @@ class TradingBot:
             await asyncio.sleep(300)  # Every 5 minutes
     
     async def keepalive_loop(self):
-        """Keep API connection alive"""
+        """Keep API connection alive with re-authentication on failure"""
+        keepalive_interval = self.settings.getint('TIMERS', 'keepalive_minutes', 8) * 60
+        logger.info(f"Keepalive interval: {keepalive_interval} seconds")
+        
+        auth_retry_count = 0
+        max_auth_retries = 3
+        
         while self.is_running:
             try:
-                await self.api.keepalive()
+                success = await self.api.keepalive()
+                if success:
+                    logger.debug("Keepalive sent successfully")
+                    auth_retry_count = 0  # Reset retry count on success
+                else:
+                    logger.warning("Keepalive returned False - may need to re-authenticate")
+                    raise Exception("Keepalive failed")
+                    
             except Exception as e:
                 logger.error(f"Keepalive error: {e}")
-            await asyncio.sleep(30)
+                
+                # Check if it's an authentication error (401, connection error, etc)
+                if "401" in str(e) or "unauthorized" in str(e).lower() or "keepalive failed" in str(e):
+                    auth_retry_count += 1
+                    
+                    if auth_retry_count <= max_auth_retries:
+                        logger.warning(f"Authentication may have expired. Re-authenticating... (attempt {auth_retry_count}/{max_auth_retries})")
+                        
+                        try:
+                            # Re-authenticate
+                            await self.api.authenticate()
+                            logger.info("Re-authentication successful")
+                            
+                            # Re-select account if we had one
+                            if self.api.current_account_id:
+                                await self.api.switch_account(self.api.current_account_id)
+                                logger.info(f"Re-selected account: {self.api.current_account_id}")
+                            
+                            # Update market info after re-auth
+                            self.market_info = await self.api.get_market_info(self.epic)
+                            logger.info("Market info updated after re-authentication")
+                            
+                            auth_retry_count = 0  # Reset on successful re-auth
+                            
+                        except Exception as auth_error:
+                            logger.error(f"Re-authentication failed: {auth_error}")
+                            # Wait before retrying
+                            auth_retry_wait = self.settings.getint('TIMERS', 'auth_retry_wait_sec', 30)
+                            await asyncio.sleep(auth_retry_wait)
+                    else:
+                        logger.error(f"Max re-authentication attempts ({max_auth_retries}) reached. Bot may need restart.")
+                        # Continue anyway, maybe connection will recover
+                        auth_retry_count = 0
+                        auth_max_wait = self.settings.getint('TIMERS', 'auth_max_retry_wait_sec', 60)
+                        await asyncio.sleep(auth_max_wait)  # Wait longer before trying again
+                        
+            await asyncio.sleep(keepalive_interval)
     
     async def maintain_data_at_market_close(self):
         """Removed Capital.com maintenance – Alpha Vantage handles analysis data."""
@@ -1115,12 +1235,24 @@ class TradingBot:
                 'coverage_pct': 0
             }
     
-    async def refresh_alpha_vantage_data(self):
-        """Refresh latest data from Alpha Vantage API at T-120s"""
+    async def refresh_alpha_vantage_data(self, force_refresh=False):
+        """Refresh latest data from Alpha Vantage API
+        
+        Args:
+            force_refresh: If True, always refresh. If False, check if we need to refresh
+        """
         try:
             import requests
             import pandas as pd
             from datetime import datetime
+
+            # Check if we've refreshed recently unless forced
+            if not force_refresh and hasattr(self, '_last_av_refresh'):
+                time_since_refresh = (datetime.now() - self._last_av_refresh).total_seconds()
+                av_cache_seconds = self.settings.getint('TIMERS', 'alpha_vantage_cache_sec', 300)  # Default 5 minutes
+                if time_since_refresh < av_cache_seconds:
+                    logger.debug(f"Skipping AV refresh - last refresh {time_since_refresh:.0f}s ago (cache: {av_cache_seconds}s)")
+                    return True
 
             # Get Alpha Vantage settings
             api_key = self.settings.get('ALPHA_VANTAGE', 'api_key')
@@ -1153,6 +1285,10 @@ class TradingBot:
                 if 'Error Message' in data:
                     logger.error(f"Alpha Vantage API Error: {data['Error Message']}")
                     return False
+                    
+                if 'Note' in data:
+                    logger.warning(f"Alpha Vantage API Note (rate limit?): {data['Note']}")
+                    return False
 
                 # Extract time series data
                 time_series_key = f'Time Series ({interval})'
@@ -1171,8 +1307,18 @@ class TradingBot:
                 for col in ['open', 'high', 'low', 'close', 'volume']:
                     df[col] = pd.to_numeric(df[col])
 
-                # Store in database
+                # Get latest timestamp in database
                 conn = sqlite3.connect(self.av_db_path)
+                cursor = conn.execute(f"SELECT MAX(timestamp) FROM {self.av_table}")
+                latest = cursor.fetchone()[0]
+                
+                if latest:
+                    latest_dt = pd.to_datetime(latest)
+                    # Only keep new data
+                    df = df[df['timestamp'] > latest_dt]
+                    logger.debug(f"Found {len(df)} new candles since {latest}")
+
+                # Store in database
                 df['timestamp'] = df['timestamp'].astype(str)
 
                 inserted = 0
@@ -1190,13 +1336,16 @@ class TradingBot:
 
                 conn.commit()
                 conn.close()
+                
+                # Update last refresh time
+                self._last_av_refresh = datetime.now()
 
                 logger.info(f"Alpha Vantage refresh complete: {inserted} new/updated candles")
                 return True
             else:
                 logger.error(f"Alpha Vantage API request failed: {response.status_code}")
                 return False
-                
+
         except Exception as e:
             logger.error(f"Error refreshing Alpha Vantage data: {e}")
             return False

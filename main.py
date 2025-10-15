@@ -355,19 +355,32 @@ async def continuous_data_update():
                 update_count += 1
                 logger.info(f"Running data update #{update_count}")
                 
-                # Update account balances
+                # Update account balances based on settings
                 if app_state.current_account:
-                    accounts = await app_state.api.get_accounts()
-                    current_id = app_state.current_account.get("accountId")
-                    updated = next((a for a in accounts if a.get("accountId") == current_id), None)
-                    if updated:
-                        app_state.current_account = updated
-                        balance = updated.get('balance', {}).get('balance', 0)
-                        logger.info(f"Account balance: ${balance}")
+                    # Get update interval from settings based on market state
+                    is_market_open = app_state.market_event.get("is_open", False) if app_state.market_event else False
+                    if is_market_open:
+                        account_interval = app_state.settings.getint('TIMERS', 'accounts_update_market_open_sec', 5)
+                    else:
+                        account_interval = app_state.settings.getint('TIMERS', 'accounts_update_market_closed_sec', 10)
+                    
+                    # Only update if enough time has passed
+                    if not hasattr(app_state, '_last_account_update') or \
+                       (datetime.utcnow() - app_state._last_account_update).total_seconds() > account_interval:
+                        accounts = await app_state.api.get_accounts()
+                        current_id = app_state.current_account.get("accountId")
+                        updated = next((a for a in accounts if a.get("accountId") == current_id), None)
+                        if updated:
+                            app_state.current_account = updated
+                            balance = updated.get('balance', {}).get('balance', 0)
+                            logger.debug(f"Account balance: ${balance}")
+                            app_state._last_account_update = datetime.utcnow()
+                        else:
+                            logger.warning(f"Could not find account {current_id} in accounts list")
                 
                 # Update positions
                 app_state.positions = await app_state.api.get_positions()
-                logger.info(f"Found {len(app_state.positions)} open positions")
+                logger.debug(f"Found {len(app_state.positions)} open positions")
                 if app_state.positions:
                     # Log first position to see structure
                     logger.info(f"Position fields: {list(app_state.positions[0].keys())}")
@@ -688,7 +701,7 @@ async def brains_preview():
             temp_bot = TradingBot(app_state.settings)
             temp_bot.api = app_state.api
             temp_bot.api_connected = True
-            await temp_bot.refresh_alpha_vantage_data()
+            await temp_bot.refresh_alpha_vantage_data(force_refresh=True)
             df = temp_bot._load_alpha_vantage_dataframe(limit=500)
 
         if df is None or len(df) < 50:
@@ -824,6 +837,9 @@ async def brains_preview():
         decision = convert_numpy(decision)
         fired_signals = decision.get('fired_signals', {})
         
+        # Get the timestamp of the last candle used for analysis
+        last_candle_time = df.iloc[-1]['timestamp'] if 'timestamp' in df.columns else str(df.index[-1])
+        
         return {
             "ok": True, 
             "strategy_mode": strategy_mode if 'strategy_mode' in locals() else "enhanced",
@@ -832,6 +848,7 @@ async def brains_preview():
             "sizing": sizing, 
             "market_info": market_info, 
             "last_candle": last_candle,
+            "last_candle_time": str(last_candle_time),
             "selected_strategy": decision.get('selected_strategy', 'N/A'),
             "fired_signals": fired_signals,
             "strategy_config": decision.get('strategy_config', None)

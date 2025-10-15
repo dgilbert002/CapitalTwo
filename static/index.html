@@ -2099,6 +2099,10 @@
                         strategyDisplay = 'Test6 - 8 Signals WITH Protection ($958k)';
                     } else if (data.strategy_mode === 'test6_no_protection') {
                         strategyDisplay = 'Test6 - 8 Signals NO Protection ($509k)';
+                    } else if (data.strategy_mode === 'test7_with_protection') {
+                        strategyDisplay = 'Test7 - 9 Signals WITH Protection';
+                    } else if (data.strategy_mode === 'test7_no_protection') {
+                        strategyDisplay = 'Test7 - 9 Signals NO Protection';
                     } else if (data.strategy_mode === 'all_signals') {
                         strategyDisplay = data.crash_protection ? 'All 6 Signals WITH Protection ($699k)' : 'All 6 Signals NO Protection ($376k)';
                     } else if (data.strategy_mode === 'two_rsi_only') {
@@ -2107,6 +2111,11 @@
                         strategyDisplay = 'Enhanced (AI System)';
                     }
                     rows.push(`<tr><td colspan="2" class="text-center bg-primary text-white"><strong>Using Strategy: ${strategyDisplay}</strong></td></tr>`);
+                }
+                
+                // Show the candle timestamp used for analysis
+                if (data.last_candle_time) {
+                    rows.push(`<tr><td colspan="2" class="text-center bg-info text-white"><strong>Analysis Based On: ${data.last_candle_time}</strong></td></tr>`);
                 }
                 
                 const confidencePercent = (typeof d.confidence === 'number') ? (d.confidence * 100) : parseFloat(d.confidence) || 0;
