@@ -2115,7 +2115,24 @@
                 
                 // Show the candle timestamp used for analysis
                 if (data.last_candle_time) {
-                    rows.push(`<tr><td colspan="2" class="text-center bg-info text-white"><strong>Analysis Based On: ${data.last_candle_time}</strong></td></tr>`);
+                    // Parse and format the timestamp
+                    let candleTime = data.last_candle_time;
+                    try {
+                        const dt = new Date(candleTime);
+                        if (!isNaN(dt.getTime())) {
+                            // Format as readable date/time
+                            candleTime = dt.toLocaleString('en-US', {
+                                month: 'short',
+                                day: 'numeric',
+                                hour: '2-digit',
+                                minute: '2-digit',
+                                timeZoneName: 'short'
+                            });
+                        }
+                    } catch(e) {
+                        // Keep original if parsing fails
+                    }
+                    rows.push(`<tr><td colspan="2" class="text-center bg-info text-white"><strong>Analysis Based On: ${candleTime}</strong></td></tr>`);
                 }
                 
                 const confidencePercent = (typeof d.confidence === 'number') ? (d.confidence * 100) : parseFloat(d.confidence) || 0;

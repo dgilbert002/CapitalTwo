@@ -451,7 +451,7 @@ async def continuous_data_update():
                                     # Ensure we're authenticated for market open
                                     try:
                                         await app_state.api.keepalive()
-                                        logger.info("Verified authentication at market open")
+                                        logger.warning("MARKET OPENED - Verified authentication")
                                     except:
                                         logger.warning("Keepalive failed at market open, will retry on next cycle")
                             else:

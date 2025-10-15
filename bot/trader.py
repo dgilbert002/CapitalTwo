@@ -1161,7 +1161,7 @@ class TradingBot:
             try:
                 success = await self.api.keepalive()
                 if success:
-                    logger.debug("Keepalive sent successfully")
+                    logger.info("Keepalive sent successfully")
                     auth_retry_count = 0  # Reset retry count on success
                 else:
                     logger.warning("Keepalive returned False - may need to re-authenticate")
@@ -1251,7 +1251,7 @@ class TradingBot:
                 time_since_refresh = (datetime.now() - self._last_av_refresh).total_seconds()
                 av_cache_seconds = self.settings.getint('TIMERS', 'alpha_vantage_cache_sec', 300)  # Default 5 minutes
                 if time_since_refresh < av_cache_seconds:
-                    logger.debug(f"Skipping AV refresh - last refresh {time_since_refresh:.0f}s ago (cache: {av_cache_seconds}s)")
+                    logger.info(f"Skipping AV refresh - last refresh {time_since_refresh:.0f}s ago (cache: {av_cache_seconds}s)")
                     return True
 
             # Get Alpha Vantage settings

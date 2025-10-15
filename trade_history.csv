@@ -2,3 +2,5 @@ timestamp,status,deal_reference,epic,epic_name,direction,size,entry_price,exit_p
 2025-10-13T23:14:03.928073,OPEN,o_8e022f59-17bf-4177-9c61-14ee81ff2e45,TECL,Direxion Daily Technology Bull 3X Shares,long,30.3,126.77,,124.2346,normal,4,3841.131,960.28275,,,,,,,{}
 2025-10-13T23:14:37.874716,OPEN,o_62027e4d-20e8-4722-919a-7cb2fcd30bd6,TECL,Direxion Daily Technology Bull 3X Shares,long,30.200000000000003,126.69,,124.1562,normal,4,3826.0380000000005,956.5095000000001,,,,,,,{}
 2025-10-13T23:24:40.120634,OPEN,o_29e69dd7-6ee9-43e0-b7eb-a04ebc630f25,TECL,Direxion Daily Technology Bull 3X Shares,long,30.5,127.39,,124.8422,normal,4,3885.395,971.34875,,,,,,,{}
+2025-10-15T22:49:51.863031,OPEN,o_1dfe2bda-065b-427f-9f90-874cc35a9da0,TECL,Direxion Daily Technology Bull 3X Shares,long,25.3,125.75,,123.235,normal,4,3181.475,795.36875,,,,,,,{}
+2025-10-15T22:50:24.655691,OPEN,o_853c6d6a-b96f-488d-b884-9b7f0dcd19cd,TECL,Direxion Daily Technology Bull 3X Shares,long,25.200000000000003,125.83,,123.3134,normal,4,3170.916,792.729,,,,,,,{}
