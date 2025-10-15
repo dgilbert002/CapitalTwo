@@ -2135,7 +2135,14 @@
                     rows.push(`<tr><td colspan="2" class="text-center bg-info text-white"><strong>Analysis Based On: ${candleTime}</strong></td></tr>`);
                 }
                 
-                const confidencePercent = (typeof d.confidence === 'number') ? (d.confidence * 100) : parseFloat(d.confidence) || 0;
+                // Show data source
+                if (data.data_source) {
+                    const sourceClass = data.data_source.includes('gap-filled') ? 'bg-success' : 'bg-warning';
+                    rows.push(`<tr><td colspan="2" class="text-center ${sourceClass} text-white"><strong>Data: ${data.data_source}</strong></td></tr>`);
+                }
+                
+                // Confidence is already in percentage (0-100), not decimal (0-1)
+                const confidencePercent = (typeof d.confidence === 'number') ? d.confidence : parseFloat(d.confidence) || 0;
                 rows.push(`<tr><td>Signal</td><td><strong>${d.trade_signal || '-'}</strong></td></tr>`);
                 rows.push(`<tr><td>Confidence</td><td>${confidencePercent.toFixed(2)}%</td></tr>`);
                 rows.push(`<tr><td>Strategy</td><td><strong>${data.selected_strategy || 'N/A'}</strong></td></tr>`);

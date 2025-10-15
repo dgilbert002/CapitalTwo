@@ -151,11 +151,11 @@ class TradingBot:
                 result = await self.api.create_position(epic, direction, size, stop_level)
                 
                 if result and 'dealReference' in result:
-                    logger.info(f"Position created successfully on attempt {attempt}")
+                    logger.warning(f"TRADE CONFIRMED: Position created successfully on attempt {attempt} - Deal: {result.get('dealReference')}")
                     return result
                 else:
                     logger.warning(f"Attempt {attempt} failed - invalid response: {result}")
-                    
+            
             except Exception as e:
                 logger.error(f"Attempt {attempt} failed with error: {e}")
                 
@@ -655,12 +655,12 @@ class TradingBot:
             # Use the stored analysis
             ai_analysis = self.pending_trade_analysis
             
-            logger.info("="*60)
-            logger.info("T-15s: USING T-120s ANALYSIS")
-            logger.info(f"Signal: {ai_analysis.get('trade_signal', 'N/A')}")
-            logger.info(f"Confidence: {ai_analysis.get('confidence', 0):.1%}")
-            logger.info(f"Strategy: {ai_analysis.get('selected_strategy', 'N/A')}")
-            logger.info("="*60)
+            logger.warning("="*60)
+            logger.warning("T-15s: USING T-120s ANALYSIS")
+            logger.warning(f"Signal: {ai_analysis.get('trade_signal', 'N/A')}")
+            logger.warning(f"Confidence: {ai_analysis.get('confidence', 0):.1f}%")
+            logger.warning(f"Strategy: {ai_analysis.get('selected_strategy', 'N/A')}")
+            logger.warning("="*60)
             
             # Get market info for dealing rules
             self.market_info = await self.api.get_market_info(self.epic)
@@ -736,6 +736,9 @@ class TradingBot:
     
             direction = 'long' if signal == 'buy' else 'short'
             entry_price = offer if direction == 'long' else bid
+            
+            # Log bid/ask for monitoring
+            logger.warning(f"Market Prices - Bid: ${bid:.2f}, Ask: ${offer:.2f}, Using: ${entry_price:.2f} for {direction}")
             
             # Get dealing rules
             min_size = float(dealing_rules.get('minDealSize', {}).get('value', 0.1))
@@ -841,7 +844,7 @@ class TradingBot:
                 self.record_action({'event': 'leverage_update', 'phase': 'error', 'category': instrument_category, 'error': str(e)})
 
             # Get account balance
-            accounts = await self.api.get_accounts()
+                accounts = await self.api.get_accounts()
             available = 0
             for acc in accounts:
                 if acc['accountId'] == self.current_account['accountId']:
@@ -910,7 +913,9 @@ class TradingBot:
                 # Fallback to normal (already calculated)
                 stop_level = entry_price * (1 - stop_loss_pct) if direction == 'long' else entry_price * (1 + stop_loss_pct)
             
-            logger.info(f"Creating position: {direction.upper()} {trade_size} @ {entry_price}, SL: {stop_level}")
+            # Log position details for monitoring
+            logger.warning(f"Creating position: {direction.upper()} {trade_size} @ {entry_price}, SL: {stop_level}")
+            logger.warning(f"Notional Value: ${notional_value:.2f}, Margin: ${margin:.2f}, Leverage: {leverage_to_use}x")
             # Record sizing/calculation
             self.record_action({
                 'event': 'create_position_calculation',
@@ -950,19 +955,19 @@ class TradingBot:
                 # Record comprehensive trade details
                 deal_reference = result.get('dealReference') if isinstance(result, dict) else None
                 
-                # Log trade execution summary with strategy details
-                logger.info("="*60)
-                logger.info("TRADE EXECUTED SUCCESSFULLY")
-                logger.info(f"Deal ID: {deal_reference}")
-                logger.info(f"Strategy: {strategy_name}")
-                logger.info(f"Direction: {direction.upper()}")
-                logger.info(f"Entry Price: ${entry_price:.2f}")
-                logger.info(f"Size: {trade_size} contracts")
-                logger.info(f"Stop Loss: ${stop_level:.2f} ({stop_loss_pct*100:.1f}% - {stop_loss_source})")
-                logger.info(f"Leverage: {leverage_to_use}x")
-                logger.info(f"Notional Value: ${notional_value:.2f}")
-                logger.info(f"Margin Required: ${margin:.2f}")
-                logger.info("="*60)
+                # Log trade execution summary with strategy details (ALWAYS visible)
+                logger.warning("="*60)
+                logger.warning("TRADE EXECUTED SUCCESSFULLY")
+                logger.warning(f"Deal ID: {deal_reference}")
+                logger.warning(f"Strategy: {strategy_name}")
+                logger.warning(f"Direction: {direction.upper()}")
+                logger.warning(f"Entry Price: ${entry_price:.2f}")
+                logger.warning(f"Size: {trade_size} contracts")
+                logger.warning(f"Stop Loss: ${stop_level:.2f} ({stop_loss_pct*100:.1f}% - {stop_loss_source})")
+                logger.warning(f"Leverage: {leverage_to_use}x")
+                logger.warning(f"Notional Value: ${notional_value:.2f}")
+                logger.warning(f"Margin Required: ${margin:.2f}")
+                logger.warning("="*60)
                 trade_record = {
                     'event': 'api_execution',
                     'success': True,
@@ -1035,7 +1040,7 @@ class TradingBot:
             try:
                 await self.update_data()
                 connection_error_count = 0  # Reset on successful update
-                
+
                 # Get market event
                 market_event = self.market_timer.get_next_market_event(self.market_info)
                 
@@ -1198,7 +1203,7 @@ class TradingBot:
                             # Wait before retrying
                             auth_retry_wait = self.settings.getint('TIMERS', 'auth_retry_wait_sec', 30)
                             await asyncio.sleep(auth_retry_wait)
-                    else:
+                else:
                         logger.error(f"Max re-authentication attempts ({max_auth_retries}) reached. Bot may need restart.")
                         # Continue anyway, maybe connection will recover
                         auth_retry_count = 0
@@ -1235,8 +1240,125 @@ class TradingBot:
                 'coverage_pct': 0
             }
     
+    async def _fill_data_gap_with_capital(self, last_av_timestamp):
+        """Get Capital.com data to fill the gap for calculations ONLY (not stored in DB)
+        
+        Args:
+            last_av_timestamp: The latest timestamp from Alpha Vantage (string or datetime)
+            
+        Returns:
+            DataFrame with gap-filled data or None
+        """
+        try:
+            import pandas as pd
+            from datetime import datetime, timedelta
+            import pytz
+            
+            # Skip if we don't have API connection
+            if not self.api or not self.api.client:
+                logger.warning("No Capital.com API connection for gap filling")
+                return None
+            
+            # Parse the last AV timestamp
+            if isinstance(last_av_timestamp, str) and last_av_timestamp != "No data":
+                # Alpha Vantage timestamps are in ET
+                et_tz = pytz.timezone('US/Eastern')
+                last_av_dt = pd.to_datetime(last_av_timestamp)
+                if last_av_dt.tzinfo is None:
+                    last_av_dt = et_tz.localize(last_av_dt)
+            else:
+                logger.warning(f"Invalid last_av_timestamp: {last_av_timestamp}")
+                return None
+            
+            # Convert to UTC for Capital.com API
+            last_av_utc = last_av_dt.astimezone(pytz.UTC)
+            now_utc = datetime.now(pytz.UTC)
+            
+            # Calculate the gap in hours
+            gap_hours = (now_utc - last_av_utc).total_seconds() / 3600
+            
+            if gap_hours <= 0:
+                logger.info("No gap to fill - Alpha Vantage data is current")
+                return None
+            
+            logger.info(f"Fetching {gap_hours:.1f} hours of recent data from Capital.com (temporary, not stored)")
+            
+            # Fetch Capital.com data
+            epic = self.settings.get('BOT_CONFIG', 'epic', 'TECL')
+            
+            # Calculate how many 5-minute candles we need
+            # Add some buffer to ensure we get all candles
+            num_candles = min(int(gap_hours * 12) + 10, 1000)  # 12 candles per hour, max 1000
+            
+            # Fetch historical prices (5-minute resolution)
+            # Import ResolutionType from the appropriate module
+            if self.api.environment == "demo":
+                from capitalcom.client_demo import ResolutionType
+            else:
+                from capitalcom.client import ResolutionType
+            
+            response = await self.api.get_historical_prices(
+                epic=epic,
+                resolution=ResolutionType.MINUTE_5,
+                num_candles=num_candles
+            )
+            
+            if not response or 'prices' not in response:
+                logger.warning("No Capital.com data available for gap filling")
+                return None
+            
+            prices = response['prices']
+            if not prices:
+                logger.info("No new candles from Capital.com")
+                return None
+            
+            # Convert to DataFrame
+            records = []
+            et_tz = pytz.timezone('US/Eastern')
+            
+            for price in prices:
+                # Parse Capital.com timestamp (UTC)
+                ts_utc = pd.to_datetime(price['snapshotTime'])
+                if ts_utc.tzinfo is None:
+                    ts_utc = pytz.UTC.localize(ts_utc)
+                
+                # Convert to ET for consistency with Alpha Vantage format
+                ts_et = ts_utc.astimezone(et_tz)
+                
+                # Only include candles AFTER our last AV timestamp
+                if ts_et <= last_av_dt:
+                    continue
+                
+                records.append({
+                    'timestamp': ts_et,  # Keep as datetime for DataFrame
+                    'open': float(price['openPrice']['bid']),
+                    'high': float(price['highPrice']['bid']),
+                    'low': float(price['lowPrice']['bid']),
+                    'close': float(price['closePrice']['bid']),
+                    'volume': float(price.get('lastTradedVolume', 0))
+                })
+            
+            if not records:
+                logger.info("No new candles after filtering")
+                return None
+            
+            # Create DataFrame from records
+            gap_df = pd.DataFrame(records)
+            gap_df.set_index('timestamp', inplace=True)
+            
+            logger.info(f"Gap data ready: {len(gap_df)} candles from Capital.com (temporary use only)")
+            
+            # Store in memory for immediate use
+            self._temp_gap_data = gap_df
+            
+            return gap_df
+            
+        except Exception as e:
+            logger.error(f"Error fetching gap data from Capital.com: {e}")
+            return None
+    
     async def refresh_alpha_vantage_data(self, force_refresh=False):
-        """Refresh latest data from Alpha Vantage API
+        """Refresh latest data from Alpha Vantage API and fill gaps with Capital.com data
         
         Args:
             force_refresh: If True, always refresh. If False, check if we need to refresh
@@ -1244,7 +1366,8 @@ class TradingBot:
         try:
             import requests
             import pandas as pd
-            from datetime import datetime
+            from datetime import datetime, timedelta
+            import pytz
 
             # Check if we've refreshed recently unless forced
             if not force_refresh and hasattr(self, '_last_av_refresh'):
@@ -1273,7 +1396,7 @@ class TradingBot:
                 'interval': interval,
                 'apikey': api_key,
                 'extended_hours': 'true',
-                'outputsize': 'compact'  # Last 100 data points
+                'outputsize': 'full'  # Get trailing 30 days including today!
             }
 
             response = requests.get(url, params=params)
@@ -1340,18 +1463,52 @@ class TradingBot:
                 # Update last refresh time
                 self._last_av_refresh = datetime.now()
 
-                logger.info(f"Alpha Vantage refresh complete: {inserted} new/updated candles")
+                if inserted > 0:
+                    logger.info(f"Alpha Vantage refresh complete: {inserted} new/updated candles")
+                else:
+                    # Get the latest timestamp to show how stale the data is
+                    latest_ts = df['timestamp'].max() if not df.empty else "No data"
+                    logger.warning(f"Alpha Vantage has no new data. Latest available: {latest_ts}")
+                    logger.warning("Note: Free tier typically updates after market close")
+                
+                # Get the latest timestamp from the database if no new data
+                if not latest:
+                    conn = sqlite3.connect(self.av_db_path)
+                    cursor = conn.cursor()
+                    cursor.execute(f'SELECT MAX(timestamp) FROM {self.av_table}')
+                    result = cursor.fetchone()
+                    conn.close()
+                    latest_db_ts = result[0] if result and result[0] else None
+                    
+                    if latest_db_ts:
+                        logger.info(f"Using existing AV database latest: {latest_db_ts}")
+                        # Get temporary gap data from Capital.com (not stored)
+                        gap_data = await self._fill_data_gap_with_capital(latest_db_ts)
+                    else:
+                        logger.warning("No data in database to determine gap start")
+                else:
+                    # Fill gap from the newly inserted data
+                    gap_data = await self._fill_data_gap_with_capital(latest)
+                
                 return True
             else:
                 logger.error(f"Alpha Vantage API request failed: {response.status_code}")
                 return False
-
+            
         except Exception as e:
             logger.error(f"Error refreshing Alpha Vantage data: {e}")
             return False
     
-    def _load_alpha_vantage_dataframe(self, limit: int = 1000) -> Optional[pd.DataFrame]:
-        """Load Alpha Vantage candles from SQLite, converted to UTC and renamed."""
+    def _load_alpha_vantage_dataframe(self, limit: int = 1000, include_gap_fill: bool = True) -> Optional[pd.DataFrame]:
+        """Load Alpha Vantage candles from SQLite, optionally combined with temporary gap data.
+        
+        Args:
+            limit: Maximum number of rows to load from database
+            include_gap_fill: Whether to include temporary Capital.com gap data
+            
+        Returns:
+            Combined DataFrame with AV data (from DB) and optional gap data (temporary)
+        """
         try:
             limit_value = max(1, int(limit))
             conn = sqlite3.connect(self.av_db_path)
@@ -1387,7 +1544,74 @@ class TradingBot:
             'close': 'closePrice',
             'volume': 'lastTradedVolume'
         })
-        return df
+        
+        # Keep original column names as well for compatibility
+        df['open'] = df['openPrice']
+        df['high'] = df['highPrice']
+        df['low'] = df['lowPrice']
+        df['close'] = df['closePrice']
+        df['volume'] = df['lastTradedVolume']
+        
+        # If we have temporary gap data and include_gap_fill is True, combine them
+        if include_gap_fill and hasattr(self, '_temp_gap_data') and self._temp_gap_data is not None:
+            gap_df = self._temp_gap_data.copy()
+            
+            # Convert gap_df index to UTC to match df
+            if gap_df.index.tz is None:
+                eastern = pytz.timezone('US/Eastern')
+                gap_df.index = gap_df.index.tz_localize(eastern)
+            gap_df.index = gap_df.index.tz_convert('UTC')
+            
+            # Reset index to have timestamp as column
+            gap_df.reset_index(inplace=True)
+            gap_df.rename(columns={'index': 'timestamp'}, inplace=True)
+            
+            # Add column aliases to gap_df to match df structure
+            gap_df['openPrice'] = gap_df['open']
+            gap_df['highPrice'] = gap_df['high']
+            gap_df['lowPrice'] = gap_df['low']
+            gap_df['closePrice'] = gap_df['close']
+            gap_df['lastTradedVolume'] = gap_df['volume']
+            
+            # Prepare df for merging - ensure it has timestamp column
+            df_copy = df.copy()
+            if 'timestamp' not in df_copy.columns:
+                # df already has a timestamp column from the SQL query, just ensure it's there
+                pass
+            
+            # Combine the dataframes (AV data + gap data)
+            # Use only the required columns to avoid any duplicates
+            cols_to_use = ['timestamp', 'open', 'high', 'low', 'close', 'volume',
+                          'openPrice', 'highPrice', 'lowPrice', 'closePrice', 'lastTradedVolume']
+            
+            # Ensure both dataframes have exactly these columns
+            df_for_concat = df_copy[cols_to_use]
+            gap_df_for_concat = gap_df[cols_to_use]
+            
+            # Combine them
+            combined_df = pd.concat([df_for_concat, gap_df_for_concat], axis=0, ignore_index=True)
+            
+            # Remove any duplicates based on timestamp (prefer AV data by keeping first)
+            combined_df = combined_df.drop_duplicates(subset=['timestamp'], keep='first')
+            
+            # Sort by timestamp
+            combined_df = combined_df.sort_values('timestamp')
+            
+            # Limit to requested number of rows (take most recent)
+            if len(combined_df) > limit_value:
+                combined_df = combined_df.tail(limit_value).reset_index(drop=True)
+            
+            # Ensure all numeric columns are float type (not object)
+            numeric_cols = ['open', 'high', 'low', 'close', 'volume',
+                           'openPrice', 'highPrice', 'lowPrice', 'closePrice', 'lastTradedVolume']
+            for col in numeric_cols:
+                combined_df[col] = pd.to_numeric(combined_df[col], errors='coerce')
+            
+            logger.info(f"Combined {len(df)} AV candles with {len(gap_df)} temporary Capital.com candles = {len(combined_df)} total")
+            return combined_df
+        else:
+            logger.info(f"Loaded {len(df)} candles from Alpha Vantage database (no gap data)")
+            return df
     
     async def prepare_data_before_close(self):
         """Download data and run Brains analysis 120 seconds before market close"""
@@ -1400,8 +1624,8 @@ class TradingBot:
             # Refresh Alpha Vantage data first
             await self.refresh_alpha_vantage_data()
             
-            # Load candles from Alpha Vantage database
-            df = self._load_alpha_vantage_dataframe(limit=1000)
+            # Load candles from Alpha Vantage database with gap-filled Capital.com data
+            df = self._load_alpha_vantage_dataframe(limit=1000, include_gap_fill=True)
             row_count = len(df) if df is not None else 0
             if df is None or row_count < 100:
                 logger.warning(f"Insufficient candles for analysis: {row_count}")
@@ -1425,16 +1649,17 @@ class TradingBot:
             # Store analysis for T-15s use
             self.pending_trade_analysis = ai_analysis
             
-            # Log the analysis result
-            logger.info("="*60)
-            logger.info("T-120s BRAINS ANALYSIS COMPLETE")
-            logger.info(f"Signal: {ai_analysis.get('trade_signal', 'N/A')}")
-            logger.info(f"Confidence: {ai_analysis.get('confidence', 0):.1%}")
-            logger.info(f"Strategy: {ai_analysis.get('selected_strategy', 'N/A')}")
-            logger.info(f"Leverage: {ai_analysis.get('strategy_leverage', 'N/A')}x")
-            logger.info(f"Stop Loss: {ai_analysis.get('strategy_stop_loss', 'N/A')}%")
-            logger.info("Analysis stored for T-15s execution")
-            logger.info("="*60)
+            # Log the analysis result (ALWAYS visible for monitoring)
+            logger.warning("="*60)
+            logger.warning("T-120s BRAINS ANALYSIS COMPLETE")
+            logger.warning(f"Signal: {ai_analysis.get('trade_signal', 'N/A')}")
+            logger.warning(f"Confidence: {ai_analysis.get('confidence', 0):.1f}%")
+            logger.warning(f"Strategy: {ai_analysis.get('selected_strategy', 'N/A')}")
+            logger.warning(f"Leverage: {ai_analysis.get('strategy_leverage', 'N/A')}x")
+            logger.warning(f"Stop Loss: {ai_analysis.get('strategy_stop_loss', 'N/A')}%")
+            logger.warning(f"Fired Signals: {ai_analysis.get('fired_signals', {})}")
+            logger.warning("Analysis stored for T-15s execution")
+            logger.warning("="*60)
             
             self.record_action({
                 'event': 'brains_analysis_t120',

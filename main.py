@@ -692,17 +692,22 @@ async def brains_preview():
             return {"ok": False, "error": "no_market_info"}
 
         # Ensure Alpha Vantage dataset is current by reusing the bot helper
+        # We'll use the existing bot or create a temporary one
+        bot_instance = None
         if app_state.bot:
-            await app_state.bot.refresh_alpha_vantage_data()
-            df = app_state.bot._load_alpha_vantage_dataframe(limit=500)
+            bot_instance = app_state.bot
+            await bot_instance.refresh_alpha_vantage_data()
+            df = bot_instance._load_alpha_vantage_dataframe(limit=500, include_gap_fill=True)
         else:
             # Temporary bot instance for shared helper usage
             from bot.trader import TradingBot
-            temp_bot = TradingBot(app_state.settings)
-            temp_bot.api = app_state.api
-            temp_bot.api_connected = True
-            await temp_bot.refresh_alpha_vantage_data(force_refresh=True)
-            df = temp_bot._load_alpha_vantage_dataframe(limit=500)
+            bot_instance = TradingBot(app_state.settings)
+            bot_instance.api = app_state.api
+            bot_instance.api_connected = True
+            # Refresh Alpha Vantage data and get gap data from Capital.com (temporary)
+            await bot_instance.refresh_alpha_vantage_data(force_refresh=True)
+            # Load the combined data (AV from DB + temporary Capital.com gap)
+            df = bot_instance._load_alpha_vantage_dataframe(limit=500, include_gap_fill=True)
 
         if df is None or len(df) < 50:
             return {"ok": False, "error": "insufficient_history"}
@@ -840,6 +845,33 @@ async def brains_preview():
         # Get the timestamp of the last candle used for analysis
         last_candle_time = df.iloc[-1]['timestamp'] if 'timestamp' in df.columns else str(df.index[-1])
         
+        # Check if we're using gap-filled data
+        # Check if the bot has temporary gap data in memory
+        data_source = "Alpha Vantage (historical only)"
+        
+        if bot_instance and hasattr(bot_instance, '_temp_gap_data') and bot_instance._temp_gap_data is not None:
+            data_source = "Alpha Vantage + Capital.com (gap-filled)"
+        else:
+            # Also check if the last candle is very recent (within 2 hours)
+            from datetime import datetime, timedelta
+            import pytz
+            
+            # Parse the last candle time
+            try:
+                last_candle_dt = pd.to_datetime(last_candle_time)
+                if last_candle_dt.tzinfo is None:
+                    # Assume UTC if no timezone
+                    last_candle_dt = pytz.UTC.localize(last_candle_dt)
+                
+                now_utc = datetime.now(pytz.UTC)
+                hours_ago = (now_utc - last_candle_dt).total_seconds() / 3600
+                
+                # If the last candle is within 2 hours, we likely have gap-filled data
+                if hours_ago < 2:
+                    data_source = "Alpha Vantage + Capital.com (gap-filled)"
+            except:
+                pass  # Keep default if parsing fails
+        
         return {
             "ok": True, 
             "strategy_mode": strategy_mode if 'strategy_mode' in locals() else "enhanced",
@@ -851,7 +883,8 @@ async def brains_preview():
             "last_candle_time": str(last_candle_time),
             "selected_strategy": decision.get('selected_strategy', 'N/A'),
             "fired_signals": fired_signals,
-            "strategy_config": decision.get('strategy_config', None)
+            "strategy_config": decision.get('strategy_config', None),
+            "data_source": data_source
         }
     except Exception as e:
         logger.error(f"Brains preview error: {e}")

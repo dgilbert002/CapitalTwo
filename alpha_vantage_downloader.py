@@ -205,7 +205,7 @@ def refresh_latest_data(settings):
     
     logger.info(f"Refreshing latest {symbol} data...")
     
-    # Fetch latest data
+    # Fetch latest data with outputsize='full' to get trailing 30 days
     df = fetch_av_data(symbol, interval, api_key, None, extended_hours)
     
     if df is not None and not df.empty:

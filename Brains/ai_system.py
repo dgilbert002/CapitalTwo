@@ -86,14 +86,21 @@ class HybridIntelligentSystem:
         """EXACT function from focused_optimizer.py"""
         df = df.copy()
         
-        # Ensure correct column names
-        df.rename(columns={
-            'open': 'openPrice',
-            'high': 'highPrice',
-            'low': 'lowPrice',
-            'close': 'closePrice',
-            'volume': 'lastTradedVolume'
-        }, inplace=True)
+        # Ensure correct column names - only rename if the target doesn't already exist
+        rename_map = {}
+        if 'openPrice' not in df.columns and 'open' in df.columns:
+            rename_map['open'] = 'openPrice'
+        if 'highPrice' not in df.columns and 'high' in df.columns:
+            rename_map['high'] = 'highPrice'
+        if 'lowPrice' not in df.columns and 'low' in df.columns:
+            rename_map['low'] = 'lowPrice'
+        if 'closePrice' not in df.columns and 'close' in df.columns:
+            rename_map['close'] = 'closePrice'
+        if 'lastTradedVolume' not in df.columns and 'volume' in df.columns:
+            rename_map['volume'] = 'lastTradedVolume'
+        
+        if rename_map:
+            df.rename(columns=rename_map, inplace=True)
 
         # Price-based indicators
         df['sma_20'] = talib.SMA(df['closePrice'], timeperiod=20)
