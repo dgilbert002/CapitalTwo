@@ -1,0 +1,13 @@
+fastapi>=0.111.0,<0.116.0
+uvicorn[standard]>=0.26.0,<0.31.0
+pandas>=2.2.0,<3.0.0
+numpy>=1.26.0,<3.0.0
+pytz>=2023.3
+# TA-Lib provides the `talib` module used in bot/ai_system.py
+TA-Lib>=0.4.28
+# Capital.com API client used by bot/api.py
+capitalcom>=0.2.0
+# aiohttp for direct API calls to Capital.com
+aiohttp>=3.9.0
+
+

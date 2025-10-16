@@ -1,12 +1,12 @@
 [CREDENTIALS]
-api_key = yktYIOXRX6dFuGbJ
+api_key = RPMu2zQirFCaT0jk
 password = Tickles21!
 email = dean2021q1@gmail.com
 account_id = 211640169982416068
 
 [BOT_CONFIG]
 bot_name = AI Hybrid Trader
-epic = TECL
+epic = SOXL
 leverage = 4.0
 stop_loss_pct = 2.0
 investment_pct = 99.0
@@ -24,28 +24,29 @@ sl_use = 0,1,2,4,6,8,10
 override_strategy_sl = False
 
 [ENV_ACCOUNTS]
-demo = 290950804147613982
-live = 290795266196460740
+demo = 293869307439690014
+live = 293339553283003588
 
 [STRATEGY]
-strategy_mode = test7_with_protection
-enable_crash_protection = True
+strategy_mode = test8_no_protection
+enable_crash_protection = False
+test8_epic = SOXL
 
 [ALPHA_VANTAGE]
 api_key = OCQ5ZK0K035MOEHM
-symbol = TECL
+symbol = SOXL
 interval = 5min
 extended_hours = true
 database = database_av.db
-table_name = TECL_av_5min
+table_name = SOXL_av_5min
 
 [DATA]
 start_date = 2024-01-01
-end_date = 2025-10-10
+end_date = 2025-10-20
 
 [TESTING]
 start_date = 2024-01-01
-end_date = 2025-10-10
+end_date = 2025-10-20
 
 [FINANCE]
 start_balance = 500
@@ -64,12 +65,12 @@ accounts_update_market_open_sec = 5
 accounts_update_market_closed_sec = 10
 market_info_update_sec = 30
 near_close_threshold_sec = 150
-near_close_check_sec = 0.5
+near_close_check_sec = 1
 near_close_data_threshold_sec = 300
 near_close_data_update_sec = 5
-normal_loop_sec = 1.0
+normal_loop_sec = 1
 alpha_vantage_cache_sec = 300
 
 [API_CONFIG]
-environment = demo
+environment = live
 

@@ -17,12 +17,35 @@ class CapitalComAPI:
         self.client: Optional[object] = None
         self.loop: Optional[asyncio.AbstractEventLoop] = None
         self.environment: str = (environment or self.settings.get("API_CONFIG", "environment", "demo")).lower() or "demo"
-        self.ClientClass = capital_client_demo.Client if self.environment == "demo" else capital_client.Client
+
+        # The latest capitalcom SDK exports CapitalClient instead of Client
+        demo_cls = getattr(capital_client_demo, "Client", None) or getattr(capital_client_demo, "CapitalClient", None)
+        live_cls = getattr(capital_client, "Client", None) or getattr(capital_client, "CapitalClient", None)
+
+        if self.environment == "demo":
+            if not demo_cls:
+                raise RuntimeError("capitalcom.client_demo is missing both Client and CapitalClient")
+            self.ClientClass = demo_cls
+            logger.info(
+                "CapitalComAPI initialized for environment=%s using demo class=%s",
+                self.environment,
+                self.ClientClass.__name__,
+            )
+        else:
+            if not live_cls:
+                raise RuntimeError("capitalcom.client is missing both Client and CapitalClient")
+            self.ClientClass = live_cls
+            logger.info(
+                "CapitalComAPI initialized for environment=%s using live class=%s",
+                self.environment,
+                self.ClientClass.__name__,
+            )
 
     @property
     def ResolutionType(self):
         # Use ResolutionType from main client module (same string values in demo)
-        return capital_client.ResolutionType
+        # Fall back if ResolutionType not present (older/newer SDKs)
+        return getattr(capital_client, "ResolutionType", None)
 
     async def _run_sync(self, func, *args, **kwargs):
         """Runs a synchronous function in a thread pool."""

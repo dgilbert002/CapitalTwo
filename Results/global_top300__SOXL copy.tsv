@@ -1,0 +1,301 @@
+condition	params_json	final_balance	total_trades	win_rate	sharpe_ratio	max_drawdown_pct
+rsi_oversold	"{""leverage"": 10.0, ""period"": 14, ""stop_loss_pct"": 4.5, ""threshold"": 25}"	7074396.76	38.0	78.9	2.79	-48.8
+keltner_lower_break	"{""leverage"": 5.0, ""multiplier"": 3.0, ""period"": 20, ""stop_loss_pct"": 5.5}"	2057025.67	68.0	72.1	3.23	-47.1
+keltner_lower_break	"{""leverage"": 5.0, ""multiplier"": 3.0, ""period"": 20, ""stop_loss_pct"": 5.5}"	2057025.67	68.0	72.1	3.23	-47.1
+keltner_lower_break	"{""leverage"": 4.0, ""multiplier"": 3.0, ""period"": 20, ""stop_loss_pct"": 6.5}"	1394921.92	68.0	75.0	3.56	-44.9
+keltner_lower_break	"{""leverage"": 4.0, ""multiplier"": 3.0, ""period"": 20, ""stop_loss_pct"": 6.5}"	1394921.92	68.0	75.0	3.56	-44.9
+keltner_lower_break	"{""leverage"": 5.0, ""multiplier"": 3.0, ""period"": 10, ""stop_loss_pct"": 5.5}"	1381003.09	71.0	70.4	3.18	-47.1
+keltner_lower_break	"{""leverage"": 5.0, ""multiplier"": 3.0, ""period"": 10, ""stop_loss_pct"": 5.5}"	1381003.09	71.0	70.4	3.18	-47.1
+keltner_lower_break	"{""leverage"": 5.0, ""multiplier"": 3.0, ""period"": 10, ""stop_loss_pct"": 5.5}"	1381003.09	71.0	70.4	3.18	-47.1
+keltner_lower_break	"{""leverage"": 5.0, ""multiplier"": 3.0, ""period"": 10, ""stop_loss_pct"": 5.5}"	1381003.09	71.0	70.4	3.18	-47.1
+keltner_lower_break	"{""leverage"": 4.0, ""multiplier"": 3.0, ""period"": 20, ""stop_loss_pct"": 7.0}"	1222783.47	68.0	75.0	3.51	-47.8
+keltner_lower_break	"{""leverage"": 4.0, ""multiplier"": 3.0, ""period"": 15, ""stop_loss_pct"": 7.0}"	1039158.81	75.0	73.3	3.4	-47.8
+keltner_lower_break	"{""leverage"": 4.0, ""multiplier"": 3.0, ""period"": 10, ""stop_loss_pct"": 6.5}"	952704.77	71.0	73.2	3.5	-44.9
+keltner_lower_break	"{""leverage"": 4.0, ""multiplier"": 3.0, ""period"": 10, ""stop_loss_pct"": 6.5}"	952704.77	71.0	73.2	3.5	-44.9
+keltner_lower_break	"{""leverage"": 4.0, ""multiplier"": 3.0, ""period"": 15, ""stop_loss_pct"": 6.5}"	886842.3	75.0	72.0	3.34	-44.9
+keltner_lower_break	"{""leverage"": 4.0, ""multiplier"": 3.0, ""period"": 10, ""stop_loss_pct"": 7.0}"	820308.31	71.0	73.2	3.43	-47.8
+keltner_lower_break	"{""leverage"": 4.0, ""multiplier"": 3.0, ""period"": 20, ""stop_loss_pct"": 5.5}"	645338.7	68.0	72.1	3.26	-38.9
+keltner_lower_break	"{""leverage"": 4.0, ""multiplier"": 3.0, ""period"": 20, ""stop_loss_pct"": 5.5}"	645338.7	68.0	72.1	3.26	-38.9
+keltner_lower_break	"{""leverage"": 4.0, ""multiplier"": 3.0, ""period"": 20, ""stop_loss_pct"": 6.0}"	643278.17	68.0	72.1	3.25	-42.0
+keltner_lower_break	"{""leverage"": 4.0, ""multiplier"": 3.0, ""period"": 20, ""stop_loss_pct"": 6.0}"	643278.17	68.0	72.1	3.25	-42.0
+keltner_lower_break	"{""leverage"": 4.0, ""multiplier"": 2.5, ""period"": 25, ""stop_loss_pct"": 7.0}"	622310.91	76.0	71.1	3.22	-47.8
+keltner_lower_break	"{""leverage"": 4.0, ""multiplier"": 2.5, ""period"": 25, ""stop_loss_pct"": 7.0}"	622310.91	76.0	71.1	3.22	-47.8
+keltner_lower_break	"{""leverage"": 4.0, ""multiplier"": 2.5, ""period"": 25, ""stop_loss_pct"": 7.0}"	622310.91	76.0	71.1	3.22	-47.8
+keltner_lower_break	"{""leverage"": 4.0, ""multiplier"": 2.5, ""period"": 25, ""stop_loss_pct"": 7.0}"	622310.91	76.0	71.1	3.22	-47.8
+rsi_oversold	"{""leverage"": 5.0, ""period"": 14, ""stop_loss_pct"": 5.5, ""threshold"": 30}"	619219.55	68.0	69.1	2.97	-47.1
+rsi_oversold	"{""leverage"": 5.0, ""period"": 14, ""stop_loss_pct"": 6.5, ""threshold"": 25}"	562144.78	38.0	81.6	3.18	-32.2
+keltner_lower_break	"{""leverage"": 4.0, ""multiplier"": 3.0, ""period"": 25, ""stop_loss_pct"": 6.5}"	560042.76	59.0	76.3	3.42	-44.9
+rsi_oversold	"{""leverage"": 5.0, ""period"": 14, ""stop_loss_pct"": 7.0, ""threshold"": 25}"	541649.11	38.0	81.6	3.16	-34.7
+keltner_lower_break	"{""leverage"": 4.0, ""multiplier"": 2.5, ""period"": 25, ""stop_loss_pct"": 6.5}"	534515.12	76.0	69.7	3.16	-44.9
+keltner_lower_break	"{""leverage"": 4.0, ""multiplier"": 2.5, ""period"": 25, ""stop_loss_pct"": 6.5}"	534515.12	76.0	69.7	3.16	-44.9
+rsi_oversold	"{""leverage"": 5.0, ""period"": 14, ""stop_loss_pct"": 7.5, ""threshold"": 25}"	521153.44	38.0	81.6	3.15	-37.2
+rsi_oversold	"{""leverage"": 5.0, ""period"": 14, ""stop_loss_pct"": 7.5, ""threshold"": 25}"	521153.44	38.0	81.6	3.15	-37.2
+keltner_lower_break	"{""leverage"": 4.0, ""multiplier"": 3.0, ""period"": 25, ""stop_loss_pct"": 7.0}"	506266.18	59.0	76.3	3.37	-47.8
+keltner_lower_break	"{""leverage"": 4.0, ""multiplier"": 3.0, ""period"": 25, ""stop_loss_pct"": 7.0}"	506266.18	59.0	76.3	3.37	-47.8
+keltner_lower_break	"{""leverage"": 4.0, ""multiplier"": 3.0, ""period"": 25, ""stop_loss_pct"": 7.0}"	506266.18	59.0	76.3	3.37	-47.8
+rsi_oversold	"{""leverage"": 5.0, ""period"": 14, ""stop_loss_pct"": 8.0, ""threshold"": 25}"	500657.76	38.0	81.6	3.13	-39.7
+keltner_lower_break	"{""leverage"": 4.0, ""multiplier"": 3.0, ""period"": 15, ""stop_loss_pct"": 5.5}"	483708.03	75.0	69.3	3.11	-47.5
+keltner_lower_break	"{""leverage"": 4.0, ""multiplier"": 3.0, ""period"": 10, ""stop_loss_pct"": 5.5}"	481813.78	71.0	70.4	3.22	-38.9
+rsi_oversold	"{""leverage"": 5.0, ""period"": 14, ""stop_loss_pct"": 8.5, ""threshold"": 25}"	480162.09	38.0	81.6	3.11	-42.1
+keltner_lower_break	"{""leverage"": 4.0, ""multiplier"": 3.0, ""period"": 10, ""stop_loss_pct"": 6.0}"	475371.25	71.0	70.4	3.21	-42.0
+rsi_oversold	"{""leverage"": 5.0, ""period"": 10, ""stop_loss_pct"": 7.5, ""threshold"": 20}"	440330.29	49.0	75.5	2.94	-37.2
+rsi_oversold	"{""leverage"": 5.0, ""period"": 14, ""stop_loss_pct"": 9.5, ""threshold"": 25}"	439170.74	38.0	81.6	3.08	-47.1
+rsi_oversold	"{""leverage"": 5.0, ""period"": 14, ""stop_loss_pct"": 9.5, ""threshold"": 25}"	439170.74	38.0	81.6	3.08	-47.1
+rsi_oversold	"{""leverage"": 5.0, ""period"": 14, ""stop_loss_pct"": 10.0, ""threshold"": 25}"	418675.07	38.0	81.6	3.06	-49.6
+rsi_oversold	"{""leverage"": 5.0, ""period"": 14, ""stop_loss_pct"": 4.5, ""threshold"": 30}"	410488.28	68.0	67.6	2.83	-40.5
+keltner_lower_break	"{""leverage"": 5.0, ""multiplier"": 3.0, ""period"": 25, ""stop_loss_pct"": 4.5}"	404574.88	59.0	69.5	2.85	-39.7
+rsi_oversold	"{""leverage"": 4.0, ""period"": 14, ""stop_loss_pct"": 6.5, ""threshold"": 30}"	402953.67	68.0	72.1	3.22	-44.9
+rsi_oversold	"{""leverage"": 5.0, ""period"": 10, ""stop_loss_pct"": 8.0, ""threshold"": 20}"	392483.69	49.0	75.5	2.9	-39.7
+keltner_lower_break	"{""leverage"": 4.0, ""multiplier"": 3.0, ""period"": 20, ""stop_loss_pct"": 5.0}"	391114.89	68.0	69.1	3.06	-47.6
+keltner_lower_break	"{""leverage"": 4.0, ""multiplier"": 3.0, ""period"": 20, ""stop_loss_pct"": 5.0}"	391114.89	68.0	69.1	3.06	-47.6
+rsi_oversold	"{""leverage"": 5.0, ""period"": 14, ""stop_loss_pct"": 5.0, ""threshold"": 30}"	375700.56	68.0	67.6	2.8	-44.3
+rsi_oversold	"{""leverage"": 5.0, ""period"": 14, ""stop_loss_pct"": 5.0, ""threshold"": 30}"	375700.56	68.0	67.6	2.8	-44.3
+rsi_oversold	"{""leverage"": 5.0, ""period"": 10, ""stop_loss_pct"": 8.5, ""threshold"": 20}"	348318.96	49.0	75.5	2.86	-42.1
+keltner_lower_break	"{""leverage"": 5.0, ""multiplier"": 3.0, ""period"": 20, ""stop_loss_pct"": 4.0}"	347204.05	68.0	64.7	2.7	-48.6
+keltner_lower_break	"{""leverage"": 5.0, ""multiplier"": 3.0, ""period"": 20, ""stop_loss_pct"": 4.0}"	347204.05	68.0	64.7	2.7	-48.6
+keltner_lower_break	"{""leverage"": 4.0, ""multiplier"": 3.0, ""period"": 25, ""stop_loss_pct"": 6.0}"	314737.59	59.0	72.9	3.17	-42.0
+keltner_lower_break	"{""leverage"": 4.0, ""multiplier"": 3.0, ""period"": 15, ""stop_loss_pct"": 5.0}"	312918.15	75.0	66.7	2.95	-47.1
+keltner_lower_break	"{""leverage"": 5.0, ""multiplier"": 3.0, ""period"": 15, ""stop_loss_pct"": 4.0}"	310189.26	75.0	62.7	2.65	-48.6
+keltner_lower_break	"{""leverage"": 5.0, ""multiplier"": 3.0, ""period"": 15, ""stop_loss_pct"": 4.0}"	310189.26	75.0	62.7	2.65	-48.6
+keltner_lower_break	"{""leverage"": 3.0, ""multiplier"": 3.0, ""period"": 20, ""stop_loss_pct"": 6.5}"	308183.29	68.0	75.0	3.61	-35.0
+keltner_lower_break	"{""leverage"": 3.0, ""multiplier"": 3.0, ""period"": 20, ""stop_loss_pct"": 6.5}"	308183.29	68.0	75.0	3.61	-35.0
+keltner_lower_break	"{""leverage"": 3.0, ""multiplier"": 3.0, ""period"": 20, ""stop_loss_pct"": 6.5}"	308183.29	68.0	75.0	3.61	-35.0
+rsi_oversold	"{""leverage"": 5.0, ""period"": 10, ""stop_loss_pct"": 9.0, ""threshold"": 20}"	307685.06	49.0	75.5	2.82	-44.6
+keltner_lower_break	"{""leverage"": 4.0, ""multiplier"": 3.0, ""period"": 20, ""stop_loss_pct"": 4.5}"	305368.75	68.0	67.6	2.97	-43.6
+keltner_lower_break	"{""leverage"": 4.0, ""multiplier"": 3.0, ""period"": 25, ""stop_loss_pct"": 5.5}"	298340.08	59.0	72.9	3.15	-38.9
+keltner_lower_break	"{""leverage"": 4.0, ""multiplier"": 3.0, ""period"": 10, ""stop_loss_pct"": 5.0}"	298244.09	71.0	67.6	3.03	-46.6
+keltner_lower_break	"{""leverage"": 5.0, ""multiplier"": 3.0, ""period"": 10, ""stop_loss_pct"": 4.0}"	294836.66	71.0	63.4	2.72	-48.6
+rsi_oversold	"{""leverage"": 5.0, ""period"": 14, ""stop_loss_pct"": 5.5, ""threshold"": 25}"	292297.12	38.0	78.9	2.92	-29.9
+keltner_lower_break	"{""leverage"": 3.0, ""multiplier"": 3.0, ""period"": 20, ""stop_loss_pct"": 7.0}"	281999.01	68.0	75.0	3.55	-37.3
+keltner_lower_break	"{""leverage"": 3.0, ""multiplier"": 3.0, ""period"": 20, ""stop_loss_pct"": 7.0}"	281999.01	68.0	75.0	3.55	-37.3
+rsi_oversold	"{""leverage"": 4.0, ""period"": 10, ""stop_loss_pct"": 6.5, ""threshold"": 25}"	273735.23	77.0	68.8	3.02	-44.9
+rsi_oversold	"{""leverage"": 4.0, ""period"": 10, ""stop_loss_pct"": 6.5, ""threshold"": 25}"	273735.23	77.0	68.8	3.02	-44.9
+keltner_lower_break	"{""leverage"": 4.0, ""multiplier"": 2.5, ""period"": 25, ""stop_loss_pct"": 6.0}"	270624.15	76.0	67.1	2.9	-42.0
+rsi_oversold	"{""leverage"": 5.0, ""period"": 10, ""stop_loss_pct"": 9.5, ""threshold"": 20}"	270430.91	49.0	75.5	2.78	-47.1
+keltner_lower_break	"{""leverage"": 4.0, ""multiplier"": 2.5, ""period"": 25, ""stop_loss_pct"": 5.5}"	267896.83	76.0	67.1	2.9	-39.9
+rsi_oversold	"{""leverage"": 5.0, ""period"": 14, ""stop_loss_pct"": 4.5, ""threshold"": 25}"	261549.6	38.0	78.9	2.88	-25.2
+rsi_oversold	"{""leverage"": 5.0, ""period"": 14, ""stop_loss_pct"": 4.5, ""threshold"": 25}"	261549.6	38.0	78.9	2.88	-25.2
+keltner_lower_break	"{""leverage"": 3.0, ""multiplier"": 3.0, ""period"": 15, ""stop_loss_pct"": 7.0}"	261197.15	75.0	73.3	3.45	-37.3
+keltner_lower_break	"{""leverage"": 4.0, ""multiplier"": 3.0, ""period"": 15, ""stop_loss_pct"": 4.5}"	260256.16	75.0	65.3	2.88	-43.2
+keltner_lower_break	"{""leverage"": 3.0, ""multiplier"": 3.0, ""period"": 20, ""stop_loss_pct"": 7.5}"	257665.17	68.0	75.0	3.49	-39.7
+keltner_lower_break	"{""leverage"": 3.0, ""multiplier"": 3.0, ""period"": 20, ""stop_loss_pct"": 7.5}"	257665.17	68.0	75.0	3.49	-39.7
+keltner_lower_break	"{""leverage"": 3.0, ""multiplier"": 3.0, ""period"": 20, ""stop_loss_pct"": 7.5}"	257665.17	68.0	75.0	3.49	-39.7
+rsi_oversold	"{""leverage"": 5.0, ""period"": 14, ""stop_loss_pct"": 5.0, ""threshold"": 25}"	246764.75	38.0	78.9	2.85	-27.6
+keltner_lower_break	"{""leverage"": 4.0, ""multiplier"": 3.0, ""period"": 10, ""stop_loss_pct"": 4.5}"	237355.01	71.0	66.2	2.94	-42.7
+keltner_lower_break	"{""leverage"": 3.0, ""multiplier"": 3.0, ""period"": 20, ""stop_loss_pct"": 8.0}"	235080.37	68.0	75.0	3.43	-41.9
+keltner_lower_break	"{""leverage"": 3.0, ""multiplier"": 3.0, ""period"": 20, ""stop_loss_pct"": 8.0}"	235080.37	68.0	75.0	3.43	-41.9
+keltner_lower_break	"{""leverage"": 3.0, ""multiplier"": 3.0, ""period"": 15, ""stop_loss_pct"": 7.5}"	232155.91	75.0	73.3	3.38	-39.7
+rsi_oversold	"{""leverage"": 4.0, ""period"": 10, ""stop_loss_pct"": 7.0, ""threshold"": 25}"	232104.44	77.0	68.8	2.95	-47.8
+keltner_lower_break	"{""leverage"": 3.0, ""multiplier"": 3.0, ""period"": 15, ""stop_loss_pct"": 6.5}"	230642.77	75.0	72.0	3.39	-35.0
+keltner_lower_break	"{""leverage"": 3.0, ""multiplier"": 3.0, ""period"": 15, ""stop_loss_pct"": 8.0}"	225784.43	75.0	73.3	3.36	-41.9
+keltner_lower_break	"{""leverage"": 3.0, ""multiplier"": 3.0, ""period"": 10, ""stop_loss_pct"": 7.0}"	217234.02	71.0	73.2	3.52	-37.3
+rsi_oversold	"{""leverage"": 10.0, ""period"": 21, ""stop_loss_pct"": 4.5, ""threshold"": 30}"	215960.72	17.0	82.4	2.07	-44.7
+keltner_lower_break	"{""leverage"": 3.0, ""multiplier"": 3.0, ""period"": 20, ""stop_loss_pct"": 8.5}"	214147.02	68.0	75.0	3.38	-44.2
+keltner_lower_break	"{""leverage"": 3.0, ""multiplier"": 3.0, ""period"": 15, ""stop_loss_pct"": 8.5}"	202916.05	75.0	73.3	3.3	-44.2
+keltner_lower_break	"{""leverage"": 3.0, ""multiplier"": 3.0, ""period"": 15, ""stop_loss_pct"": 8.5}"	202916.05	75.0	73.3	3.3	-44.2
+rsi_oversold	"{""leverage"": 10.0, ""period"": 21, ""stop_loss_pct"": 5.0, ""threshold"": 30}"	196764.25	17.0	82.4	2.05	-49.6
+rsi_oversold	"{""leverage"": 10.0, ""period"": 21, ""stop_loss_pct"": 5.0, ""threshold"": 30}"	196764.25	17.0	82.4	2.05	-49.6
+keltner_lower_break	"{""leverage"": 3.0, ""multiplier"": 3.0, ""period"": 10, ""stop_loss_pct"": 7.5}"	196268.76	71.0	73.2	3.45	-39.7
+keltner_lower_break	"{""leverage"": 3.0, ""multiplier"": 3.0, ""period"": 10, ""stop_loss_pct"": 7.5}"	196268.76	71.0	73.2	3.45	-39.7
+keltner_lower_break	"{""leverage"": 3.0, ""multiplier"": 3.0, ""period"": 10, ""stop_loss_pct"": 7.5}"	196268.76	71.0	73.2	3.45	-39.7
+keltner_lower_break	"{""leverage"": 3.0, ""multiplier"": 3.0, ""period"": 10, ""stop_loss_pct"": 7.5}"	196268.76	71.0	73.2	3.45	-39.7
+keltner_lower_break	"{""leverage"": 3.0, ""multiplier"": 3.0, ""period"": 20, ""stop_loss_pct"": 9.0}"	194771.24	68.0	75.0	3.32	-46.4
+rsi_oversold	"{""leverage"": 4.0, ""period"": 14, ""stop_loss_pct"": 7.0, ""threshold"": 25}"	193179.47	38.0	81.6	3.21	-27.8
+rsi_oversold	"{""leverage"": 4.0, ""period"": 14, ""stop_loss_pct"": 7.5, ""threshold"": 25}"	187909.42	38.0	81.6	3.2	-29.8
+keltner_lower_break	"{""leverage"": 5.0, ""multiplier"": 3.0, ""period"": 25, ""stop_loss_pct"": 4.0}"	183589.06	59.0	66.1	2.63	-48.6
+rsi_oversold	"{""leverage"": 4.0, ""period"": 14, ""stop_loss_pct"": 8.0, ""threshold"": 25}"	182639.38	38.0	81.6	3.18	-31.7
+rsi_oversold	"{""leverage"": 4.0, ""period"": 14, ""stop_loss_pct"": 8.0, ""threshold"": 25}"	182639.38	38.0	81.6	3.18	-31.7
+keltner_lower_break	"{""leverage"": 3.0, ""multiplier"": 3.0, ""period"": 15, ""stop_loss_pct"": 9.0}"	182097.29	75.0	73.3	3.24	-46.4
+rsi_oversold	"{""leverage"": 4.0, ""period"": 10, ""stop_loss_pct"": 7.5, ""threshold"": 20}"	179910.26	49.0	75.5	2.99	-29.8
+keltner_lower_break	"{""leverage"": 4.0, ""multiplier"": 2.5, ""period"": 25, ""stop_loss_pct"": 5.0}"	179244.2	76.0	64.5	2.75	-47.4
+keltner_lower_break	"{""leverage"": 4.0, ""multiplier"": 2.5, ""period"": 25, ""stop_loss_pct"": 5.0}"	179244.2	76.0	64.5	2.75	-47.4
+keltner_lower_break	"{""leverage"": 3.0, ""multiplier"": 3.0, ""period"": 20, ""stop_loss_pct"": 6.0}"	178020.72	68.0	72.1	3.31	-32.5
+rsi_oversold	"{""leverage"": 4.0, ""period"": 14, ""stop_loss_pct"": 8.5, ""threshold"": 25}"	177369.33	38.0	81.6	3.16	-33.7
+keltner_lower_break	"{""leverage"": 3.0, ""multiplier"": 3.0, ""period"": 10, ""stop_loss_pct"": 8.0}"	177098.48	71.0	73.2	3.38	-41.9
+keltner_lower_break	"{""leverage"": 3.0, ""multiplier"": 3.0, ""period"": 20, ""stop_loss_pct"": 5.5}"	177040.77	68.0	72.1	3.31	-30.1
+keltner_lower_break	"{""leverage"": 3.0, ""multiplier"": 3.0, ""period"": 20, ""stop_loss_pct"": 9.5}"	176862.83	68.0	75.0	3.26	-48.5
+keltner_lower_break	"{""leverage"": 3.0, ""multiplier"": 3.0, ""period"": 20, ""stop_loss_pct"": 9.5}"	176862.83	68.0	75.0	3.26	-48.5
+rsi_oversold	"{""leverage"": 4.0, ""period"": 14, ""stop_loss_pct"": 4.5, ""threshold"": 30}"	176613.29	68.0	67.6	2.88	-33.3
+keltner_lower_break	"{""leverage"": 3.0, ""multiplier"": 2.5, ""period"": 25, ""stop_loss_pct"": 7.0}"	176499.05	76.0	71.1	3.27	-37.3
+keltner_lower_break	"{""leverage"": 4.0, ""multiplier"": 3.0, ""period"": 25, ""stop_loss_pct"": 5.0}"	174372.35	59.0	69.5	2.91	-35.8
+keltner_lower_break	"{""leverage"": 4.0, ""multiplier"": 3.0, ""period"": 25, ""stop_loss_pct"": 4.5}"	172317.26	59.0	69.5	2.91	-32.6
+rsi_oversold	"{""leverage"": 4.0, ""period"": 14, ""stop_loss_pct"": 9.0, ""threshold"": 25}"	172099.28	38.0	81.6	3.15	-35.7
+rsi_oversold	"{""leverage"": 4.0, ""period"": 7, ""stop_loss_pct"": 6.5, ""threshold"": 20}"	168106.94	87.0	65.5	2.78	-48.4
+rsi_oversold	"{""leverage"": 4.0, ""period"": 14, ""stop_loss_pct"": 9.5, ""threshold"": 25}"	166829.24	38.0	81.6	3.13	-37.7
+rsi_oversold	"{""leverage"": 4.0, ""period"": 14, ""stop_loss_pct"": 5.0, ""threshold"": 30}"	166802.5	68.0	67.6	2.85	-36.5
+rsi_oversold	"{""leverage"": 4.0, ""period"": 10, ""stop_loss_pct"": 8.0, ""threshold"": 20}"	166023.59	49.0	75.5	2.95	-31.7
+keltner_lower_break	"{""leverage"": 5.0, ""multiplier"": 2.5, ""period"": 25, ""stop_loss_pct"": 4.0}"	164009.81	76.0	60.5	2.46	-48.6
+keltner_lower_break	"{""leverage"": 3.0, ""multiplier"": 3.0, ""period"": 20, ""stop_loss_pct"": 10.0}"	163588.3	68.0	75.0	3.21	-49.5
+keltner_lower_break	"{""leverage"": 3.0, ""multiplier"": 3.0, ""period"": 20, ""stop_loss_pct"": 10.0}"	163588.3	68.0	75.0	3.21	-49.5
+keltner_lower_break	"{""leverage"": 3.0, ""multiplier"": 3.0, ""period"": 20, ""stop_loss_pct"": 10.0}"	163588.3	68.0	75.0	3.21	-49.5
+keltner_lower_break	"{""leverage"": 3.0, ""multiplier"": 3.0, ""period"": 15, ""stop_loss_pct"": 9.5}"	163174.76	75.0	73.3	3.17	-48.5
+keltner_lower_break	"{""leverage"": 3.0, ""multiplier"": 3.0, ""period"": 15, ""stop_loss_pct"": 9.5}"	163174.76	75.0	73.3	3.17	-48.5
+keltner_lower_break	"{""leverage"": 3.0, ""multiplier"": 2.5, ""period"": 25, ""stop_loss_pct"": 8.0}"	160796.75	76.0	71.1	3.21	-41.9
+keltner_lower_break	"{""leverage"": 3.0, ""multiplier"": 3.0, ""period"": 10, ""stop_loss_pct"": 8.5}"	159594.68	71.0	73.2	3.31	-44.2
+keltner_lower_break	"{""leverage"": 3.0, ""multiplier"": 3.0, ""period"": 10, ""stop_loss_pct"": 8.5}"	159594.68	71.0	73.2	3.31	-44.2
+keltner_lower_break	"{""leverage"": 3.0, ""multiplier"": 2.5, ""period"": 20, ""stop_loss_pct"": 6.5}"	158955.19	85.0	67.1	3.15	-47.5
+keltner_lower_break	"{""leverage"": 3.0, ""multiplier"": 2.5, ""period"": 20, ""stop_loss_pct"": 6.5}"	158955.19	85.0	67.1	3.15	-47.5
+keltner_lower_break	"{""leverage"": 4.0, ""multiplier"": 3.0, ""period"": 20, ""stop_loss_pct"": 4.0}"	158632.77	68.0	64.7	2.73	-40.5
+keltner_lower_break	"{""leverage"": 4.0, ""multiplier"": 3.0, ""period"": 20, ""stop_loss_pct"": 4.0}"	158632.77	68.0	64.7	2.73	-40.5
+keltner_lower_break	"{""leverage"": 3.0, ""multiplier"": 2.5, ""period"": 25, ""stop_loss_pct"": 6.5}"	156639.54	76.0	69.7	3.21	-35.0
+keltner_lower_break	"{""leverage"": 3.0, ""multiplier"": 2.5, ""period"": 25, ""stop_loss_pct"": 6.5}"	156639.54	76.0	69.7	3.21	-35.0
+keltner_lower_break	"{""leverage"": 3.0, ""multiplier"": 3.0, ""period"": 25, ""stop_loss_pct"": 6.5}"	155161.54	59.0	76.3	3.52	-35.0
+keltner_lower_break	"{""leverage"": 4.0, ""multiplier"": 2.5, ""period"": 25, ""stop_loss_pct"": 4.5}"	153821.98	76.0	63.2	2.69	-43.4
+rsi_oversold	"{""leverage"": 4.0, ""period"": 10, ""stop_loss_pct"": 8.5, ""threshold"": 20}"	152895.0	49.0	75.5	2.91	-33.7
+keltner_lower_break	"{""leverage"": 3.0, ""multiplier"": 3.0, ""period"": 15, ""stop_loss_pct"": 10.0}"	152300.57	75.0	73.3	3.13	-49.5
+rsi_oversold	"{""leverage"": 3.0, ""period"": 14, ""stop_loss_pct"": 8.0, ""threshold"": 30}"	151639.29	68.0	73.5	3.39	-41.9
+rsi_oversold	"{""leverage"": 3.0, ""period"": 14, ""stop_loss_pct"": 8.0, ""threshold"": 30}"	151639.29	68.0	73.5	3.39	-41.9
+rsi_oversold	"{""leverage"": 3.0, ""period"": 14, ""stop_loss_pct"": 8.0, ""threshold"": 30}"	151639.29	68.0	73.5	3.39	-41.9
+rsi_oversold	"{""leverage"": 3.0, ""period"": 14, ""stop_loss_pct"": 7.5, ""threshold"": 30}"	150553.35	68.0	73.5	3.38	-39.7
+keltner_lower_break	"{""leverage"": 3.0, ""multiplier"": 3.0, ""period"": 15, ""stop_loss_pct"": 5.5}"	147971.95	75.0	69.3	3.17	-37.2
+rsi_oversold	"{""leverage"": 4.0, ""period"": 10, ""stop_loss_pct"": 6.0, ""threshold"": 25}"	147590.5	77.0	66.2	2.77	-49.9
+rsi_oversold	"{""leverage"": 4.0, ""period"": 10, ""stop_loss_pct"": 5.5, ""threshold"": 25}"	147460.69	77.0	66.2	2.78	-45.9
+keltner_lower_break	"{""leverage"": 3.0, ""multiplier"": 2.5, ""period"": 25, ""stop_loss_pct"": 8.5}"	146603.95	76.0	71.1	3.16	-44.2
+keltner_lower_break	"{""leverage"": 3.0, ""multiplier"": 3.0, ""period"": 10, ""stop_loss_pct"": 5.5}"	146467.36	71.0	70.4	3.31	-30.1
+keltner_lower_break	"{""leverage"": 3.0, ""multiplier"": 3.0, ""period"": 10, ""stop_loss_pct"": 6.0}"	146251.6	71.0	70.4	3.3	-32.5
+keltner_lower_break	"{""leverage"": 3.0, ""multiplier"": 3.0, ""period"": 10, ""stop_loss_pct"": 9.0}"	143635.96	71.0	73.2	3.24	-46.4
+keltner_lower_break	"{""leverage"": 3.0, ""multiplier"": 3.0, ""period"": 10, ""stop_loss_pct"": 9.0}"	143635.96	71.0	73.2	3.24	-46.4
+keltner_lower_break	"{""leverage"": 3.0, ""multiplier"": 3.0, ""period"": 15, ""stop_loss_pct"": 6.0}"	142731.05	75.0	69.3	3.15	-40.5
+rsi_oversold	"{""leverage"": 3.0, ""period"": 14, ""stop_loss_pct"": 8.5, ""threshold"": 30}"	141143.29	68.0	73.5	3.34	-44.2
+rsi_oversold	"{""leverage"": 4.0, ""period"": 10, ""stop_loss_pct"": 9.0, ""threshold"": 20}"	140502.51	49.0	75.5	2.87	-35.7
+keltner_lower_break	"{""leverage"": 4.0, ""multiplier"": 3.0, ""period"": 10, ""stop_loss_pct"": 4.0}"	140413.52	71.0	63.4	2.78	-40.5
+rsi_oversold	"{""leverage"": 4.0, ""period"": 14, ""stop_loss_pct"": 6.0, ""threshold"": 25}"	139536.86	38.0	78.9	3.06	-23.8
+keltner_lower_break	"{""leverage"": 3.0, ""multiplier"": 3.0, ""period"": 25, ""stop_loss_pct"": 7.5}"	135556.37	59.0	76.3	3.41	-39.7
+keltner_lower_break	"{""leverage"": 3.0, ""multiplier"": 3.0, ""period"": 25, ""stop_loss_pct"": 7.5}"	135556.37	59.0	76.3	3.41	-39.7
+keltner_lower_break	"{""leverage"": 3.0, ""multiplier"": 3.0, ""period"": 25, ""stop_loss_pct"": 7.5}"	135556.37	59.0	76.3	3.41	-39.7
+keltner_lower_break	"{""leverage"": 3.0, ""multiplier"": 2.5, ""period"": 25, ""stop_loss_pct"": 9.0}"	133462.23	76.0	71.1	3.1	-46.4
+keltner_lower_break	"{""leverage"": 3.0, ""multiplier"": 2.5, ""period"": 25, ""stop_loss_pct"": 9.0}"	133462.23	76.0	71.1	3.1	-46.4
+rsi_oversold	"{""leverage"": 3.0, ""period"": 14, ""stop_loss_pct"": 9.0, ""threshold"": 30}"	131236.26	68.0	73.5	3.29	-46.4
+rsi_oversold	"{""leverage"": 3.0, ""period"": 10, ""stop_loss_pct"": 8.5, ""threshold"": 30}"	129709.56	110.0	65.5	2.95	-49.0
+rsi_oversold	"{""leverage"": 3.0, ""period"": 10, ""stop_loss_pct"": 8.5, ""threshold"": 30}"	129709.56	110.0	65.5	2.95	-49.0
+keltner_lower_break	"{""leverage"": 3.0, ""multiplier"": 3.0, ""period"": 10, ""stop_loss_pct"": 9.5}"	129107.73	71.0	73.2	3.17	-48.5
+rsi_oversold	"{""leverage"": 3.0, ""period"": 10, ""stop_loss_pct"": 9.5, ""threshold"": 30}"	124498.39	110.0	65.5	2.93	-49.4
+rsi_oversold	"{""leverage"": 3.0, ""period"": 14, ""stop_loss_pct"": 6.5, ""threshold"": 30}"	123897.38	68.0	72.1	3.3	-35.0
+keltner_lower_break	"{""leverage"": 3.0, ""multiplier"": 3.0, ""period"": 20, ""stop_loss_pct"": 5.0}"	122838.54	68.0	69.1	3.12	-36.8
+keltner_lower_break	"{""leverage"": 4.0, ""multiplier"": 3.0, ""period"": 20, ""stop_loss_pct"": 3.5}"	122488.5	68.0	60.3	2.65	-43.6
+keltner_lower_break	"{""leverage"": 3.0, ""multiplier"": 2.0, ""period"": 25, ""stop_loss_pct"": 6.5}"	122208.06	95.0	64.2	3.0	-47.5
+keltner_lower_break	"{""leverage"": 3.0, ""multiplier"": 2.0, ""period"": 25, ""stop_loss_pct"": 6.5}"	122208.06	95.0	64.2	3.0	-47.5
+rsi_oversold	"{""leverage"": 3.0, ""period"": 14, ""stop_loss_pct"": 9.5, ""threshold"": 30}"	121895.02	68.0	73.5	3.24	-48.5
+keltner_lower_break	"{""leverage"": 3.0, ""multiplier"": 2.5, ""period"": 25, ""stop_loss_pct"": 9.5}"	121310.83	76.0	71.1	3.05	-48.5
+keltner_lower_break	"{""leverage"": 4.0, ""multiplier"": 3.0, ""period"": 15, ""stop_loss_pct"": 3.5}"	120779.57	75.0	58.7	2.62	-43.4
+keltner_lower_break	"{""leverage"": 3.0, ""multiplier"": 3.0, ""period"": 10, ""stop_loss_pct"": 10.0}"	120593.01	71.0	73.2	3.13	-49.5
+keltner_lower_break	"{""leverage"": 3.0, ""multiplier"": 3.0, ""period"": 10, ""stop_loss_pct"": 10.0}"	120593.01	71.0	73.2	3.13	-49.5
+rsi_oversold	"{""leverage"": 4.0, ""period"": 14, ""stop_loss_pct"": 5.5, ""threshold"": 25}"	120502.92	38.0	78.9	2.98	-24.1
+keltner_lower_break	"{""leverage"": 3.0, ""multiplier"": 3.0, ""period"": 25, ""stop_loss_pct"": 8.5}"	118003.23	59.0	76.3	3.31	-44.2
+rsi_oversold	"{""leverage"": 4.0, ""period"": 10, ""stop_loss_pct"": 10.0, ""threshold"": 20}"	117837.86	49.0	75.5	2.79	-39.7
+rsi_oversold	"{""leverage"": 3.0, ""period"": 14, ""stop_loss_pct"": 10.0, ""threshold"": 30}"	115297.33	68.0	73.5	3.2	-49.5
+rsi_oversold	"{""leverage"": 4.0, ""period"": 10, ""stop_loss_pct"": 7.0, ""threshold"": 20}"	113140.19	49.0	73.5	2.79	-27.9
+rsi_oversold	"{""leverage"": 3.0, ""period"": 10, ""stop_loss_pct"": 7.0, ""threshold"": 30}"	112902.93	110.0	64.5	2.9	-47.5
+rsi_oversold	"{""leverage"": 5.0, ""period"": 14, ""stop_loss_pct"": 4.0, ""threshold"": 25}"	112898.34	38.0	73.7	2.62	-35.9
+keltner_lower_break	"{""leverage"": 3.0, ""multiplier"": 2.5, ""period"": 25, ""stop_loss_pct"": 10.0}"	112283.16	76.0	71.1	3.0	-49.5
+keltner_lower_break	"{""leverage"": 3.0, ""multiplier"": 2.5, ""period"": 25, ""stop_loss_pct"": 10.0}"	112283.16	76.0	71.1	3.0	-49.5
+rsi_oversold	"{""leverage"": 4.0, ""period"": 10, ""stop_loss_pct"": 5.0, ""threshold"": 25}"	110113.84	77.0	64.9	2.66	-46.8
+keltner_lower_break	"{""leverage"": 3.0, ""multiplier"": 3.0, ""period"": 25, ""stop_loss_pct"": 9.0}"	109947.85	59.0	76.3	3.26	-46.4
+rsi_oversold	"{""leverage"": 3.0, ""period"": 14, ""stop_loss_pct"": 7.0, ""threshold"": 30}"	109947.04	68.0	72.1	3.22	-37.3
+keltner_lower_break	"{""leverage"": 4.0, ""multiplier"": 3.0, ""period"": 10, ""stop_loss_pct"": 3.5}"	108757.89	71.0	59.2	2.69	-43.4
+rsi_oversold	"{""leverage"": 3.0, ""period"": 7, ""stop_loss_pct"": 9.0, ""threshold"": 20}"	108129.63	87.0	66.7	3.08	-46.4
+rsi_oversold	"{""leverage"": 5.0, ""period"": 10, ""stop_loss_pct"": 5.0, ""threshold"": 20}"	107571.57	49.0	67.3	2.45	-43.6
+keltner_lower_break	"{""leverage"": 3.0, ""multiplier"": 3.0, ""period"": 15, ""stop_loss_pct"": 5.0}"	107358.04	75.0	66.7	3.01	-36.3
+rsi_oversold	"{""leverage"": 4.0, ""period"": 14, ""stop_loss_pct"": 5.0, ""threshold"": 25}"	105816.42	38.0	78.9	2.91	-22.1
+keltner_lower_break	"{""leverage"": 4.0, ""multiplier"": 2.5, ""period"": 20, ""stop_loss_pct"": 4.0}"	105371.68	85.0	58.8	2.54	-45.0
+keltner_lower_break	"{""leverage"": 4.0, ""multiplier"": 2.5, ""period"": 20, ""stop_loss_pct"": 4.0}"	105371.68	85.0	58.8	2.54	-45.0
+rsi_oversold	"{""leverage"": 3.0, ""period"": 10, ""stop_loss_pct"": 8.5, ""threshold"": 25}"	104074.86	77.0	70.1	3.12	-44.2
+rsi_oversold	"{""leverage"": 3.0, ""period"": 10, ""stop_loss_pct"": 8.5, ""threshold"": 25}"	104074.86	77.0	70.1	3.12	-44.2
+keltner_lower_break	"{""leverage"": 3.0, ""multiplier"": 3.0, ""period"": 10, ""stop_loss_pct"": 5.0}"	103229.27	71.0	67.6	3.12	-35.7
+keltner_lower_break	"{""leverage"": 3.0, ""multiplier"": 3.0, ""period"": 25, ""stop_loss_pct"": 6.0}"	103185.07	59.0	72.9	3.27	-32.5
+keltner_lower_break	"{""leverage"": 3.0, ""multiplier"": 3.0, ""period"": 25, ""stop_loss_pct"": 9.5}"	102348.24	59.0	76.3	3.21	-48.5
+keltner_lower_break	"{""leverage"": 3.0, ""multiplier"": 3.0, ""period"": 20, ""stop_loss_pct"": 4.5}"	102065.05	68.0	67.6	3.03	-33.5
+bb_lower_break	"{""leverage"": 3.0, ""period"": 21, ""std_dev"": 2.5, ""stop_loss_pct"": 6.5}"	98981.51	113.0	62.8	2.78	-49.7
+rsi_oversold	"{""leverage"": 3.0, ""period"": 7, ""stop_loss_pct"": 9.5, ""threshold"": 20}"	98446.05	87.0	66.7	3.02	-48.5
+rsi_oversold	"{""leverage"": 4.0, ""period"": 14, ""stop_loss_pct"": 4.0, ""threshold"": 30}"	97484.27	68.0	63.2	2.68	-40.5
+keltner_lower_break	"{""leverage"": 3.0, ""multiplier"": 3.0, ""period"": 25, ""stop_loss_pct"": 10.0}"	96958.67	59.0	76.3	3.17	-49.5
+keltner_lower_break	"{""leverage"": 3.0, ""multiplier"": 2.5, ""period"": 25, ""stop_loss_pct"": 6.0}"	96556.76	76.0	67.1	2.96	-32.5
+rsi_oversold	"{""leverage"": 4.0, ""period"": 10, ""stop_loss_pct"": 4.5, ""threshold"": 25}"	96395.19	77.0	63.6	2.61	-42.9
+rsi_oversold	"{""leverage"": 3.0, ""period"": 10, ""stop_loss_pct"": 6.5, ""threshold"": 25}"	96123.08	77.0	68.8	3.11	-35.0
+keltner_lower_break	"{""leverage"": 3.0, ""multiplier"": 2.5, ""period"": 20, ""stop_loss_pct"": 5.5}"	95378.33	85.0	64.7	2.9	-47.5
+keltner_lower_break	"{""leverage"": 3.0, ""multiplier"": 2.5, ""period"": 25, ""stop_loss_pct"": 5.5}"	95009.65	76.0	67.1	2.96	-30.9
+keltner_lower_break	"{""leverage"": 3.0, ""multiplier"": 3.0, ""period"": 15, ""stop_loss_pct"": 4.5}"	93144.98	75.0	65.3	2.95	-33.0
+rsi_oversold	"{""leverage"": 3.0, ""period"": 7, ""stop_loss_pct"": 10.0, ""threshold"": 20}"	91222.86	87.0	66.7	2.98	-49.5
+keltner_lower_break	"{""leverage"": 4.0, ""multiplier"": 2.5, ""period"": 25, ""stop_loss_pct"": 4.0}"	89310.29	76.0	60.5	2.5	-40.5
+keltner_lower_break	"{""leverage"": 4.0, ""multiplier"": 2.5, ""period"": 25, ""stop_loss_pct"": 4.0}"	89310.29	76.0	60.5	2.5	-40.5
+keltner_lower_break	"{""leverage"": 3.0, ""multiplier"": 3.0, ""period"": 10, ""stop_loss_pct"": 4.5}"	86959.59	71.0	66.2	3.03	-32.4
+rsi_oversold	"{""leverage"": 3.0, ""period"": 10, ""stop_loss_pct"": 9.5, ""threshold"": 25}"	86530.5	77.0	70.1	3.0	-48.5
+iftrsi_sell_signal	"{""leverage"": 3.0, ""period"": 3, ""stop_loss_pct"": 10.0, ""threshold"": 0.7}"	86223.71	121.0	62.0	2.8	-49.0
+rsi_oversold	"{""leverage"": 3.0, ""period"": 10, ""stop_loss_pct"": 7.0, ""threshold"": 25}"	85978.73	77.0	68.8	3.04	-37.3
+rsi_oversold	"{""leverage"": 3.0, ""period"": 10, ""stop_loss_pct"": 7.0, ""threshold"": 25}"	85978.73	77.0	68.8	3.04	-37.3
+rsi_oversold	"{""leverage"": 3.0, ""period"": 14, ""stop_loss_pct"": 6.0, ""threshold"": 30}"	85917.04	68.0	69.1	3.1	-32.5
+stoch_rsi_oversold	"{""fastd_period"": 7, ""fastk_period"": 7, ""leverage"": 2.0, ""period"": 14, ""stop_loss_pct"": 6.5}"	84724.06	194.0	59.8	3.06	-47.9
+iftrsi_sell_signal	"{""leverage"": 4.0, ""period"": 3, ""stop_loss_pct"": 5.5, ""threshold"": 0.5}"	84579.97	124.0	58.1	2.54	-48.8
+iftrsi_sell_signal	"{""leverage"": 3.0, ""period"": 3, ""stop_loss_pct"": 8.5, ""threshold"": 0.7}"	80738.21	122.0	61.5	2.92	-49.8
+keltner_lower_break	"{""leverage"": 3.0, ""multiplier"": 2.0, ""period"": 25, ""stop_loss_pct"": 5.5}"	78666.89	95.0	62.1	2.79	-47.5
+stoch_oversold	"{""fastk_period"": 9, ""leverage"": 10.0, ""slowd_period"": 3, ""slowk_period"": 5, ""stop_loss_pct"": 7.0}"	77663.96	16.0	87.5	2.28	-33.4
+stoch_oversold	"{""fastk_period"": 9, ""leverage"": 10.0, ""slowd_period"": 3, ""slowk_period"": 5, ""stop_loss_pct"": 9.5}"	77663.96	16.0	87.5	2.28	-33.4
+stoch_oversold	"{""fastk_period"": 9, ""leverage"": 10.0, ""slowd_period"": 3, ""slowk_period"": 5, ""stop_loss_pct"": 7.5}"	77663.96	16.0	87.5	2.28	-33.4
+stoch_oversold	"{""fastk_period"": 9, ""leverage"": 10.0, ""slowd_period"": 3, ""slowk_period"": 5, ""stop_loss_pct"": 7.0}"	77663.96	16.0	87.5	2.28	-33.4
+stoch_oversold	"{""fastk_period"": 9, ""leverage"": 10.0, ""slowd_period"": 3, ""slowk_period"": 5, ""stop_loss_pct"": 8.0}"	77663.96	16.0	87.5	2.28	-33.4
+stoch_oversold	"{""fastk_period"": 9, ""leverage"": 10.0, ""slowd_period"": 3, ""slowk_period"": 5, ""stop_loss_pct"": 8.0}"	77663.96	16.0	87.5	2.28	-33.4
+stoch_oversold	"{""fastk_period"": 9, ""leverage"": 10.0, ""slowd_period"": 3, ""slowk_period"": 5, ""stop_loss_pct"": 7.5}"	77663.96	16.0	87.5	2.28	-33.4
+stoch_oversold	"{""fastk_period"": 9, ""leverage"": 10.0, ""slowd_period"": 3, ""slowk_period"": 5, ""stop_loss_pct"": 7.0}"	77663.96	16.0	87.5	2.28	-33.4
+stoch_oversold	"{""fastk_period"": 9, ""leverage"": 10.0, ""slowd_period"": 3, ""slowk_period"": 5, ""stop_loss_pct"": 6.5}"	77663.96	16.0	87.5	2.28	-33.4
+stoch_oversold	"{""fastk_period"": 9, ""leverage"": 10.0, ""slowd_period"": 3, ""slowk_period"": 5, ""stop_loss_pct"": 7.5}"	77663.96	16.0	87.5	2.28	-33.4
+stoch_rsi_oversold	"{""fastd_period"": 7, ""fastk_period"": 5, ""leverage"": 2.0, ""period"": 21, ""stop_loss_pct"": 6.5}"	76541.93	197.0	59.4	3.0	-47.9
+stoch_rsi_oversold	"{""fastd_period"": 5, ""fastk_period"": 5, ""leverage"": 2.0, ""period"": 21, ""stop_loss_pct"": 6.5}"	76541.93	197.0	59.4	3.0	-47.9
+stoch_rsi_oversold	"{""fastd_period"": 3, ""fastk_period"": 5, ""leverage"": 2.0, ""period"": 21, ""stop_loss_pct"": 6.5}"	76541.93	197.0	59.4	3.0	-47.9
+stoch_rsi_oversold	"{""fastd_period"": 7, ""fastk_period"": 5, ""leverage"": 2.0, ""period"": 21, ""stop_loss_pct"": 6.5}"	76541.93	197.0	59.4	3.0	-47.9
+keltner_lower_break	"{""leverage"": 4.0, ""multiplier"": 2.5, ""period"": 20, ""stop_loss_pct"": 3.5}"	75369.88	85.0	54.1	2.42	-43.7
+rsi_oversold	"{""leverage"": 4.0, ""period"": 10, ""stop_loss_pct"": 6.0, ""threshold"": 20}"	75286.64	49.0	69.4	2.62	-42.0
+keltner_lower_break	"{""leverage"": 4.0, ""multiplier"": 2.5, ""period"": 25, ""stop_loss_pct"": 3.5}"	75103.44	76.0	56.6	2.45	-43.4
+keltner_lower_break	"{""leverage"": 3.0, ""multiplier"": 2.5, ""period"": 20, ""stop_loss_pct"": 5.0}"	73826.55	85.0	62.4	2.78	-43.7
+keltner_lower_break	"{""leverage"": 3.0, ""multiplier"": 2.5, ""period"": 20, ""stop_loss_pct"": 5.0}"	73826.55	85.0	62.4	2.78	-43.7
+rsi_oversold	"{""leverage"": 4.0, ""period"": 14, ""stop_loss_pct"": 3.5, ""threshold"": 30}"	73651.92	68.0	58.8	2.58	-43.4
+rsi_oversold	"{""leverage"": 5.0, ""period"": 10, ""stop_loss_pct"": 4.0, ""threshold"": 20}"	73375.73	49.0	63.3	2.36	-35.9
+rsi_oversold	"{""leverage"": 4.0, ""period"": 10, ""stop_loss_pct"": 5.5, ""threshold"": 20}"	73262.09	49.0	69.4	2.61	-39.0
+obv_decreasing	"{""leverage"": 2.0, ""stop_loss_pct"": 6.5}"	72375.14	204.0	58.8	2.94	-47.9
+obv_decreasing	"{""leverage"": 2.0, ""stop_loss_pct"": 6.5}"	72375.14	204.0	58.8	2.94	-47.9
+obv_decreasing	"{""leverage"": 2.0, ""stop_loss_pct"": 6.5}"	72375.14	204.0	58.8	2.94	-47.9
+obv_decreasing	"{""leverage"": 2.0, ""stop_loss_pct"": 6.5}"	72375.14	204.0	58.8	2.94	-47.9
+obv_decreasing	"{""leverage"": 2.0, ""stop_loss_pct"": 6.5}"	72375.14	204.0	58.8	2.94	-47.9
+obv_decreasing	"{""leverage"": 2.0, ""stop_loss_pct"": 6.5}"	72375.14	204.0	58.8	2.94	-47.9
+rsi_oversold	"{""leverage"": 4.0, ""period"": 10, ""stop_loss_pct"": 4.5, ""threshold"": 20}"	70826.9	49.0	67.3	2.6	-32.6
+keltner_lower_break	"{""leverage"": 3.0, ""multiplier"": 2.5, ""period"": 25, ""stop_loss_pct"": 5.0}"	70691.28	76.0	64.5	2.81	-36.5
+stoch_rsi_oversold	"{""fastd_period"": 5, ""fastk_period"": 7, ""leverage"": 2.0, ""period"": 14, ""stop_loss_pct"": 6.0}"	70647.86	194.0	58.8	2.97	-44.9
+stoch_rsi_oversold	"{""fastd_period"": 5, ""fastk_period"": 7, ""leverage"": 2.0, ""period"": 21, ""stop_loss_pct"": 6.5}"	70617.05	192.0	59.4	2.98	-49.7
+stoch_rsi_oversold	"{""fastd_period"": 3, ""fastk_period"": 7, ""leverage"": 2.0, ""period"": 21, ""stop_loss_pct"": 6.5}"	70617.05	192.0	59.4	2.98	-49.7
+stoch_rsi_oversold	"{""fastd_period"": 7, ""fastk_period"": 7, ""leverage"": 2.0, ""period"": 21, ""stop_loss_pct"": 6.5}"	70617.05	192.0	59.4	2.98	-49.7
+iftrsi_sell_signal	"{""leverage"": 3.0, ""period"": 3, ""stop_loss_pct"": 8.0, ""threshold"": 0.7}"	70313.93	122.0	60.7	2.84	-47.9
+iftrsi_sell_signal	"{""leverage"": 3.0, ""period"": 3, ""stop_loss_pct"": 8.0, ""threshold"": 0.7}"	70313.93	122.0	60.7	2.84	-47.9
+iftrsi_sell_signal	"{""leverage"": 3.0, ""period"": 3, ""stop_loss_pct"": 8.0, ""threshold"": 0.7}"	70313.93	122.0	60.7	2.84	-47.9
+rsi_oversold	"{""leverage"": 3.0, ""period"": 7, ""stop_loss_pct"": 6.5, ""threshold"": 20}"	70082.4	87.0	65.5	2.86	-37.2
+keltner_lower_break	"{""leverage"": 3.0, ""multiplier"": 2.5, ""period"": 20, ""stop_loss_pct"": 4.5}"	68035.28	85.0	61.2	2.75	-39.6
+rsi_oversold	"{""leverage"": 3.0, ""period"": 14, ""stop_loss_pct"": 4.5, ""threshold"": 30}"	67399.16	68.0	67.6	2.97	-25.6
+keltner_lower_break	"{""leverage"": 3.0, ""multiplier"": 3.0, ""period"": 25, ""stop_loss_pct"": 5.0}"	67016.62	59.0	69.5	3.02	-27.6
+keltner_lower_break	"{""leverage"": 3.0, ""multiplier"": 3.0, ""period"": 25, ""stop_loss_pct"": 5.0}"	67016.62	59.0	69.5	3.02	-27.6
+stoch_rsi_oversold	"{""fastd_period"": 3, ""fastk_period"": 5, ""leverage"": 2.0, ""period"": 14, ""stop_loss_pct"": 6.5}"	66787.67	198.0	59.1	2.93	-47.9
+stoch_rsi_oversold	"{""fastd_period"": 7, ""fastk_period"": 5, ""leverage"": 2.0, ""period"": 14, ""stop_loss_pct"": 6.5}"	66787.67	198.0	59.1	2.93	-47.9
+stoch_rsi_oversold	"{""fastd_period"": 3, ""fastk_period"": 5, ""leverage"": 2.0, ""period"": 14, ""stop_loss_pct"": 6.5}"	66787.67	198.0	59.1	2.93	-47.9
+stoch_rsi_oversold	"{""fastd_period"": 5, ""fastk_period"": 3, ""leverage"": 2.0, ""period"": 14, ""stop_loss_pct"": 6.5}"	66578.34	207.0	58.5	2.89	-47.9
+stoch_rsi_oversold	"{""fastd_period"": 3, ""fastk_period"": 3, ""leverage"": 2.0, ""period"": 14, ""stop_loss_pct"": 6.5}"	66578.34	207.0	58.5	2.89	-47.9
+stoch_rsi_oversold	"{""fastd_period"": 7, ""fastk_period"": 3, ""leverage"": 2.0, ""period"": 14, ""stop_loss_pct"": 6.5}"	66578.34	207.0	58.5	2.89	-47.9
+rsi_oversold	"{""leverage"": 3.0, ""period"": 10, ""stop_loss_pct"": 7.5, ""threshold"": 20}"	66252.27	49.0	75.5	3.09	-22.3
+iftrsi_extreme_oversold	"{""leverage"": 2.0, ""period"": 3, ""stop_loss_pct"": 6.5, ""threshold"": -0.9}"	65676.97	194.0	59.3	2.93	-49.6
+iftrsi_extreme_oversold	"{""leverage"": 2.0, ""period"": 3, ""stop_loss_pct"": 6.5, ""threshold"": -0.9}"	65676.97	194.0	59.3	2.93	-49.6
+iftrsi_extreme_oversold	"{""leverage"": 2.0, ""period"": 3, ""stop_loss_pct"": 6.5, ""threshold"": -0.95}"	65551.54	190.0	58.9	2.94	-49.7
+iftrsi_extreme_oversold	"{""leverage"": 2.0, ""period"": 3, ""stop_loss_pct"": 6.5, ""threshold"": -0.95}"	65551.54	190.0	58.9	2.94	-49.7
+rsi_oversold	"{""leverage"": 3.0, ""period"": 14, ""stop_loss_pct"": 5.0, ""threshold"": 30}"	65227.03	68.0	67.6	2.95	-28.2
+rsi_oversold	"{""leverage"": 3.0, ""period"": 14, ""stop_loss_pct"": 7.0, ""threshold"": 25}"	65002.59	38.0	81.6	3.31	-20.8
+stoch_rsi_oversold	"{""fastd_period"": 5, ""fastk_period"": 5, ""leverage"": 2.0, ""period"": 21, ""stop_loss_pct"": 6.0}"	64531.98	197.0	58.4	2.92	-44.8
+stoch_rsi_oversold	"{""fastd_period"": 3, ""fastk_period"": 5, ""leverage"": 2.0, ""period"": 21, ""stop_loss_pct"": 6.0}"	64531.98	197.0	58.4	2.92	-44.8
+stoch_rsi_oversold	"{""fastd_period"": 5, ""fastk_period"": 5, ""leverage"": 2.0, ""period"": 21, ""stop_loss_pct"": 6.0}"	64531.98	197.0	58.4	2.92	-44.8
+keltner_lower_break	"{""leverage"": 3.0, ""multiplier"": 3.0, ""period"": 20, ""stop_loss_pct"": 4.0}"	63864.62	68.0	64.7	2.81	-31.7
+keltner_lower_break	"{""leverage"": 3.0, ""multiplier"": 3.0, ""period"": 20, ""stop_loss_pct"": 4.0}"	63864.62	68.0	64.7	2.81	-31.7
+rsi_oversold	"{""leverage"": 3.0, ""period"": 14, ""stop_loss_pct"": 7.5, ""threshold"": 25}"	63798.72	38.0	81.6	3.3	-22.3
+rsi_oversold	"{""leverage"": 3.0, ""period"": 10, ""stop_loss_pct"": 8.0, ""threshold"": 20}"	62867.38	49.0	75.5	3.05	-23.8
+keltner_lower_break	"{""leverage"": 3.0, ""multiplier"": 2.5, ""period"": 25, ""stop_loss_pct"": 4.5}"	62771.15	76.0	63.2	2.76	-33.2
+keltner_lower_break	"{""leverage"": 3.0, ""multiplier"": 2.5, ""period"": 25, ""stop_loss_pct"": 4.5}"	62771.15	76.0	63.2	2.76	-33.2
+keltner_lower_break	"{""leverage"": 3.0, ""multiplier"": 2.5, ""period"": 25, ""stop_loss_pct"": 4.5}"	62771.15	76.0	63.2	2.76	-33.2
+rsi_oversold	"{""leverage"": 4.0, ""period"": 10, ""stop_loss_pct"": 4.0, ""threshold"": 25}"	62387.14	77.0	59.7	2.48	-45.0
+obv_decreasing	"{""leverage"": 2.0, ""stop_loss_pct"": 6.0}"	62380.28	204.0	57.8	2.88	-44.8
+obv_decreasing	"{""leverage"": 2.0, ""stop_loss_pct"": 6.0}"	62380.28	204.0	57.8	2.88	-44.8
+obv_decreasing	"{""leverage"": 2.0, ""stop_loss_pct"": 6.0}"	62380.28	204.0	57.8	2.88	-44.8
+obv_decreasing	"{""leverage"": 2.0, ""stop_loss_pct"": 6.0}"	62380.28	204.0	57.8	2.88	-44.8
+obv_decreasing	"{""leverage"": 2.0, ""stop_loss_pct"": 6.0}"	62380.28	204.0	57.8	2.88	-44.8

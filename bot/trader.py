@@ -33,18 +33,31 @@ class TradingBot:
         # Load strategy configuration
         if settings.has_section('STRATEGY'):
             strategy_mode = settings.get('STRATEGY', 'strategy_mode', 'enhanced')
-            
-            # Handle Test6 modes specially
+
+            # Map UI strategy modes to AI system modes and crash protection settings
             if strategy_mode == 'test6_no_protection':
                 self.ai_system.strategy_mode = 'test6'
                 self.ai_system.enable_crash_protection = False
             elif strategy_mode == 'test6_with_protection':
                 self.ai_system.strategy_mode = 'test6'
                 self.ai_system.enable_crash_protection = True
+            elif strategy_mode == 'test8_no_protection':
+                self.ai_system.strategy_mode = 'test8'
+                self.ai_system.enable_crash_protection = False
+            elif strategy_mode == 'test8_with_protection':
+                self.ai_system.strategy_mode = 'test8'
+                self.ai_system.enable_crash_protection = True
             else:
                 self.ai_system.strategy_mode = strategy_mode
                 self.ai_system.enable_crash_protection = settings.getboolean('STRATEGY', 'enable_crash_protection', True)
-            
+
+            if self.ai_system.strategy_mode == 'test8':
+                # Test8 is SOXL profitability strategy; override epic if provided
+                test8_epic = settings.get('STRATEGY', 'test8_epic', fallback='SOXL')
+                if test8_epic:
+                    self.epic = test8_epic
+                    self.av_table = settings.get('ALPHA_VANTAGE', 'table_name', f'{self.epic}_av_5min')
+
             logger.info(f"Strategy mode: {self.ai_system.strategy_mode}, Crash protection: {self.ai_system.enable_crash_protection}")
         
         # Get timer settings
@@ -844,7 +857,7 @@ class TradingBot:
                 self.record_action({'event': 'leverage_update', 'phase': 'error', 'category': instrument_category, 'error': str(e)})
 
             # Get account balance
-                accounts = await self.api.get_accounts()
+            accounts = await self.api.get_accounts()
             available = 0
             for acc in accounts:
                 if acc['accountId'] == self.current_account['accountId']:
@@ -1111,31 +1124,32 @@ class TradingBot:
                 await asyncio.sleep(error_retry_wait)  # Wait before continuing
     
     async def update_data(self):
-        """Update market data with caching based on settings"""
+        """Update market data with configurable cadence."""
         try:
-            # Get update interval from settings
             market_update_interval = self.settings.getint('TIMERS', 'market_info_update_sec', 30)
-            
+            near_close_window = self.settings.getint('BOT_CONFIG', 'seconds_before_close_to_trade', 15)
+            near_close_update_sec = self.settings.getint('TIMERS', 'near_close_data_update_sec', 1)
+
             now = datetime.now()
+            time_since = None
             if hasattr(self, '_last_market_update'):
                 time_since = (now - self._last_market_update).total_seconds()
-                
-                # Check if we're near market open/close for more frequent updates
-                if self.market_info:
+
+                if self.market_info and time_since is not None:
                     event = self.market_timer.get_next_market_event(self.market_info)
-                    if event and event.get('is_open'):
-                        time_until_close = event.get('time_until_close', float('inf'))
-                        # Get thresholds from settings
-                        near_close_threshold = self.settings.getint('TIMERS', 'near_close_data_threshold_sec', 300)  # 5 minutes
-                        near_close_update_sec = self.settings.getint('TIMERS', 'near_close_data_update_sec', 5)
-                        
-                        # Update more frequently near close
-                        if time_until_close < near_close_threshold:
-                            if time_since < near_close_update_sec:
-                                return
-                        elif time_since < market_update_interval:
+                else:
+                    event = None
+
+                if event and event.get('is_open'):
+                    time_until_close = event.get('time_until_close', float('inf'))
+                    if time_until_close <= near_close_window:
+                        if time_since < near_close_update_sec:
                             return
-            
+                    elif time_since < market_update_interval:
+                        return
+                elif time_since is not None and time_since < market_update_interval:
+                    return
+
             self.market_info = await self.api.get_market_info(self.epic)
             self._last_market_update = now
         except Exception as e:
@@ -1317,8 +1331,8 @@ class TradingBot:
             et_tz = pytz.timezone('US/Eastern')
             
             for price in prices:
-                # Parse Capital.com timestamp (UTC)
-                ts_utc = pd.to_datetime(price['snapshotTime'])
+                # Parse Capital.com timestamp (use UTC version)
+                ts_utc = pd.to_datetime(price['snapshotTimeUTC'])
                 if ts_utc.tzinfo is None:
                     ts_utc = pytz.UTC.localize(ts_utc)
                 

@@ -40,12 +40,28 @@ class TradingBotSettings:
     def getfloat(self, section: str, key: str, fallback: float = 0.0) -> float:
         """Get float setting value"""
         self.load_settings()
-        return self.config.getfloat(section, key, fallback=fallback)
+        try:
+            value = self.config.get(section, key, fallback='')
+            if value == '' or value is None:
+                return fallback
+            return float(value)
+        except (ValueError, TypeError):
+            return fallback
+        except Exception:
+            return self.config.getfloat(section, key, fallback=fallback)
     
     def getint(self, section: str, key: str, fallback: int = 0) -> int:
         """Get integer setting value"""
         self.load_settings()
-        return self.config.getint(section, key, fallback=fallback)
+        try:
+            value = self.config.get(section, key, fallback='')
+            if value == '' or value is None:
+                return fallback
+            return int(value)
+        except (ValueError, TypeError):
+            return fallback
+        except Exception:
+            return self.config.getint(section, key, fallback=fallback)
     
     def getboolean(self, section: str, key: str, fallback: bool = False) -> bool:
         """Get boolean setting value"""

@@ -1,0 +1,2723 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Hybrid Trader</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        
+        body {
+            background: #050506;
+            background-image: 
+                radial-gradient(ellipse at top left, rgba(120, 119, 198, 0.15) 0%, transparent 50%),
+                radial-gradient(ellipse at bottom right, rgba(255, 119, 198, 0.1) 0%, transparent 50%);
+            color: #e8e9ef; 
+            min-height: 100vh;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        }
+        
+        .dashboard-container {
+            background: rgba(10, 11, 13, 0.95);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 20px;
+            box-shadow: 
+                0 20px 40px rgba(0, 0, 0, 0.4),
+                inset 0 1px 0 rgba(255, 255, 255, 0.05);
+            margin: 20px;
+            padding: 28px;
+            backdrop-filter: blur(20px);
+        }
+        
+        h1 {
+            background: linear-gradient(135deg, #7877c6 0%, #ff77c6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 700;
+        }
+        
+        .status-card {
+            background: linear-gradient(135deg, rgba(120, 119, 198, 0.1) 0%, rgba(255, 119, 198, 0.05) 100%);
+            color: #e8e9ef; 
+            border-radius: 16px; 
+            padding: 20px; 
+            margin-bottom: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(10px);
+        }
+        
+        .metric-card {
+            background: rgba(15, 16, 20, 0.6);
+            border-radius: 16px; 
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+        
+        .metric-card:hover {
+            border-color: rgba(120, 119, 198, 0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(120, 119, 198, 0.1);
+        }
+        
+        .metric-card h6 {
+            color: #9ca3af;
+            font-weight: 600;
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 0.75rem;
+        }
+        
+        .text-muted {
+            color: #9ca3af !important;
+        }
+        
+        .form-text {
+            color: #9ca3af;
+            font-size: 0.875rem;
+        }
+        .metric-value {
+            font-size: 1.8rem; 
+            font-weight: 700; 
+            background: linear-gradient(135deg, #7877c6 0%, #ff77c6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .metric-label {
+            color: #6b7280; 
+            font-size: 0.75rem; 
+            letter-spacing: 1px;
+            text-transform: uppercase; 
+            font-weight: 600;
+        }
+        .status-indicator {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 8px;
+            box-shadow: 0 0 10px currentColor;
+        }
+        .status-running {
+            background-color: #10b981; 
+            animation: pulse 2s infinite;
+            box-shadow: 0 0 20px #10b981;
+        }
+        .status-stopped {
+            background-color: #ef4444;
+            box-shadow: 0 0 20px #ef4444;
+        }
+        @keyframes pulse {
+            0% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.8; transform: scale(1.1); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+        .positions-table {
+            background: rgba(15, 16, 20, 0.6);
+            border-radius: 16px; 
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .table { 
+            color: #e5e7eb;
+            margin-bottom: 0;
+        }
+        .table th {
+            background: rgba(120, 119, 198, 0.1);
+            color: #d1d5db; 
+            border: none;
+            font-weight: 600;
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: 1rem;
+        }
+        .table td { 
+            border-color: rgba(255, 255, 255, 0.05);
+            padding: 0.875rem 1rem;
+            vertical-align: middle;
+        }
+        .table tbody tr:hover {
+            background: rgba(120, 119, 198, 0.05);
+        }
+        .text-success { 
+            color: #10b981 !important; 
+            font-weight: 600;
+            text-shadow: 0 0 10px rgba(16, 185, 129, 0.5);
+        }
+        .text-danger { 
+            color: #ef4444 !important; 
+            font-weight: 600;
+            text-shadow: 0 0 10px rgba(239, 68, 68, 0.5);
+        }
+        .connection-status {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 10px 20px;
+            border-radius: 25px;
+            color: white;
+            font-weight: bold;
+            z-index: 1000;
+        }
+        .connected { background-color: #17c964; }
+        .disconnected { background-color: #f21361; }
+        .tab-btn { cursor: pointer; padding: 8px 14px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.06); background: #12163a; color: #cfd6ff; }
+        .tab-btn.active { background: #1e255f; }
+        /* Debug toggle styling */
+        #debugToggle {
+            width: 44px;
+            height: 22px;
+            vertical-align: middle;
+            cursor: pointer;
+        }
+        
+        #debugToggle:checked {
+            background-color: #ffc107;
+            border-color: #ffc107;
+        }
+        
+        .form-check-label[for="debugToggle"] {
+            vertical-align: middle;
+            font-size: 0.9rem;
+            cursor: pointer;
+            user-select: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="connection-status" id="connectionStatus">
+        <i class="fas fa-wifi"></i> Connecting...
+    </div>
+
+    <div class="container-fluid">
+        <div class="dashboard-container">
+            <div class="row">
+                <div class="col-12">
+                    <h1 class="text-center mb-4" id="botTitle">
+                        <i class="fas fa-chart-line"></i> <span id="botNameDisplay">AI Hybrid Trader</span>
+                    </h1>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="status-card">
+                        <div class="row align-items-center">
+                            <div class="col-md-6">
+                                <h5><i class="fas fa-cog"></i> Bot Status</h5>
+                                <p class="mb-0">
+                                    <span class="status-indicator" id="statusIndicator"></span>
+                                    <span id="status">Initializing...</span>
+                                    <span class="ms-3 text-muted" id="connectionSeparator">|</span>
+                                    <span class="ms-3" id="connectionStatus">Connecting...</span>
+                                </p>
+                            </div>
+                            <div class="col-md-6 text-end">
+                                <div class="form-check form-switch d-inline-block me-3">
+                                    <input class="form-check-input" type="checkbox" id="debugToggle" title="Toggle Debug Logging">
+                                    <label class="form-check-label" for="debugToggle">
+                                        <i class="fas fa-bug"></i> Debug
+                                    </label>
+                                </div>
+                                <button class="btn btn-sm btn-success" id="btnStart"><i class="fas fa-play"></i> Start Bot</button>
+                                <button class="btn btn-sm btn-danger ms-2" id="btnStop" style="display:none;"><i class="fas fa-stop"></i> Stop Bot</button>
+                                <button class="btn btn-sm btn-warning ms-2" id="btnSimulate" title="Simulate Market Close"><i class="fas fa-vial"></i> Simulate</button>
+                                <button class="btn btn-sm btn-info ms-2" id="btnSpeedTest" title="Speed Test Multiple Days"><i class="fas fa-tachometer-alt"></i> Speed Test</button>
+                                <button class="btn btn-sm btn-info ms-2" id="btnBrainPreview" title="Run Brains Preview"><i class="fas fa-brain"></i> Brain Preview</button>
+                            </div>
+                            </div>
+                            </div>
+                        </div>
+                    </div>
+
+            <!-- Balance Row -->
+            <div class="row mb-3">
+                <div class="col-12">
+                    <div class="metric-card">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="metric-label">Account Balance</div>
+                                <div class="metric-value" id="balance">$0.00</div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="metric-label">Available Funds</div>
+                                <div class="metric-value" id="available">$0.00</div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="metric-label">Total P&L</div>
+                                <div class="metric-value" id="pnl">$0.00</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Environment/Account and Market Info Row -->
+            <div class="row mb-3">
+                <div class="col-lg-4">
+                    <div class="metric-card">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="metric-label mb-1"><i class="fas fa-plug"></i> Environment</label>
+                                <select id="envSelect" class="form-select">
+                                    <option value="demo">Demo</option>
+                                    <option value="live">Live</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="metric-label mb-1"><i class="fas fa-user"></i> Account</label>
+                                <select id="accountSelect" class="form-select">
+                                    <option value="">Loading...</option>
+                                </select>
+                            </div>
+                        </div>
+                        <hr class="my-2">
+                        <div class="mt-2">
+                            <small class="text-muted">Active Strategy:</small>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <strong id="activeStrategyDisplay" class="text-info">Not Set</strong>
+                                <button class="btn btn-sm btn-outline-primary" onclick="showStrategyModal()">
+                                    <i class="fas fa-edit"></i> Change
+                                </button>
+                            </div>
+                        </div>
+                        <hr class="my-2">
+                        <div class="mt-2">
+                            <small class="text-muted">Stop Loss:</small>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <strong id="activeStopLossDisplay" class="text-warning">Not Set</strong>
+                                <button class="btn btn-sm btn-outline-warning" onclick="showStopLossModal()">
+                                    <i class="fas fa-edit"></i> Configure
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-8">
+                    <div class="metric-card h-100">
+                        <h5 class="mb-3"><i class="fas fa-globe"></i> Market Information</h5>
+                        <div class="row">
+                            <div class="col-md-3">
+                                <p class="mb-1 small"><strong>EPIC:</strong> <span id="epic">-</span></p>
+                                <p class="mb-1 small"><strong>Name:</strong> <span id="epicName" style="font-size: 0.85em;">-</span></p>
+                                <p class="mb-1 small"><strong>Category:</strong> <span id="categoryDisplay">-</span></p>
+                            </div>
+                            <div class="col-md-3">
+                                <p class="mb-1 small"><strong>Bid/Ask:</strong> <span id="bidAsk">-</span></p>
+                                <p class="mb-1 small"><strong>Spread:</strong> <span id="epicSpread">-</span></p>
+                                <p class="mb-1 small"><strong>Change:</strong> <span id="percentChange">-</span>%</p>
+                            </div>
+                            <div class="col-md-3">
+                                <p class="mb-1 small"><strong>Status:</strong> <span id="marketStatus">-</span></p>
+                                <p class="mb-1 small"><strong>Next:</strong> <span id="nextEvent" style="font-size: 0.85em;">-</span></p>
+                                <p class="mb-1 small"><strong>Countdown:</strong> <span id="countdown" class="countdown">-</span></p>
+                            </div>
+                            <div class="col-md-3">
+                                <p class="mb-1 small"><strong>Leverage:</strong> <span id="leverageDisplay">-</span>x</p>
+                                <select id="leveragePicker" class="form-select form-select-sm" style="font-size: 0.85em;">
+                                    <option value="">Loading...</option>
+                                </select>
+                                <button class="btn btn-sm btn-outline-info mt-1" id="btnApplyLeverage" disabled style="font-size: 0.85em;">
+                                    <i class="fas fa-save"></i> Apply
+                                </button>
+                            </div>
+                        </div>
+                        <div class="row mt-2">
+                            <div class="col-12">
+                                <small class="text-muted">
+                                    <strong>Market Time (UTC):</strong> <span id="marketTime">-</span> | 
+                                    <strong>UAE Time:</strong> <span id="uaeTime">-</span>
+                                </small>
+                                <small class="text-muted d-block">
+                                    <strong>Min Size:</strong> <span id="minDealSize">-</span> |
+                                    <strong>Max Size:</strong> <span id="maxDealSize">-</span>
+                                </small>
+                                <span id="category" style="display:none;">-</span>
+                                <span id="minStop" style="display:none;">-</span>
+                                <span id="maxStop" style="display:none;">-</span>
+                                <span id="minSizeIncrement" style="display:none;">-</span>
+                                <span id="lotSize" style="display:none;">-</span>
+                                <small id="leverageHelp" class="text-muted d-block"></small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Open Positions and Tabs Row -->
+            <div class="row">
+                <div class="col-12">
+                    <div class="positions-table">
+                        <div class="d-flex justify-content-between align-items-center p-3">
+                            <div>
+                                <button class="tab-btn active" id="tabOpen">Positions & Orders</button>
+                                <button class="tab-btn ms-2" id="tabHistory" onclick="fetchTradeHistory()">Trade History</button>
+                                <button class="tab-btn ms-2" id="tabTransactions" onclick="fetchAccountTransactions()">Account Transactions</button>
+                            </div>
+                        </div>
+                        <div class="table-responsive" id="openPositionsPanel">
+                            <table class="table table-hover mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>Epic</th>
+                                        <th>Direction</th>
+                                        <th>Deal / Date</th>
+                                        <th>Size Details</th>
+                                        <th>Open Level</th>
+                                        <th>Current Level</th>
+                                        <th>SL</th>
+                                        <th>P&L (UPL)</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="positionsTable">
+                                    <tr>
+                                        <td colspan="8" class="text-center text-muted py-4">
+                                            <i class="fas fa-chart-line fa-2x mb-2"></i><br>
+                                            No open positions
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="table-responsive" id="historyPanel" style="display:none;">
+                            <table class="table table-hover mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>Close Date</th>
+                                        <th>Epic</th>
+                                        <th>Direction</th>
+                                        <th>Size</th>
+                                        <th>Entry Price</th>
+                                        <th>Exit Price</th>
+                                        <th>Net P&L</th>
+                                        <th>Deal ID</th>
+                                        <th>Strategy</th>
+                                        <th>Reason</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="historyTable">
+                                    <tr>
+                                        <td colspan="10" class="text-center text-muted py-4">No trade history</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                    </div>
+                        <div class="table-responsive" id="transactionsPanel" style="display:none;">
+                            <table class="table table-hover mb-0" id="transactionsTableElement">
+                                <thead id="transactionsTableHeader">
+                                    <tr>
+                                        <th>Loading...</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="transactionsTable">
+                                    <tr>
+                                        <td class="text-center text-muted py-4">No transactions</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Log -->
+            <div class="row mt-3">
+                <div class="col-12">
+                    <div class="metric-card">
+                        <h5 class="mb-3"><i class="fas fa-stream"></i> Action Log</h5>
+                        <div class="table-responsive">
+                            <table class="table table-sm" id="actionLogTable">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 120px;">Time</th>
+                                        <th style="width: 160px;">Event</th>
+                                        <th>Details</th>
+                                        <th style="width: 100px;">Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bot Status Modal -->
+    <div class="modal fade" id="botStatusModal" tabindex="-1">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content bg-dark text-light">
+                <div class="modal-header border-secondary">
+                    <h5 class="modal-title" id="modalTitle">Bot Status</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="modalBody">
+                    <!-- Dynamic content -->
+                </div>
+                <div class="modal-footer border-secondary" id="modalFooter">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Simulation Progress Modal -->
+    <div class="modal fade" id="simulationModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content bg-dark text-light">
+                <div class="modal-header border-warning">
+                    <h5 class="modal-title"><i class="fas fa-vial text-warning"></i> Market Simulation</h5>
+                </div>
+                <div class="modal-body">
+                    <div class="text-center mb-3">
+                        <div class="spinner-border text-warning" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    </div>
+                    <div id="simulationStatus" class="text-center">
+                        <p class="mb-2">Initializing simulation...</p>
+                        <small class="text-muted">This will simulate a complete market cycle</small>
+                    </div>
+                    <div class="progress mt-3" style="height: 25px;">
+                        <div id="simulationProgress" class="progress-bar progress-bar-striped progress-bar-animated bg-warning" 
+                             role="progressbar" style="width: 0%">0%</div>
+                    </div>
+                    <div id="simulationSteps" class="mt-3">
+                        <ul class="list-unstyled">
+                            <li id="step1" class="text-muted"><i class="fas fa-circle"></i> T-30s: Closing all positions...</li>
+                            <li id="step2" class="text-muted"><i class="fas fa-circle"></i> T-15s: Analyze & create trade...</li>
+                            <li id="step3" class="text-muted"><i class="fas fa-circle"></i> Final countdown...</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Speed Test Modal -->
+    <div class="modal fade" id="speedTestModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
+        <div class="modal-dialog modal-xl modal-dialog-centered">
+            <div class="modal-content bg-dark text-light">
+                <div class="modal-header border-info">
+                    <h5 class="modal-title"><i class="fas fa-tachometer-alt text-info"></i> Speed Test - Accelerated Trading</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label for="speedTestDays" class="form-label">Days to simulate:</label>
+                                <select id="speedTestDays" class="form-select bg-dark text-light border-secondary">
+                                    <option value="3">3 days</option>
+                                    <option value="5" selected>5 days</option>
+                                    <option value="10">10 days</option>
+                                    <option value="20">20 days</option>
+                                </select>
+                            </div>
+                            <button class="btn btn-info w-100 mb-3" id="btnStartSpeedTest">
+                                <i class="fas fa-play"></i> Start Speed Test
+                            </button>
+                            <div class="alert alert-warning">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                <strong>REAL TRADES</strong><br>
+                                <small>Market must be OPEN</small>
+                            </div>
+                        </div>
+                        <div class="col-md-8">
+                            <!-- Time Display -->
+                            <div class="text-center mb-3">
+                                <div class="d-flex justify-content-around align-items-center">
+                                    <div>
+                                        <small class="text-muted">Day</small>
+                                        <h2 id="speedTestDay" class="text-info mb-0">1/5</h2>
+                                    </div>
+                                    <div>
+                                        <small class="text-muted">Simulated Time</small>
+                                        <h1 id="speedTestTime" class="text-warning mb-0" style="font-family: monospace;">09:30:00</h1>
+                                    </div>
+                                    <div>
+                                        <small class="text-muted">Speed</small>
+                                        <h3 id="speedTestSpeed" class="text-success mb-0">⚡ 2880x</h3>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Market Timeline -->
+                            <div class="mb-3">
+                                <div class="position-relative" style="height: 60px; background: linear-gradient(90deg, #28a745 0%, #ffc107 95%, #dc3545 100%); border-radius: 10px;">
+                                    <div id="speedTestTimeMarker" class="position-absolute" style="left: 0%; top: -10px; transition: left 0.5s;">
+                                        <div style="width: 2px; height: 80px; background: white;"></div>
+                                        <div class="text-white text-center" style="margin-left: -20px; margin-top: -5px;">
+                                            <i class="fas fa-caret-down"></i>
+                                        </div>
+                                    </div>
+                                    <div class="d-flex justify-content-between position-absolute w-100" style="bottom: -25px;">
+                                        <small>09:30</small>
+                                        <small>12:00</small>
+                                        <small>14:00</small>
+                                        <small>15:30</small>
+                                        <small>15:59:30</small>
+                                        <small>16:00</small>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Progress Bar -->
+                            <div class="progress mt-5 mb-3" style="height: 30px;">
+                                <div id="speedTestProgress" class="progress-bar progress-bar-striped progress-bar-animated bg-info" 
+                                     role="progressbar" style="width: 0%">0%</div>
+                            </div>
+                            
+                            <!-- Status Display -->
+                            <div id="speedTestStatus" class="text-center mb-3">
+                                <h5 class="text-info">Ready to Start</h5>
+                                <p class="mb-0">Click "Start Speed Test" to begin</p>
+                            </div>
+                            
+                            <!-- Live Events (moved to full-width below) -->
+                        </div>
+                    </div>
+                    <!-- Full-width Live Events under timeline/progress -->
+                    <div class="row mt-3">
+                        <div class="col-12">
+                            <div class="card bg-secondary">
+                                <div class="card-header d-flex justify-content-between align-items-center">
+                                    <span><i class="fas fa-stream"></i> Live Events</span>
+                                    <small class="text-dark">Market must be OPEN</small>
+                                </div>
+                                <div class="card-body" style="max-height: 420px; overflow-y: auto;">
+                                    <div id="speedTestEvents">
+                                        <div class="text-muted">No events yet...</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Brains Preview Modal -->
+    <div class="modal fade" id="brainsModal" tabindex="-1">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content bg-dark text-light">
+                <div class="modal-header border-info">
+                    <h5 class="modal-title"><i class="fas fa-brain text-info"></i> Brains Preview</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="brainsBody">
+                    <div class="text-center py-4"><i class="fas fa-spinner fa-spin"></i> Running analysis...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Save strategy settings function - PROVEN RESULTS MATRIX
+        function saveStrategySettings() {
+            const strategyMode = document.querySelector('input[name="strategyMode"]:checked').value;
+            console.log('Saving strategy:', strategyMode);
+            
+            // Parse the combined strategy mode to extract strategy and protection settings
+            let actualStrategy = 'enhanced';
+            let crashProtection = false;
+            
+            if (strategyMode === 'all_with_protection') {
+                actualStrategy = 'all_signals';
+                crashProtection = true;
+            } else if (strategyMode === 'all_no_protection') {
+                actualStrategy = 'all_signals';
+                crashProtection = false;
+            } else if (strategyMode === 'two_rsi_protection') {
+                actualStrategy = 'two_rsi_only';
+                crashProtection = true;
+            } else if (strategyMode === 'two_rsi_no_protection') {
+                actualStrategy = 'two_rsi_only';
+                crashProtection = false;
+            } else if (strategyMode === 'test6_no_protection') {
+                actualStrategy = 'test6_no_protection';
+                crashProtection = false;
+            } else if (strategyMode === 'test6_with_protection') {
+                actualStrategy = 'test6_with_protection';
+                crashProtection = true;
+            } else if (strategyMode === 'test7_no_protection') {
+                actualStrategy = 'test7_no_protection';
+                crashProtection = false;
+            } else if (strategyMode === 'test7_with_protection') {
+                actualStrategy = 'test7_with_protection';
+                crashProtection = true;
+            } else {
+                actualStrategy = 'enhanced';
+                crashProtection = false;
+            }
+            
+            fetch('/api/strategy/settings', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    strategy_mode: actualStrategy,
+                    enable_crash_protection: crashProtection
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Show specific result expectation
+                    let expectedResult = '';
+                    if (strategyMode === 'all_with_protection') {
+                        expectedResult = '$699,074 (Proven result with crash protection)';
+                    } else if (strategyMode === 'all_no_protection') {
+                        expectedResult = '$376,004 (Higher risk without protection)';
+                    } else if (strategyMode === 'two_rsi_protection') {
+                        expectedResult = '$485,948 (Lowest risk, -33.9% max DD)';
+                    } else if (strategyMode === 'two_rsi_no_protection') {
+                        expectedResult = '$348,803 (Two RSI without protection)';
+                    } else if (strategyMode === 'test6_no_protection') {
+                        expectedResult = '$509,453 (8 strategies without protection)';
+                    } else if (strategyMode === 'test6_with_protection') {
+                        expectedResult = '$958,260 (BEST PERFORMER! 8 strategies with protection)';
+                    } else if (strategyMode === 'test7_no_protection') {
+                        expectedResult = 'Test7 - 9 Signals (includes MACD v2) without protection';
+                    } else if (strategyMode === 'test7_with_protection') {
+                        expectedResult = 'Test7 - 9 Signals (includes MACD v2) WITH protection';
+                    } else {
+                        expectedResult = 'Enhanced AI system';
+                    }
+                    
+                    showNotification(`Strategy saved! Expected: ${expectedResult}`, 'success');
+                    console.log(`Strategy: ${actualStrategy}, Protection: ${crashProtection}, Expected: ${expectedResult}`);
+                } else {
+                    showNotification('Failed to save strategy settings', 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error saving strategy:', error);
+                showNotification('Error saving strategy settings', 'error');
+            });
+        }
+        
+        const elements = {
+            connectionStatus: document.getElementById("connectionStatus"),
+            statusIndicator: document.getElementById("statusIndicator"),
+            status: document.getElementById("status"),
+            epic: document.getElementById("epic"),
+            epicName: document.getElementById("epicName"),
+            bidAsk: document.getElementById("bidAsk"),
+            epicSpread: document.getElementById("epicSpread"),
+            percentChange: document.getElementById("percentChange"),
+            minDealSize: document.getElementById("minDealSize"),
+            maxDealSize: document.getElementById("maxDealSize"),
+            minSizeIncrement: document.getElementById("minSizeIncrement"),
+            lotSize: document.getElementById("lotSize"),
+            leverageDisplay: document.getElementById("leverageDisplay"),
+            leveragePicker: document.getElementById("leveragePicker"),
+            btnApplyLeverage: document.getElementById("btnApplyLeverage"),
+            leverageHelp: document.getElementById("leverageHelp"),
+            balance: document.getElementById("balance"),
+            available: document.getElementById("available"),
+            pnl: document.getElementById("pnl"),
+            marketStatus: document.getElementById("marketStatus"),
+            nextEvent: document.getElementById("nextEvent"),
+            countdown: document.getElementById("countdown"),
+            marketTime: document.getElementById("marketTime"),
+            uaeTime: document.getElementById("uaeTime"),
+            // lastUpdate: document.getElementById("lastUpdate"), // Removed - element doesn't exist
+            positionsTable: document.getElementById("positionsTable"),
+            envSelect: document.getElementById("envSelect"),
+            accountSelect: document.getElementById("accountSelect"),
+            botNameDisplay: document.getElementById("botNameDisplay"),
+            tabOpen: document.getElementById("tabOpen"),
+            tabHistory: document.getElementById("tabHistory"),
+            tabTransactions: document.getElementById("tabTransactions"),
+            openPositionsPanel: document.getElementById("openPositionsPanel"),
+            historyPanel: document.getElementById("historyPanel"),
+            transactionsPanel: document.getElementById("transactionsPanel"),
+            historyTable: document.getElementById("historyTable"),
+            transactionsTable: document.getElementById("transactionsTable"),
+            btnStart: document.getElementById("btnStart"),
+            btnStop: document.getElementById("btnStop"),
+            btnSimulate: document.getElementById("btnSimulate"),
+            btnSpeedTest: document.getElementById("btnSpeedTest")
+        };
+
+        let ws;
+        let reconnectInterval;
+        // Leverage UI control flags
+        let leverageInitialized = false;
+        let lastLeverageUpdateTs = '';
+        // Speed Test live sync state
+        let speedTestLive = false;
+        let stDaysTotal = 0;
+        let stLastTs = '';
+
+        // Track if we've already loaded the saved settings
+        let strategySettingsLoaded = false;
+        
+        // Load saved strategy settings - will be called ONCE when WebSocket first sends data
+        function loadSavedStrategySettings(strategyMode, crashProtection) {
+            // Only load once on initial connection
+            if (strategySettingsLoaded) {
+                return;
+            }
+            
+            try {
+                // Map backend settings to radio button values
+                let radioValue = 'enhanced';
+                if (strategyMode === 'all_signals' && crashProtection === true) {
+                    radioValue = 'all_with_protection';
+                } else if (strategyMode === 'all_signals' && crashProtection === false) {
+                    radioValue = 'all_no_protection';
+                } else if (strategyMode === 'two_rsi_only' && crashProtection === true) {
+                    radioValue = 'two_rsi_protection';
+                } else if (strategyMode === 'two_rsi_only' && crashProtection === false) {
+                    radioValue = 'two_rsi_no_protection';
+                } else if (strategyMode === 'test6_no_protection') {
+                    radioValue = 'test6_no_protection';
+                } else if (strategyMode === 'test6_with_protection') {
+                    radioValue = 'test6_with_protection';
+                } else if (strategyMode === 'test6' && crashProtection === true) {
+                    radioValue = 'test6_with_protection';
+                } else if (strategyMode === 'test6' && crashProtection === false) {
+                    radioValue = 'test6_no_protection';
+                } else if (strategyMode === 'test7_no_protection') {
+                    radioValue = 'test7_no_protection';
+                } else if (strategyMode === 'test7_with_protection') {
+                    radioValue = 'test7_with_protection';
+                } else if (strategyMode === 'test7' && crashProtection === true) {
+                    radioValue = 'test7_with_protection';
+                } else if (strategyMode === 'test7' && crashProtection === false) {
+                    radioValue = 'test7_no_protection';
+                } else if (strategyMode === 'enhanced') {
+                    radioValue = 'enhanced';
+                }
+                
+                // Set the radio button
+                const radioButton = document.querySelector(`input[name="strategyMode"][value="${radioValue}"]`);
+                if (radioButton) {
+                    radioButton.checked = true;
+                    console.log(`Loaded saved strategy: ${strategyMode}, Protection: ${crashProtection}, Radio: ${radioValue}`);
+                    strategySettingsLoaded = true; // Mark as loaded
+                    // Update the display
+                    updateActiveStrategyDisplay();
+                }
+            } catch (error) {
+                console.error('Error loading saved strategy settings:', error);
+            }
+        }
+
+        // On-demand data fetching functions
+        function fetchTradeHistory() {
+            if (ws && ws.readyState === WebSocket.OPEN) {
+                ws.send(JSON.stringify({ command: "fetch_trade_history" }));
+                console.log("Fetching trade history on demand...");
+            }
+        }
+        
+        function fetchAccountTransactions() {
+            if (ws && ws.readyState === WebSocket.OPEN) {
+                ws.send(JSON.stringify({ command: "fetch_account_transactions" }));
+                console.log("Fetching account transactions on demand...");
+            }
+        }
+        
+        function connectWebSocket() {
+            const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const wsUrl = `${protocol}//${window.location.host}/ws`;
+            
+            ws = new WebSocket(wsUrl);
+
+            ws.onopen = function() {
+                // Only show connection status if bot is not running
+                if (elements.status.textContent !== "Bot Running - Monitoring Market") {
+                elements.connectionStatus.textContent = "Connected";
+                elements.connectionStatus.className = "connection-status connected";
+                    elements.connectionStatus.style.display = 'inline';
+                    document.getElementById('connectionSeparator').style.display = 'inline';
+                }
+                if (reconnectInterval) {
+                    clearInterval(reconnectInterval);
+                    reconnectInterval = null;
+                }
+            };
+
+            ws.onmessage = function(event) {
+                try {
+                    const data = JSON.parse(event.data);
+                    
+                    // Check if this is a countdown-only update
+                    if (data.countdown_only) {
+                        // Only update the countdown timer
+                        if (data.market_event) {
+                            updateCountdown(data.market_event);
+                        }
+                        return;
+                    }
+                    
+                    // Debug logging for full updates
+                    if (!ws._debugLogged) {
+                        console.log("WebSocket data received:", data);
+                        if (data.account) {
+                            console.log("Account info:", data.account);
+                            console.log("Balance info:", data.account.balance);
+                        }
+                        ws._debugLogged = true;
+                    }
+                    // Keep latest payload for SL type access in positions table
+                    window.latestWsData = data;
+                    updateDashboard(data);
+                    
+                    // Load saved strategy settings from WebSocket data
+                    if (data.strategy_mode !== undefined && data.enable_crash_protection !== undefined) {
+                        loadSavedStrategySettings(data.strategy_mode, data.enable_crash_protection);
+                    }
+                    // Live-sync Speed Test from action log
+                    if (speedTestLive) {
+                        syncSpeedTestFromActionLog(data.action_log || []);
+                    }
+                } catch (error) {
+                    console.error("Error parsing WebSocket data:", error);
+                }
+            };
+
+            ws.onclose = function() {
+                // Reset the flag so settings load again on reconnect
+                strategySettingsLoaded = false;
+                
+                // Only show connection status if bot is not running
+                if (elements.status.textContent !== "Bot Running - Monitoring Market") {
+                    elements.connectionStatus.textContent = "Connecting...";
+                elements.connectionStatus.className = "connection-status disconnected";
+                    elements.connectionStatus.style.display = 'inline';
+                    document.getElementById('connectionSeparator').style.display = 'inline';
+                }
+                
+                if (!reconnectInterval) {
+                    reconnectInterval = setInterval(connectWebSocket, 5000);
+                }
+            };
+
+            ws.onerror = function(error) { };
+        }
+
+        function updateCountdown(marketEvent) {
+            // Update countdown timer only
+            if (!marketEvent) return;
+            
+            const elements = getElements();
+            if (!elements.countdown) return;
+            
+            const timeUntil = marketEvent.time_until_seconds || 0;
+            const hours = Math.floor(timeUntil / 3600);
+            const minutes = Math.floor((timeUntil % 3600) / 60);
+            const seconds = Math.floor(timeUntil % 60);
+            elements.countdown.textContent = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            
+            // Also update the next event text if needed
+            if (elements.nextEvent && marketEvent.next_event) {
+                const isOpen = marketEvent.is_open;
+                elements.nextEvent.textContent = isOpen ? 'Market Close' : 'Market Open';
+            }
+        }
+        
+        async function updateDashboard(data) {
+            // Update bot name
+            if (data.bot_name && elements.botNameDisplay) {
+                elements.botNameDisplay.textContent = data.bot_name;
+            }
+            
+            // Update bot status
+            elements.epic.textContent = data.epic || "-";
+            if (typeof data.leverage !== 'undefined' && elements.leverageDisplay) {
+                elements.leverageDisplay.textContent = String(data.leverage);
+            }
+            if (data.environment) {
+                elements.envSelect.value = data.environment;
+            }
+            
+            // Update bot status and button visibility
+            if (data.is_running) {
+                elements.status.textContent = "Bot Running - Monitoring Market";
+                elements.statusIndicator.className = "status-indicator status-running";
+                // Update button states
+                elements.btnStart.style.display = 'none';
+                elements.btnStop.style.display = 'inline-block';
+                elements.btnSimulate.style.display = 'inline-block';
+                elements.btnSpeedTest.style.display = 'inline-block';
+                // Hide connection status and separator when bot is running
+                elements.connectionStatus.style.display = 'none';
+                document.getElementById('connectionSeparator').style.display = 'none';
+            } else {
+                elements.status.textContent = "Bot Stopped";
+                elements.statusIndicator.className = "status-indicator status-stopped";
+                // Update button states
+                elements.btnStart.style.display = 'inline-block';
+                elements.btnStop.style.display = 'none';
+                elements.btnSimulate.style.display = 'inline-block';
+                elements.btnSpeedTest.style.display = 'inline-block';
+                // Show connection status and separator when bot is stopped
+                elements.connectionStatus.style.display = 'inline';
+                document.getElementById('connectionSeparator').style.display = 'inline';
+            }
+
+            // Badges removed - no longer needed
+
+            // Update connection status (only when bot is not running)
+            if (!data.is_running) {
+                const connStatus = data.is_connected ? 'Connected' : 'Connecting...';
+                const statusElem = document.getElementById('connectionStatus');
+                if (statusElem) statusElem.textContent = connStatus;
+            }
+
+            // Update account information
+            if (data.account) {
+                // Account name is shown in the dropdown and badge
+                if (data.account.balance) {
+                    elements.balance.textContent = `$${data.account.balance.balance?.toFixed(2) || "0.00"}`;
+                    elements.available.textContent = `$${data.account.balance.available?.toFixed(2) || "0.00"}`;
+                    
+                    const pnlValue = data.account.balance.profitLoss || 0;
+                    elements.pnl.textContent = `$${pnlValue.toFixed(2)}`;
+                    elements.pnl.className = `metric-value ${pnlValue >= 0 ? 'profit-positive' : 'profit-negative'}`;
+                }
+            } else {
+                // No account data - show zeros
+                elements.balance.textContent = "$0.00";
+                elements.available.textContent = "$0.00";
+                elements.pnl.textContent = "$0.00";
+            }
+
+            // Update market information
+            if (data.market_event) {
+                // Update market status - use actual market_status from API if available
+                const marketStatus = data.market_event.market_status || (data.market_event.is_open ? "OPEN" : "CLOSED");
+                elements.marketStatus.textContent = marketStatus;
+                
+                // Style the status based on open/closed
+                if (data.market_event.is_open) {
+                    elements.marketStatus.style.color = '#4caf50';
+                } else {
+                    elements.marketStatus.style.color = '#f44336';
+                }
+                
+                // Update next event with time
+                if (data.market_event.next_event === "close") {
+                    elements.nextEvent.textContent = "Market Close";
+                    if (data.market_event.next_event_time_local) {
+                        const closeTime = new Date(data.market_event.next_event_time_local);
+                        elements.nextEvent.textContent += ` at ${closeTime.toLocaleTimeString()}`;
+                    }
+                } else if (data.market_event.next_event === "open") {
+                    elements.nextEvent.textContent = "Market Open";
+                    if (data.market_event.next_event_time_local) {
+                        const openTime = new Date(data.market_event.next_event_time_local);
+                        const tomorrow = openTime.toDateString() !== new Date().toDateString();
+                        elements.nextEvent.textContent += ` at ${openTime.toLocaleTimeString()}`;
+                        if (tomorrow) {
+                            elements.nextEvent.textContent += ` (${openTime.toLocaleDateString()})`;
+                        }
+                    }
+                } else {
+                    elements.nextEvent.textContent = data.market_event.error || "Unknown";
+                }
+                
+                // Update countdown
+                const timeUntil = data.market_event.time_until_seconds || 0;
+                const hours = Math.floor(timeUntil / 3600);
+                const minutes = Math.floor((timeUntil % 3600) / 60);
+                const seconds = Math.floor(timeUntil % 60);
+                elements.countdown.textContent = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+
+                // Update times - show local time and UAE time
+                if (data.market_event.current_local_time) {
+                    const localTime = new Date(data.market_event.current_local_time);
+                    elements.marketTime.textContent = localTime.toLocaleTimeString();
+                }
+                if (data.market_event.current_uae_time) {
+                    const uaeTime = new Date(data.market_event.current_uae_time);
+                    elements.uaeTime.textContent = uaeTime.toLocaleTimeString() + " (Dubai)";
+                }
+            }
+            
+            // Update market info details
+            if (data.market_info) {
+                const mi = data.market_info;
+                
+                // Update instrument name
+                if (mi.instrument && mi.instrument.name) {
+                    elements.epicName.textContent = mi.instrument.name;
+                }
+                
+                // Update category display from market info
+                if (mi.instrument && mi.instrument.type) {
+                    const categoryHidden = document.getElementById('category');
+                    const categoryDisplay = document.getElementById('categoryDisplay');
+                    if (categoryHidden) categoryHidden.textContent = mi.instrument.type;
+                    if (categoryDisplay) categoryDisplay.textContent = mi.instrument.type;
+                }
+                
+                // Update market status from market_info
+                if (mi.marketStatus) {
+                    // Override with actual market status if different
+                    const actualStatus = mi.marketStatus === "TRADEABLE" ? "Open" : mi.marketStatus;
+                    if (actualStatus !== "Open" && actualStatus !== "Closed") {
+                        elements.marketStatus.textContent = actualStatus;
+                    }
+                }
+                
+                // Show bid/ask and spread if available
+                if (mi.snapshot) {
+                    const snapshot = mi.snapshot;
+                    if (snapshot.bid && snapshot.offer) {
+                        elements.bidAsk.textContent = `${snapshot.bid.toFixed(2)} / ${snapshot.offer.toFixed(2)}`;
+                        const spread = (snapshot.offer - snapshot.bid).toFixed(4);
+                        elements.epicSpread.textContent = spread;
+                    }
+                    if (snapshot.percentageChange !== undefined) {
+                        const change = snapshot.percentageChange;
+                        elements.percentChange.textContent = change.toFixed(2);
+                        elements.percentChange.style.color = change >= 0 ? '#4caf50' : '#f44336';
+                    }
+                    // Reflect leverage display from settings or preferences
+                    if (typeof window.latestWsData?.leverage !== 'undefined') {
+                        elements.leverageDisplay.textContent = String(window.latestWsData.leverage);
+                    }
+                }
+                
+                // Update dealing rules if available
+                if (mi.dealingRules) {
+                    const rules = mi.dealingRules;
+                    const currentPrice = mi.snapshot?.bid || mi.snapshot?.offer || 0;
+                    
+                    if (rules.minDealSize?.value !== undefined) {
+                        const minSize = rules.minDealSize.value;
+                        const minUSD = (minSize * currentPrice).toFixed(2);
+                        elements.minDealSize.textContent = `${minSize} ($${minUSD})`;
+                    }
+                    if (rules.maxDealSize?.value !== undefined) {
+                        const maxSize = rules.maxDealSize.value;
+                        const maxUSD = (maxSize * currentPrice).toFixed(2);
+                        elements.maxDealSize.textContent = `${maxSize} ($${maxUSD})`;
+                    }
+                    if (rules.minSizeIncrement?.value !== undefined) {
+                        const increment = rules.minSizeIncrement.value;
+                        const incrementUSD = (increment * currentPrice).toFixed(2);
+                        elements.minSizeIncrement.textContent = `${increment} ($${incrementUSD})`;
+                    }
+                }
+                
+                // Update lot size if available
+                if (mi.instrument?.lotSize !== undefined) {
+                    elements.lotSize.textContent = mi.instrument.lotSize;
+                }
+                
+                // Show market hours if available
+                if (mi.instrument && mi.instrument.openingHours) {
+                    // This is already handled by market_event, but we could show full schedule here
+                }
+            }
+
+            // Update positions
+            updatePositionsTable(data.positions || []);
+
+            // Update history - combine bot trades and historic trades
+            const allTrades = [...(data.historic_trades || []), ...(data.trade_history || [])];
+            updateHistoryTable(allTrades);
+            
+            // Update account transactions
+            updateTransactionsTable(data.account_transactions || []);
+
+            // Update action log
+            updateActionLogTable(data.action_log || []);
+
+            // Update stop loss settings if present
+            if (data.stop_loss_type !== undefined) {
+                // Update radio button
+                const slRadio = document.querySelector(`input[name="stopLossType"][value="${data.stop_loss_type}"]`);
+                if (slRadio) slRadio.checked = true;
+                
+                // Trigger change event to enable/disable appropriate inputs
+                slRadio.dispatchEvent(new Event('change'));
+            }
+            
+            // Update override checkbox if present
+            if (data.override_strategy_sl !== undefined) {
+                document.getElementById('overrideStrategySL').checked = data.override_strategy_sl;
+            }
+
+            // Initialize leverage picker once when market info is first present
+            if (!leverageInitialized && data.market_info) {
+                leverageInitialized = true;
+                try { await refreshLeverageOptions(); } catch(e) { }
+            }
+
+            // If server applied a leverage update before a trade, reflect it once
+            if (Array.isArray(data.action_log) && data.action_log.length) {
+                const applied = [...data.action_log].reverse().find(a => a.event === 'leverage_update' && a.phase === 'applied' && a.ts && (!lastLeverageUpdateTs || a.ts > lastLeverageUpdateTs));
+                if (applied) {
+                    lastLeverageUpdateTs = applied.ts;
+                    try { await refreshLeverageOptions(); } catch(e) { }
+                    if (elements.leverageDisplay && typeof applied.to !== 'undefined') {
+                        const fromV = typeof applied.from !== 'undefined' ? applied.from : undefined;
+                        elements.leverageDisplay.textContent = String(applied.to);
+                        showNotification(`Leverage updated ${fromV !== undefined ? `(from ${fromV}x ` : '('}to ${applied.to}x) for ${applied.category || ''}`, 'success');
+                    }
+                }
+            }
+
+            // Update last update time - removed as element doesn't exist
+            // elements.lastUpdate.textContent = new Date().toLocaleTimeString();
+            // Removed frequent leverage refresh; now handled only on init and explicit updates
+            
+            // Update active strategy and stop loss displays
+            updateActiveStrategyDisplay();
+            updateActiveStopLossDisplay();
+        }
+
+        // ===== Leverage UI logic =====
+        async function refreshLeverageOptions() {
+            try {
+                elements.leveragePicker.innerHTML = '<option value="">Loading...</option>';
+                const res = await fetch('/account/preferences');
+                const json = await res.json();
+                if (!json.ok || !json.preferences) {
+                    elements.leveragePicker.innerHTML = '<option value="">Unavailable</option>';
+                    elements.btnApplyLeverage.disabled = true;
+                    return;
+                }
+                const prefs = json.preferences;
+                // Determine category from instrument type
+                const mi = window.latestWsData?.market_info || {};
+                const instrumentType = mi.instrument?.type || 'SHARES';
+                const category = instrumentType in (prefs.leverages || {}) ? instrumentType : 'SHARES';
+                const catPrefs = (prefs.leverages || {})[category] || {};
+                const available = catPrefs.available || [];
+                const current = catPrefs.current || window.latestWsData?.leverage || 1;
+                elements.leveragePicker.innerHTML = '';
+                available.forEach(v => {
+                    const opt = document.createElement('option');
+                    opt.value = v; opt.textContent = `${v}x`;
+                    if (Number(v) === Number(current)) opt.selected = true;
+                    elements.leveragePicker.appendChild(opt);
+                });
+                elements.btnApplyLeverage.disabled = available.length === 0;
+                elements.leverageHelp.textContent = `Category: ${category}`;
+                elements.leveragePicker.dataset.category = category;
+            } catch (e) {
+                console.error(e);
+                elements.leveragePicker.innerHTML = '<option value="">Error</option>';
+                elements.btnApplyLeverage.disabled = true;
+            }
+        }
+
+        // Apply leverage change
+        elements.btnApplyLeverage.addEventListener('click', async () => {
+            const category = elements.leveragePicker.dataset.category || 'SHARES';
+            const val = parseInt(elements.leveragePicker.value || '0');
+            if (!val) return;
+            elements.btnApplyLeverage.disabled = true;
+            elements.leverageHelp.textContent = 'Applying leverage...';
+            try {
+                const res = await fetch('/account/leverage', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ category, leverage: val })
+                });
+                const json = await res.json();
+                if (json.ok) {
+                    const prev = elements.leverageDisplay?.textContent ? Number(elements.leverageDisplay.textContent) : undefined;
+                    showNotification(`Leverage updated ${prev ? `(from ${prev}x ` : '('}to ${val}x) for ${category}`, 'success');
+                    elements.leverageHelp.textContent = 'Leverage updated.';
+                    // Update display and reload options
+                    elements.leverageDisplay.textContent = String(val);
+                    await refreshLeverageOptions();
+                } else {
+                    const err = json.error || (json.errorCode || 'Unknown error');
+                    showNotification(`Failed to update leverage: ${err}`, 'error');
+                    elements.leverageHelp.textContent = `Error: ${err}`;
+                }
+            } catch (e) {
+                console.error(e);
+                showNotification(`Error updating leverage: ${e.message}`, 'error');
+                elements.leverageHelp.textContent = `Error: ${e.message}`;
+            } finally {
+                elements.btnApplyLeverage.disabled = false;
+            }
+        });
+
+        // ===== Speed Test Live Sync Helpers =====
+        function stAddEvent(message, type = 'info') {
+            const container = document.getElementById('speedTestEvents');
+            if (!container) return;
+            const div = document.createElement('div');
+            div.className = `small mb-1 text-${type}`;
+            div.innerHTML = `<i class="fas fa-chevron-right"></i> ${new Date().toLocaleTimeString()} - ${message}`;
+            container.prepend(div);
+            while (container.children.length > 200) container.lastElementChild.remove();
+        }
+
+        function stUpdateTimeDisplay(day, timeStr, speedLabel, overallProgressPct) {
+            const dayEl = document.getElementById('speedTestDay');
+            const timeEl = document.getElementById('speedTestTime');
+            const speedEl = document.getElementById('speedTestSpeed');
+            const bar = document.getElementById('speedTestProgress');
+            const marker = document.getElementById('speedTestTimeMarker');
+            if (dayEl) dayEl.textContent = `${day}/${stDaysTotal || day}`;
+            if (timeEl) timeEl.textContent = timeStr || '09:30:00';
+            if (speedEl) speedEl.textContent = speedLabel || '⚡ 2880x';
+            if (bar && overallProgressPct !== undefined) {
+                const pct = Math.max(0, Math.min(100, overallProgressPct));
+                bar.style.width = pct + '%';
+                bar.textContent = Math.round(pct) + '%';
+            }
+            // Move marker according to 09:30 -> 16:00
+            const [hh, mm, ss] = (timeStr || '09:30:00').split(':').map(Number);
+            let totalMinutes = (hh * 60 + mm);
+            const marketStart = 9 * 60 + 30;
+            const marketEnd = 16 * 60;
+            const position = Math.min(100, Math.max(0, ((totalMinutes - marketStart) / (marketEnd - marketStart)) * 100));
+            if (marker) marker.style.left = position + '%';
+        }
+
+        function syncSpeedTestFromActionLog(actionLog) {
+            if (!Array.isArray(actionLog) || !actionLog.length) return;
+            // Process newer than stLastTs
+            const newer = actionLog.filter(a => a.ts && a.ts > (stLastTs || ''));
+            if (!newer.length) return;
+            // Sort chronologically
+            newer.sort((a, b) => (a.ts > b.ts ? 1 : -1));
+            newer.forEach(a => {
+                stLastTs = a.ts;
+                const ev = a.event || '';
+                if (ev === 'speedtest_start') {
+                    stDaysTotal = a.days || stDaysTotal || 0;
+                    stAddEvent(`Speed Test started for ${stDaysTotal} days`, 'warning');
+                    document.getElementById('speedTestStatus').innerHTML = '<h5 class="text-warning">Initializing...</h5>';
+                } else if (ev === 'speedtest_progress') {
+                    const day = a.day || 1;
+                    const simTime = a.sim_time || '09:30:00';
+                    const speed = a.speed || '⚡ 2880x';
+                    const progress = a.progress || 0;
+                    stUpdateTimeDisplay(day, simTime, speed, progress);
+                } else if (ev === 'speedtest_phase') {
+                    const phase = a.phase;
+                    if (phase === 't_minus_30') {
+                        document.getElementById('speedTestStatus').innerHTML = '<h5 class="text-danger">Closing Positions</h5>';
+                        stAddEvent(`Day ${a.day}: T-30s - Closing positions`, 'warning');
+                    } else if (phase === 't_minus_15') {
+                        document.getElementById('speedTestStatus').innerHTML = '<h5 class="text-success">Creating Trade</h5>';
+                        stAddEvent(`Day ${a.day}: T-15s - Creating trade`, 'success');
+                    } else if (phase === 'positions_closed') {
+                        stAddEvent(`Day ${a.day}: Closed ${a.count || 0} positions`, 'info');
+                    }
+                } else if (ev === 'speedtest_trade') {
+                    if (a.status === 'created') {
+                        stAddEvent(`Day ${a.day}: Trade created`, 'success');
+                    } else {
+                        stAddEvent(`Day ${a.day}: Trade failed`, 'danger');
+                    }
+                } else if (ev === 'speedtest_day_complete') {
+                    stAddEvent(`Day ${a.day} complete`, 'info');
+                } else if (ev === 'speedtest_complete') {
+                    stAddEvent('Speed Test complete', 'success');
+                    document.getElementById('speedTestStatus').innerHTML = '<h5 class="text-success">Complete!</h5>';
+                    speedTestLive = false;
+                    document.getElementById('btnStartSpeedTest').disabled = false;
+                    document.getElementById('btnStartSpeedTest').innerHTML = '<i class="fas fa-play"></i> Start Speed Test';
+                }
+            });
+        }
+
+        async function fetchConfig() {
+            try {
+                const res = await fetch('/config');
+                if (!res.ok) return;
+                const cfg = await res.json();
+                if (cfg.environment) elements.envSelect.value = cfg.environment;
+                // Only fetch accounts if connected
+                if (cfg.is_connected) {
+                    await fetchAccounts(cfg.selected_account_id);
+                } else {
+                    elements.accountSelect.innerHTML = '<option value="">Connecting...</option>';
+                }
+            } catch (e) { console.error(e); }
+        }
+
+        async function fetchAccounts(preselectId) {
+            try {
+                elements.accountSelect.innerHTML = '<option value="">Loading accounts...</option>';
+                const res = await fetch('/accounts');
+                if (!res.ok) {
+                    elements.accountSelect.innerHTML = '<option value="">Failed to load accounts</option>';
+                    return;
+                }
+                const data = await res.json();
+                const accounts = data.accounts || [];
+                
+                if (!accounts.length) {
+                    elements.accountSelect.innerHTML = '<option value="">No accounts available</option>';
+                    return;
+                }
+                
+                elements.accountSelect.innerHTML = '';
+                accounts.forEach(acc => {
+                    const opt = document.createElement('option');
+                    opt.value = acc.accountId;
+                    opt.textContent = `${acc.accountName} (${acc.accountId})`;
+                    elements.accountSelect.appendChild(opt);
+                });
+                
+                if (preselectId && accounts.find(a => a.accountId === preselectId)) {
+                    elements.accountSelect.value = preselectId;
+                } else if (accounts.length) {
+                    elements.accountSelect.value = accounts[0].accountId;
+                }
+                
+                if (elements.accountSelect.value) {
+                    await selectAccount(elements.accountSelect.value);
+                }
+            } catch (e) { 
+                console.error(e);
+                elements.accountSelect.innerHTML = '<option value="">Error loading accounts</option>';
+            }
+        }
+
+        elements.envSelect.addEventListener('change', async () => {
+            const env = elements.envSelect.value;
+            try {
+                const res = await fetch('/config/environment', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ environment: env })
+                });
+                if (res.ok) { await fetchAccounts(); }
+            } catch (e) { console.error(e); }
+        });
+
+        // Removed refresh button listener - accounts refresh automatically
+
+        async function selectAccount(account_id) {
+            try {
+                await fetch('/accounts/select', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ account_id })
+                });
+            } catch (e) { console.error(e); }
+        }
+
+        elements.accountSelect.addEventListener('change', async () => {
+            const account_id = elements.accountSelect.value;
+            if (!account_id) return;
+            await selectAccount(account_id);
+        });
+
+        // Initial loads
+        fetchConfig();
+        // Don't call fetchAccounts separately - fetchConfig will do it if connected
+
+        function updatePositionsTable(positions) {
+            if (!positions || positions.length === 0) {
+                elements.positionsTable.innerHTML = `
+                    <tr>
+                        <td colspan="9" class="text-center text-muted py-4">
+                            <i class="fas fa-chart-line fa-2x mb-2"></i><br>
+                            No open positions or orders
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            // Removed noisy console logging of position structure
+
+            let html = '';
+            positions.forEach(position => {
+                // Extract fields from various possible structures
+                const dealId = position.position?.dealId || position.dealId || '-';
+                const dealReference = position.position?.dealReference || '-';
+                const epic = position.market?.epic || position.instrument?.epic || position.position?.epic || position.epic || '-';
+                const instrumentName = position.market?.instrumentName || position.instrument?.name || '';
+                const direction = position.position?.direction || position.direction || '-';
+                const size = parseFloat(position.position?.size || position.size || 0);
+                const leverage = parseFloat(position.position?.leverage || position.leverage || 1);
+                const level = parseFloat(position.position?.level || position.level || position.openLevel || 0);
+                const bidPrice = parseFloat(position.market?.bid || 0);
+                const offerPrice = parseFloat(position.market?.offer || 0);
+                // Capital.com shows Trade size/Margin using the current price (their "Last price").
+                // In most cases this equals the bid. Fallback to offer, then entry level.
+                const currentPrice = (!isNaN(bidPrice) && bidPrice > 0)
+                    ? bidPrice
+                    : ((!isNaN(offerPrice) && offerPrice > 0) ? offerPrice : level);
+                const upl = parseFloat(position.position?.upl || position.position?.profit || position.position?.pnl || position.profit || position.pnl || 0);
+                const pnlClass = upl >= 0 ? 'text-success fw-bold' : 'text-danger fw-bold';
+                const type = position.orderType ? 'ORDER' : 'POSITION';
+                const createdDate = position.position?.createdDate || position.createdDate || '-';
+                const stopLevel = position.position?.stopLevel || '-';
+                
+                // Calculate Trade Size (notional) and Margin using current price to match Capital.com UI
+                const notionalValue = size * currentPrice;
+                // Capital.com appears to truncate margin to 2 decimals (not round)
+                const marginRequiredRaw = notionalValue / leverage;
+                const marginRequired = Math.floor(marginRequiredRaw * 100) / 100;
+                
+                // Format date
+                let dateDisplay = '-';
+                if (createdDate !== '-') {
+                    const date = new Date(createdDate);
+                    dateDisplay = date.toLocaleDateString() + '<br>' + date.toLocaleTimeString();
+                }
+                
+                // Stop loss info (type from settings, level from position)
+                const slType = (window.latestWsData && window.latestWsData.stop_loss_type) ? window.latestWsData.stop_loss_type : 'normal';
+                const slLevel = parseFloat(stopLevel) || 0;
+                const slPct = (slLevel && level) ? ((direction === 'BUY' ? (level - slLevel) : (slLevel - level)) / level) * 100 : 0;
+                const capType = slType ? slType.charAt(0).toUpperCase() + slType.slice(1) : '-';
+                const slDisplay = slLevel 
+                    ? `<small>$${slLevel.toFixed(2)}<br>${slPct.toFixed(2)}%<br>${capType}</small>` 
+                    : '<small class="text-muted">-</small>';
+                
+                html += `
+                    <tr>
+                        <td>
+                            <strong>${epic}</strong>
+                            ${instrumentName ? `<br><small class="text-muted">${instrumentName}</small>` : ''}
+                        </td>
+                        <td>
+                            <span class="badge ${direction === 'BUY' ? 'bg-success' : 'bg-danger'}">
+                                ${direction}
+                            </span>
+                        </td>
+                        <td>
+                            <small class="text-muted">${dealId}</small>
+                            <br>
+                            <small>${dateDisplay}</small>
+                            ${type === 'ORDER' ? '<br><span class="badge bg-warning">ORDER</span>' : ''}
+                        </td>
+                        <td>
+                            <small>
+                                <strong>Notional:</strong> $${notionalValue.toFixed(2)}<br>
+                                <strong>Margin:</strong> $${marginRequired.toFixed(2)}<br>
+                                <strong>Contracts:</strong> ${size.toFixed(2)}
+                            </small>
+                        </td>
+                        <td>$${level.toFixed(2)}</td>
+                        <td>${currentPrice ? '$' + currentPrice.toFixed(2) : '-'}</td>
+                        <td>${slDisplay}</td>
+                        <td class="${pnlClass}">${upl >= 0 ? '+' : ''}$${Math.abs(upl).toFixed(2)}</td>
+                        <td>
+                            <button class="btn btn-sm btn-outline-danger" onclick="closePosition('${dealId}')">
+                                <i class="fas fa-times"></i> Close
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            });
+            elements.positionsTable.innerHTML = html;
+        }
+
+        function updateHistoryTable(history) {
+            if (!history || history.length === 0) {
+                elements.historyTable.innerHTML = '<tr><td colspan="10" class="text-center text-muted py-4">No trade history</td></tr>';
+                return;
+            }
+            
+            let html = '';
+            history.forEach(h => {
+                // Handle different trade formats
+                const closeDate = h.closeDateUtc || h.closeDate || h.dateUtc || h.dateUTC || h.date || '-';
+                const epic = h.epic || h.instrumentName || '-';
+                const pnl = parseFloat(h.pnl || h.closePnL || h.size || 0);
+                const profitClass = pnl >= 0 ? 'text-success fw-bold' : 'text-danger fw-bold';
+                const dealId = h.dealId || h.reference || '-';
+                const reason = h.closeReason || h.note || 'Trade closed';
+                
+                // For now, we don't have complete entry/exit data from the API
+                // These would need to come from our trade_history.csv or be calculated
+                const direction = h.direction || 'UNKNOWN';
+                const directionBadge = direction === 'BUY' || direction === 'LONG' ? 'bg-success' : 
+                                      direction === 'SELL' || direction === 'SHORT' ? 'bg-danger' : 'bg-secondary';
+                
+                const size = h.size !== undefined && h.size !== null ? Math.abs(h.size) : '-';
+                const entryPrice = h.entryPrice || '-';
+                const exitPrice = h.closePrice || h.exitPrice || '-';
+                const strategy = h.strategy || '-';
+                
+                html += `
+                    <tr>
+                        <td>${closeDate !== '-' ? new Date(closeDate).toLocaleString() : '-'}</td>
+                        <td><strong>${epic}</strong></td>
+                        <td>
+                            <span class="badge ${directionBadge}">
+                                ${direction}
+                            </span>
+                        </td>
+                        <td>${size !== '-' && typeof size === 'number' ? size.toFixed(2) : size}</td>
+                        <td>${entryPrice !== '-' && typeof entryPrice === 'number' ? '$' + entryPrice.toFixed(2) : entryPrice}</td>
+                        <td>${exitPrice !== '-' && typeof exitPrice === 'number' ? '$' + exitPrice.toFixed(2) : exitPrice}</td>
+                        <td class="${profitClass}">${pnl >= 0 ? '+' : ''}$${Math.abs(pnl).toFixed(2)}</td>
+                        <td><small>${dealId}</small></td>
+                        <td>${strategy}</td>
+                        <td><small>${reason}</small></td>
+                    </tr>
+                `;
+            });
+            elements.historyTable.innerHTML = html;
+        }
+        
+        function updateTransactionsTable(transactions) {
+            const headerElement = document.getElementById('transactionsTableHeader');
+            const bodyElement = document.getElementById('transactionsTable');
+            
+            if (!transactions || transactions.length === 0) {
+                headerElement.innerHTML = '<tr><th>No Data</th></tr>';
+                bodyElement.innerHTML = '<tr><td class="text-center text-muted py-4">No transactions</td></tr>';
+                return;
+            }
+            
+            // Get all unique keys from all transactions
+            const allKeys = new Set();
+            transactions.forEach(t => {
+                Object.keys(t).forEach(key => allKeys.add(key));
+            });
+            
+            // Convert to array and sort for consistent ordering
+            const keys = Array.from(allKeys).sort();
+            
+            // Build header
+            let headerHtml = '<tr>';
+            keys.forEach(key => {
+                // Make headers more readable
+                const displayKey = key
+                    .replace(/([A-Z])/g, ' $1')
+                    .replace(/^./, str => str.toUpperCase())
+                    .replace('Utc', 'UTC')
+                    .replace('Id', 'ID')
+                    .trim();
+                headerHtml += `<th>${displayKey}</th>`;
+            });
+            headerHtml += '</tr>';
+            headerElement.innerHTML = headerHtml;
+            
+            // Build body
+            let bodyHtml = '';
+            transactions.forEach(t => {
+                bodyHtml += '<tr>';
+                keys.forEach(key => {
+                    let value = t[key];
+                    
+                    // Format values for display
+                    if (value === null || value === undefined) {
+                        value = '-';
+                    } else if (key.toLowerCase().includes('date') && value) {
+                        // Format dates
+                        try {
+                            value = new Date(value).toLocaleString();
+                        } catch (e) {
+                            // Keep original if not parseable
+                        }
+                    } else if (key === 'status') {
+                        // Format status as badge
+                        value = `<span class="badge ${value === 'PROCESSED' ? 'bg-success' : 'bg-warning'}">${value}</span>`;
+                    } else if (key === 'transactionType' || key === 'type') {
+                        // Format type as badge
+                        value = `<span class="badge bg-secondary">${value}</span>`;
+                    } else if (key.startsWith('enriched_')) {
+                        // Format enriched fields specially
+                        if (key === 'enriched_pnl' && value && value !== '-') {
+                            const pnl = parseFloat(value);
+                            const pnlClass = pnl >= 0 ? 'text-success fw-bold' : 'text-danger fw-bold';
+                            value = `<span class="${pnlClass}">${pnl >= 0 ? '+' : ''}$${Math.abs(pnl).toFixed(2)}</span>`;
+                        } else if (key === 'enriched_direction' && value && value !== '-') {
+                            const dirBadge = value === 'BUY' || value === 'LONG' ? 'bg-success' : 'bg-danger';
+                            value = `<span class="badge ${dirBadge}">${value}</span>`;
+                        }
+                    } else if (typeof value === 'object') {
+                        // Convert objects to JSON string
+                        value = JSON.stringify(value);
+                    }
+                    
+                    bodyHtml += `<td>${value}</td>`;
+                });
+                bodyHtml += '</tr>';
+            });
+            bodyElement.innerHTML = bodyHtml;
+        }
+
+        // tabs
+        elements.tabOpen.addEventListener('click', () => {
+            elements.tabOpen.classList.add('active');
+            elements.tabHistory.classList.remove('active');
+            elements.tabTransactions.classList.remove('active');
+            elements.openPositionsPanel.style.display = '';
+            elements.historyPanel.style.display = 'none';
+            elements.transactionsPanel.style.display = 'none';
+        });
+        elements.tabHistory.addEventListener('click', () => {
+            elements.tabHistory.classList.add('active');
+            elements.tabOpen.classList.remove('active');
+            elements.tabTransactions.classList.remove('active');
+            elements.openPositionsPanel.style.display = 'none';
+            elements.historyPanel.style.display = '';
+            elements.transactionsPanel.style.display = 'none';
+        });
+        elements.tabTransactions.addEventListener('click', () => {
+            elements.tabTransactions.classList.add('active');
+            elements.tabOpen.classList.remove('active');
+            elements.tabHistory.classList.remove('active');
+            elements.openPositionsPanel.style.display = 'none';
+            elements.historyPanel.style.display = 'none';
+            elements.transactionsPanel.style.display = '';
+        });
+
+        function closePosition(dealId) {
+            if (confirm('Are you sure you want to close this position?')) {
+                // This would need to be implemented as an API endpoint
+                console.log('Closing position:', dealId);
+            }
+        }
+
+        function updateActionLogTable(actions) {
+            const tbody = document.querySelector('#actionLogTable tbody');
+            if (!tbody) return;
+            if (!actions || actions.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" class="text-center text-muted py-3">No actions yet</td></tr>';
+                return;
+            }
+            // Most recent first
+            const rows = actions.slice().reverse().map(a => {
+                const status = a.success === true ? 'success' : (a.success === false ? 'danger' : 'secondary');
+                const statusText = a.success === true ? 'OK' : (a.success === false ? 'FAIL' : '');
+                let details = '';
+                if (a.event === 'brains_decision') {
+                    details = `Signal: ${a.signal}, Conf: ${(a.confidence*100||0).toFixed ? (a.confidence*100).toFixed(1) : a.confidence}%` + (a.simulation_override ? ' (simulation override)' : '');
+                } else if (a.event === 'create_position_calculation') {
+                    details = `Dir: ${a.direction}, Entry: $${Number(a.entry_price).toFixed(4)}, Notional: $${Number(a.notional).toFixed(2)}, Ctrts: ${Number(a.contracts).toFixed(2)}, SL: $${Number(a.stop_level).toFixed(4)}`;
+                } else if (a.event?.startsWith('close_position')) {
+                    details = `Deal: ${a.deal_id || ''} ${a.attempt ? 'Attempt ' + a.attempt : ''} ${a.error ? ('Err: ' + a.error) : ''}`;
+                } else if (a.event === 'api_execution') {
+                    const ref = a.dealReference ? ('Ref: ' + a.dealReference) : '';
+                    details = `${ref} ${a.error ? ('Err: ' + a.error) : ''}`;
+                } else if (a.event === 'close_positions') {
+                    details = `Found: ${a.found}`;
+                } else if (a.event === 'data_maintenance_start') {
+                    details = `Starting data maintenance for ${a.epic}`;
+                } else if (a.event === 'data_maintenance_complete') {
+                    const quality = a.quality_check || {};
+                    details = `Downloaded: ${a.candles_downloaded}, Stored: ${a.candles_stored}, Quality: ${quality.status || 'Unknown'} (${quality.coverage_pct || 0}% coverage, ${quality.duplicates || 0} duplicates, ${quality.gaps || 0} gaps)`;
+                } else if (a.event === 'data_maintenance_error') {
+                    details = `Error: ${a.error}`;
+                } else {
+                    details = JSON.stringify(a);
+                }
+                return `<tr>
+                    <td><small>${a.ts || '-'}</small></td>
+                    <td><small>${a.event || '-'}</small></td>
+                    <td><small>${details}</small></td>
+                    <td>${statusText ? `<span class="badge bg-${status}">${statusText}</span>` : ''}</td>
+                </tr>`;
+            }).join('');
+            tbody.innerHTML = rows;
+        }
+
+        // Add notification helper function
+        function showNotification(message, type = 'info') {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type === 'error' ? 'danger' : type} alert-dismissible fade show position-fixed`;
+            alertDiv.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+            alertDiv.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            document.body.appendChild(alertDiv);
+            
+            // Auto-dismiss after 5 seconds
+            setTimeout(() => {
+                alertDiv.remove();
+            }, 5000);
+        }
+        
+        // Modal helper function
+        function showModal(title, body, type = 'info') {
+            const modal = new bootstrap.Modal(document.getElementById('botStatusModal'));
+            document.getElementById('modalTitle').innerHTML = title;
+            document.getElementById('modalBody').innerHTML = body;
+            
+            // Set modal color based on type
+            const modalHeader = document.querySelector('#botStatusModal .modal-header');
+            modalHeader.className = 'modal-header border-' + 
+                (type === 'success' ? 'success' : type === 'error' ? 'danger' : 'secondary');
+            
+            modal.show();
+        }
+        
+        // Start/Stop controls with modal feedback
+        elements.btnStart.addEventListener('click', async () => {
+            try {
+                elements.btnStart.disabled = true;
+                elements.btnStart.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Starting...';
+                
+                const response = await fetch('/bot/start', { method: 'POST' });
+                const result = await response.json();
+                
+                if (result.ok) {
+                    // Update button states
+                    elements.btnStart.style.display = 'none';
+                    elements.btnStop.style.display = 'inline-block';
+                    elements.btnSimulate.style.display = 'inline-block';
+                    
+                    // Update status
+                    elements.status.textContent = 'Bot Running - Monitoring Market';
+                    elements.statusIndicator.className = 'status-indicator status-running';
+                    
+                    // Show modal with bot status
+                    showModal(
+                        '<i class="fas fa-check-circle text-success"></i> Bot Started Successfully',
+                        `
+                        <div class="alert alert-success">
+                            <strong>Bot is now active and monitoring the market!</strong>
+                        </div>
+                        <h6>Current Configuration:</h6>
+                        <ul>
+                            <li><strong>Epic:</strong> TECL</li>
+                            <li><strong>Mode:</strong> Timer-Based Trading</li>
+                            <li><strong>Close Positions:</strong> 30 seconds before market close</li>
+                            <li><strong>Analyze & Trade:</strong> 15 seconds before market close</li>
+                            <li><strong>Investment:</strong> 99% of available balance</li>
+                            <li><strong>Leverage:</strong> 4.0x</li>
+                        </ul>
+                        <div class="alert alert-info mt-3">
+                            <i class="fas fa-info-circle"></i> The bot will wait for the market to open, then monitor for trading opportunities.
+                            Market is currently <strong>${document.getElementById('marketStatus').textContent}</strong>.
+                        </div>
+                        `,
+                        'success'
+                    );
+                } else {
+                    showModal(
+                        '<i class="fas fa-exclamation-triangle text-danger"></i> Failed to Start Bot',
+                        `
+                        <div class="alert alert-danger">
+                            <strong>Error:</strong> ${result.error || 'Unknown error occurred'}
+                        </div>
+                        <p>Please check the logs for more details.</p>
+                        `,
+                        'error'
+                    );
+                    elements.btnStart.disabled = false;
+                    elements.btnStart.innerHTML = '<i class="fas fa-play"></i> Start Bot';
+                }
+            } catch (e) {
+                console.error(e);
+                showModal(
+                    '<i class="fas fa-exclamation-triangle text-danger"></i> Connection Error',
+                    `
+                    <div class="alert alert-danger">
+                        <strong>Failed to communicate with the server.</strong>
+                    </div>
+                    <p>Error: ${e.message}</p>
+                    `,
+                    'error'
+                );
+                elements.btnStart.disabled = false;
+                elements.btnStart.innerHTML = '<i class="fas fa-play"></i> Start Bot';
+            }
+        });
+        
+        elements.btnStop.addEventListener('click', async () => {
+            // Confirm stop action
+            if (!confirm('Are you sure you want to stop the bot? Any pending trades will be cancelled.')) {
+                return;
+            }
+            
+            try {
+                elements.btnStop.disabled = true;
+                elements.btnStop.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Stopping...';
+                
+                const response = await fetch('/bot/stop', { method: 'POST' });
+                const result = await response.json();
+                
+                if (result.ok) {
+                    // Update button states
+                    elements.btnStart.style.display = 'inline-block';
+                    elements.btnStop.style.display = 'none';
+                    elements.btnSimulate.style.display = 'inline-block';
+                    
+                    // Update status
+                    elements.status.textContent = 'Bot Stopped';
+                    elements.statusIndicator.className = 'status-indicator status-stopped';
+                    
+                    // Show modal
+                    showModal(
+                        '<i class="fas fa-stop-circle text-warning"></i> Bot Stopped',
+                        `
+                        <div class="alert alert-warning">
+                            <strong>Bot has been stopped successfully.</strong>
+                        </div>
+                        <p>The bot is no longer monitoring the market or executing trades.</p>
+                        <div class="mt-3">
+                            <p>You can:</p>
+                            <ul>
+                                <li>Start the bot again to resume monitoring</li>
+                                <li>Run a simulation to test the trading logic</li>
+                                <li>Review your positions and history</li>
+                            </ul>
+                        </div>
+                        `,
+                        'warning'
+                    );
+                } else {
+                    showModal(
+                        '<i class="fas fa-exclamation-triangle text-danger"></i> Failed to Stop Bot',
+                        `<div class="alert alert-danger">Error stopping bot: ${result.error || 'Unknown error'}</div>`,
+                        'error'
+                    );
+                }
+                
+                elements.btnStop.disabled = false;
+                elements.btnStop.innerHTML = '<i class="fas fa-stop"></i> Stop Bot';
+            } catch (e) {
+                console.error(e);
+                showModal(
+                    '<i class="fas fa-exclamation-triangle text-danger"></i> Error',
+                    `<div class="alert alert-danger">Error stopping bot: ${e.message}</div>`,
+                    'error'
+                );
+                elements.btnStop.disabled = false;
+                elements.btnStop.innerHTML = '<i class="fas fa-stop"></i> Stop Bot';
+            }
+        });
+        
+            // Simulate button with progress modal
+        document.getElementById('btnSimulate').addEventListener('click', async () => {
+            // Show simulation modal
+            const simulationModal = new bootstrap.Modal(document.getElementById('simulationModal'));
+            simulationModal.show();
+            
+            // Reset progress
+            document.getElementById('simulationProgress').style.width = '0%';
+            document.getElementById('simulationProgress').textContent = '0%';
+            
+            // Update steps
+            const updateStep = (step, status) => {
+                const stepElement = document.getElementById(`step${step}`);
+                if (status === 'active') {
+                    stepElement.className = 'text-warning';
+                    stepElement.innerHTML = stepElement.textContent.replace(/^.*?(\s)/, '<i class="fas fa-circle-notch fa-spin"></i>$1');
+                } else if (status === 'done') {
+                    stepElement.className = 'text-success';
+                    stepElement.innerHTML = stepElement.textContent.replace(/^.*?(\s)/, '<i class="fas fa-check-circle"></i>$1');
+                }
+            };
+            
+            try {
+                // Start simulation
+                updateStep(1, 'active'); // T-30s close
+                document.getElementById('simulationProgress').style.width = '33%';
+                document.getElementById('simulationProgress').textContent = '33%';
+                
+                const response = await fetch('/bot/simulate', { method: 'POST' });
+                const result = await response.json();
+                
+                // Simulate progress
+                setTimeout(() => {
+                    updateStep(1, 'done');
+                    updateStep(2, 'active'); // T-15s trade
+                    document.getElementById('simulationProgress').style.width = '66%';
+                    document.getElementById('simulationProgress').textContent = '66%';
+                }, 1500);
+                
+                setTimeout(() => {
+                    updateStep(2, 'done');
+                    updateStep(3, 'active'); // Final countdown
+                    document.getElementById('simulationProgress').style.width = '90%';
+                    document.getElementById('simulationProgress').textContent = '90%';
+                }, 3500);
+                
+                setTimeout(() => {
+                    updateStep(3, 'done');
+                    document.getElementById('simulationProgress').style.width = '100%';
+                    document.getElementById('simulationProgress').textContent = '100%';
+                    
+                    // Hide simulation modal and show result
+                    simulationModal.hide();
+                    
+                    const steps = result.steps || {};
+                    const closeOK = steps.close_positions !== undefined ? steps.close_positions : result.ok;
+                    const createOK = steps.create_trade !== undefined ? steps.create_trade : result.ok;
+                    
+                    if (result.ok && closeOK && createOK) {
+                        showModal(
+                            '<i class="fas fa-check-circle text-success"></i> Simulation Complete',
+                            `
+                            <div class="alert alert-success">
+                                <strong>Market simulation completed successfully!</strong>
+                            </div>
+                            <ul class="mb-2">
+                                <li>${closeOK ? '✅' : '❌'} Closed all positions at T-30s</li>
+                                <li>${createOK ? '✅' : '❌'} Analyzed & placed a trade at T-15s</li>
+                                <li>✅ Final countdown completed</li>
+                            </ul>
+                            <div class="alert alert-info mt-3">
+                                <i class="fas fa-info-circle"></i> Positions and history will refresh automatically.
+                            </div>
+                            `,
+                            'success'
+                        );
+                    } else {
+                        const errorMsg = result.error || 'Simulation failed. Check logs for details.';
+                        showModal(
+                            '<i class="fas fa-exclamation-triangle text-danger"></i> Simulation Result',
+                            `
+                            <div class="alert alert-warning">
+                                <strong>Completed with warnings.</strong>
+                            </div>
+                            <ul class="mb-2">
+                                <li>${closeOK ? '✅' : '❌'} Closed all positions at T-30s</li>
+                                <li>${createOK ? '✅' : '❌'} Analyzed & placed a trade at T-15s</li>
+                                <li>✅ Final countdown completed</li>
+                            </ul>
+                            <div class="alert alert-secondary mt-2"><small>${errorMsg}</small></div>
+                            `,
+                            'error'
+                        );
+                    }
+                }, 5000);
+                
+            } catch (e) {
+                console.error(e);
+                simulationModal.hide();
+                showModal(
+                    '<i class="fas fa-exclamation-triangle text-danger"></i> Simulation Error',
+                    `<div class="alert alert-danger">Error: ${e.message}</div>`,
+                    'error'
+                );
+            }
+        });
+
+        // Speed Test button - open modal
+        document.getElementById('btnSpeedTest').addEventListener('click', () => {
+            // Show speed test modal
+            const speedTestModal = new bootstrap.Modal(document.getElementById('speedTestModal'));
+            speedTestModal.show();
+            
+            // Reset UI
+            document.getElementById('speedTestDay').textContent = '0/0';
+            document.getElementById('speedTestTime').textContent = '09:30:00';
+            document.getElementById('speedTestSpeed').textContent = '⚡ Ready';
+            document.getElementById('speedTestProgress').style.width = '0%';
+            document.getElementById('speedTestProgress').textContent = '0%';
+            document.getElementById('speedTestTimeMarker').style.left = '0%';
+            document.getElementById('speedTestEvents').innerHTML = '<div class="text-muted">Click "Start Speed Test" to begin...</div>';
+            document.getElementById('speedTestStatus').innerHTML = '<h5 class="text-info">Ready to Start</h5><p class="mb-0">Click "Start Speed Test" to begin</p>';
+            speedTestLive = false; stDaysTotal = 0; stLastTs = '';
+        });
+        
+        // Start Speed Test button
+        document.getElementById('btnStartSpeedTest').addEventListener('click', async () => {
+            const speedTestModal = bootstrap.Modal.getInstance(document.getElementById('speedTestModal'));
+            const days = parseInt(document.getElementById('speedTestDays').value) || 5;
+            const btn = document.getElementById('btnStartSpeedTest');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Running...';
+            document.getElementById('speedTestEvents').innerHTML = '';
+            document.getElementById('speedTestStatus').innerHTML = '<h5 class="text-warning">Initializing...</h5>';
+            document.getElementById('speedTestProgress').style.width = '0%';
+            document.getElementById('speedTestProgress').textContent = '0%';
+            stDaysTotal = days;
+            stLastTs = '';
+            speedTestLive = true;
+
+            try {
+                stAddEvent('Starting speed test...', 'warning');
+                // Fire and forget; progress will stream via websocket action_log
+                const resp = await fetch(`/bot/speedtest?days=${days}`, { method: 'POST' });
+                const json = await resp.json();
+                if (!json.ok) {
+                    speedTestLive = false;
+                    const errorMsg = json.error || 'Speed test failed';
+                    const isMarketClosed = errorMsg.includes('market_closed') || errorMsg.includes('Market is');
+                    speedTestModal.hide();
+                    showModal(
+                        '<i class="fas fa-exclamation-triangle text-danger"></i> Speed Test Error',
+                        `
+                        <div class="alert alert-danger"><strong>Speed Test Failed</strong></div>
+                        <div class="alert ${isMarketClosed ? 'alert-warning' : 'alert-danger'}">${isMarketClosed ? '<i class="fas fa-clock"></i> <strong>Market is CLOSED!</strong><br>Speed test requires market to be OPEN for real trading.' : 'Error: ' + errorMsg}</div>
+                        ${isMarketClosed ? '<div class="alert alert-info mt-2"><i class="fas fa-info-circle"></i> Use the regular "Simulate" button when market is closed.</div>' : ''}
+                        `,
+                        'error'
+                    );
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="fas fa-play"></i> Start Speed Test';
+                }
+            } catch (e) {
+                speedTestLive = false;
+                console.error(e);
+                speedTestModal.hide();
+                showModal(
+                    '<i class="fas fa-exclamation-triangle text-danger"></i> Speed Test Error',
+                    `<div class="alert alert-danger">Error: ${e.message}</div>`,
+                    'error'
+                );
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-play"></i> Start Speed Test';
+            }
+        });
+
+        // Brain Preview
+        document.getElementById('btnBrainPreview').addEventListener('click', async () => {
+            const modal = new bootstrap.Modal(document.getElementById('brainsModal'));
+            const body = document.getElementById('brainsBody');
+            body.innerHTML = '<div class="text-center py-4"><i class="fas fa-spinner fa-spin"></i> Running analysis...</div>';
+            modal.show();
+            try {
+                const res = await fetch('/brains/preview', { method: 'POST' });
+                const data = await res.json();
+                if (!data.ok) {
+                    body.innerHTML = `<div class="alert alert-danger">Error: ${data.error || 'Unknown error'}</div>`;
+                    return;
+                }
+                const d = data.decision || {};
+                const s = data.sizing || {};
+                const mi = data.market_info || {};
+                const lc = data.last_candle || {};
+                const rows = [];
+                
+                // Show which strategy mode is being used
+                if (data.strategy_mode) {
+                    let strategyDisplay = data.strategy_mode;
+                    if (data.strategy_mode === 'test6_with_protection') {
+                        strategyDisplay = 'Test6 - 8 Signals WITH Protection ($958k)';
+                    } else if (data.strategy_mode === 'test6_no_protection') {
+                        strategyDisplay = 'Test6 - 8 Signals NO Protection ($509k)';
+                    } else if (data.strategy_mode === 'test7_with_protection') {
+                        strategyDisplay = 'Test7 - 9 Signals WITH Protection';
+                    } else if (data.strategy_mode === 'test7_no_protection') {
+                        strategyDisplay = 'Test7 - 9 Signals NO Protection';
+                    } else if (data.strategy_mode === 'all_signals') {
+                        strategyDisplay = data.crash_protection ? 'All 6 Signals WITH Protection ($699k)' : 'All 6 Signals NO Protection ($376k)';
+                    } else if (data.strategy_mode === 'two_rsi_only') {
+                        strategyDisplay = data.crash_protection ? 'Two RSI WITH Protection ($486k)' : 'Two RSI NO Protection ($349k)';
+                    } else if (data.strategy_mode === 'enhanced') {
+                        strategyDisplay = 'Enhanced (AI System)';
+                    }
+                    rows.push(`<tr><td colspan="2" class="text-center bg-primary text-white"><strong>Using Strategy: ${strategyDisplay}</strong></td></tr>`);
+                }
+                
+                // Show the candle timestamp used for analysis
+                if (data.last_candle_time) {
+                    // Parse and format the timestamp
+                    let candleTime = data.last_candle_time;
+                    try {
+                        const dt = new Date(candleTime);
+                        if (!isNaN(dt.getTime())) {
+                            // Format as readable date/time
+                            candleTime = dt.toLocaleString('en-US', {
+                                month: 'short',
+                                day: 'numeric',
+                                hour: '2-digit',
+                                minute: '2-digit',
+                                timeZoneName: 'short'
+                            });
+                        }
+                    } catch(e) {
+                        // Keep original if parsing fails
+                    }
+                    rows.push(`<tr><td colspan="2" class="text-center bg-info text-white"><strong>Analysis Based On: ${candleTime}</strong></td></tr>`);
+                }
+                
+                // Show data source
+                if (data.data_source) {
+                    const sourceClass = data.data_source.includes('gap-filled') ? 'bg-success' : 'bg-warning';
+                    rows.push(`<tr><td colspan="2" class="text-center ${sourceClass} text-white"><strong>Data: ${data.data_source}</strong></td></tr>`);
+                }
+                
+                // Confidence is already in percentage (0-100), not decimal (0-1)
+                const confidencePercent = (typeof d.confidence === 'number') ? d.confidence : parseFloat(d.confidence) || 0;
+                rows.push(`<tr><td>Signal</td><td><strong>${d.trade_signal || '-'}</strong></td></tr>`);
+                rows.push(`<tr><td>Confidence</td><td>${confidencePercent.toFixed(2)}%</td></tr>`);
+                rows.push(`<tr><td>Strategy</td><td><strong>${data.selected_strategy || 'N/A'}</strong></td></tr>`);
+                
+                // Show fired signals with winning strategy highlighted
+                if (data.fired_signals) {
+                    const signals = Object.entries(data.fired_signals)
+                        .map(([name, fired]) => {
+                            const isWinner = name === data.selected_strategy;
+                            const badgeClass = fired ? (isWinner ? 'bg-warning' : 'bg-success') : 'bg-secondary';
+                            const winnerMark = isWinner ? ' ⭐ WINNER' : '';
+                            return `<span class="badge ${badgeClass} me-1">${name.replace(/_/g, ' ')}: ${fired ? '✓' : '✗'}${winnerMark}</span>`;
+                        })
+                        .join(' ');
+                    rows.push(`<tr><td>Signals</td><td>${signals}</td></tr>`);
+                }
+                
+                // Show strategy config if available
+                if (data.strategy_config) {
+                    const cfg = data.strategy_config;
+                    rows.push(`<tr><td>Win Rate</td><td><strong>${cfg.win_rate || 0}%</strong></td></tr>`);
+                    rows.push(`<tr><td>Strategy Leverage</td><td><strong>${cfg.leverage || 1}x</strong></td></tr>`);
+                    if (cfg.stop_loss_pct) rows.push(`<tr><td>Stop Loss</td><td>${cfg.stop_loss_pct}%</td></tr>`);
+                }
+                
+                // Show sizing with leverage details
+                if (s.contracts !== undefined) {
+                    rows.push(`<tr><td colspan="2" class="text-center bg-secondary"><strong>Position Sizing</strong></td></tr>`);
+                    rows.push(`<tr><td>Contracts</td><td><strong>${s.contracts.toFixed ? s.contracts.toFixed(2) : s.contracts}</strong></td></tr>`);
+                    rows.push(`<tr><td>Leverage Used</td><td><strong>${s.leverage || 1}x</strong> ${s.leverage_source === 'strategy' ? '(from strategy)' : '(from settings)'}</td></tr>`);
+                    if (s.entry_price) rows.push(`<tr><td>Entry Price</td><td>$${s.entry_price.toFixed ? s.entry_price.toFixed(2) : s.entry_price}</td></tr>`);
+                    if (s.stop_level) rows.push(`<tr><td>Stop Level</td><td>$${s.stop_level.toFixed ? s.stop_level.toFixed(2) : s.stop_level} (${s.sl_type})</td></tr>`);
+                    rows.push(`<tr><td>Available</td><td>$${s.available?.toFixed ? s.available.toFixed(2) : s.available || 0}</td></tr>`);
+                    rows.push(`<tr><td>Investment %</td><td>${(s.investment_pct*100)?.toFixed ? (s.investment_pct*100).toFixed(1) : s.investment_pct*100 || 0}%</td></tr>`);
+                }
+                
+                if (mi.instrument && mi.instrument.name) rows.push(`<tr><td>Instrument</td><td>${mi.instrument.name}</td></tr>`);
+                body.innerHTML = `
+                    <div class="mb-3">
+                        <h6 class="text-muted">Latest 5m Candle</h6>
+                        <div><small><strong>Time:</strong> ${lc.timestamp ? new Date(lc.timestamp).toLocaleString() : '-'}</small></div>
+                        <div><small><strong>O</strong>: ${lc.open?.toFixed ? lc.open.toFixed(4) : lc.open || '-'}  
+                            <strong>H</strong>: ${lc.high?.toFixed ? lc.high.toFixed(4) : lc.high || '-'}  
+                            <strong>L</strong>: ${lc.low?.toFixed ? lc.low.toFixed(4) : lc.low || '-'}  
+                            <strong>C</strong>: ${lc.close?.toFixed ? lc.close.toFixed(4) : lc.close || '-'}</small></div>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-sm table-dark table-bordered">
+                            <tbody>${rows.join('')}</tbody>
+                        </table>
+                    </div>
+                    <div class="alert alert-secondary"><small>This preview does not place trades. It shows what the Brains would decide and the computed sizing based on current settings and dealing rules.</small></div>
+                `;
+            } catch (e) {
+                body.innerHTML = `<div class="alert alert-danger">Error: ${e.message}</div>`;
+            }
+        });
+
+        // Stop Loss Configuration Handlers
+        const stopLossRadios = document.querySelectorAll('input[name="stopLossType"]');
+        const slNormalValue = document.getElementById('slNormalValue');
+        const slThresholds = document.getElementById('slThresholds');
+        const slAdjustments = document.getElementById('slAdjustments');
+        const slWhenAt = document.getElementById('slWhenAt');
+        const slUse = document.getElementById('slUse');
+        
+        // Handle radio button changes
+        stopLossRadios.forEach(radio => {
+            radio.addEventListener('change', () => {
+                // Disable all inputs first
+                slNormalValue.disabled = true;
+                slThresholds.disabled = true;
+                slAdjustments.disabled = true;
+                slWhenAt.disabled = true;
+                slUse.disabled = true;
+                
+                // Enable the selected one
+                if (radio.value === 'normal') {
+                    slNormalValue.disabled = false;
+                } else if (radio.value === 'trailing') {
+                    slThresholds.disabled = false;
+                    slAdjustments.disabled = false;
+                } else if (radio.value === 'staggered') {
+                    slWhenAt.disabled = false;
+                    slUse.disabled = false;
+                }
+            });
+        });
+        
+        // Save Stop Loss Settings - Modified for modal
+        async function saveStopLossSettings() {
+            const selectedType = document.querySelector('input[name="stopLossType"]:checked').value;
+            const overrideStrategySL = document.getElementById('overrideStrategySL').checked;
+            
+            const settings = {
+                stop_loss_type: selectedType,
+                stop_loss_pct: slNormalValue.value || '2.0',
+                override_strategy_sl: overrideStrategySL,
+                sl_thresholds: slThresholds.value || '5,10,15',
+                sl_adjustments: slAdjustments.value || '2,5,8',
+                sl_when_at: slWhenAt.value || '2,4,5,7,10,12,15',
+                sl_use: slUse.value || '0,1,2,4,6,8,10'
+            };
+            
+            try {
+                const response = await fetch('/config/stoploss', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(settings)
+                });
+                
+                if (response.ok) {
+                    showNotification('Stop loss settings saved successfully!', 'success');
+                } else {
+                    showNotification('Failed to save stop loss settings', 'error');
+                }
+            } catch (e) {
+                showNotification('Error saving settings: ' + e.message, 'error');
+            }
+            updateActiveStopLossDisplay();
+        }
+
+        // Initialize displays on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set initial display values
+            const strategyDisplay = document.getElementById('activeStrategyDisplay');
+            const stopLossDisplay = document.getElementById('activeStopLossDisplay');
+            
+            if (strategyDisplay) {
+                strategyDisplay.textContent = 'Connecting...';
+            }
+            if (stopLossDisplay) {
+                stopLossDisplay.textContent = 'Connecting...';
+            }
+        });
+        
+        // Initialize WebSocket connection
+        connectWebSocket();
+        
+        // Debug toggle handler
+        document.getElementById('debugToggle').addEventListener('change', async (e) => {
+            const debugMode = e.target.checked;
+            
+            try {
+                const response = await fetch('/api/log/level', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({debug_mode: debugMode})
+                });
+                
+                const data = await response.json();
+                if (data.success) {
+                    showNotification(
+                        `Logging: ${debugMode ? 'Debug Mode (All Logs)' : 'Production Mode (Errors/Warnings)'}`, 
+                        debugMode ? 'info' : 'warning'
+                    );
+                } else {
+                    showNotification('Failed to change log level', 'error');
+                    e.target.checked = !debugMode; // Revert toggle
+                }
+            } catch (error) {
+                console.error('Error changing log level:', error);
+                showNotification('Error changing log level', 'error');
+                e.target.checked = !debugMode; // Revert toggle
+            }
+        });
+        
+        // Strategy settings will be loaded when WebSocket sends data
+        
+        // Show strategy details modal
+        function showStrategyDetails() {
+            const modal = new bootstrap.Modal(document.getElementById('strategyDetailsModal'));
+            modal.show();
+        }
+        
+        // Show strategy selection modal
+        function showStrategyModal() {
+            const modal = new bootstrap.Modal(document.getElementById('strategySelectionModal'));
+            modal.show();
+        }
+        
+        // Show stop loss configuration modal
+        function showStopLossModal() {
+            const modal = new bootstrap.Modal(document.getElementById('stopLossModal'));
+            modal.show();
+        }
+        
+        // Update active strategy display
+        function updateActiveStrategyDisplay() {
+            const strategyMode = document.querySelector('input[name="strategyMode"]:checked');
+            const display = document.getElementById('activeStrategyDisplay');
+            if (strategyMode && display) {
+                const label = strategyMode.parentElement.querySelector('strong');
+                if (label) {
+                    display.textContent = label.textContent;
+                } else {
+                    display.textContent = strategyMode.value;
+                }
+            } else if (display) {
+                display.textContent = 'Not Set';
+            }
+        }
+        
+        // Update active stop loss display
+        function updateActiveStopLossDisplay() {
+            const slType = document.querySelector('input[name="stopLossType"]:checked');
+            const display = document.getElementById('activeStopLossDisplay');
+            if (slType && display) {
+                let text = '';
+                if (slType.value === 'normal') {
+                    const value = document.getElementById('slNormalValue').value || '2.0';
+                    text = `Normal ${value}%`;
+                } else if (slType.value === 'trailing') {
+                    text = 'Trailing SL';
+                } else if (slType.value === 'staggered') {
+                    text = 'Staggered SL';
+                }
+                display.textContent = text;
+            }
+        }
+        
+        // Update category display
+        function updateCategoryDisplay() {
+            const categoryHidden = document.getElementById('category');
+            const categoryDisplay = document.getElementById('categoryDisplay');
+            if (categoryHidden && categoryDisplay && categoryHidden.textContent !== '-') {
+                categoryDisplay.textContent = categoryHidden.textContent;
+            }
+        }
+    </script>
+    
+    <!-- Strategy Details Modal -->
+    <div class="modal fade" id="strategyDetailsModal" tabindex="-1">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Strategy Details - What Each Signal Means</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="accordion" id="strategyAccordion">
+                        <!-- All 6 Signals -->
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#all6Signals">
+                                    <strong>All 6 Signals Strategy</strong>
+                                </button>
+                            </h2>
+                            <div id="all6Signals" class="accordion-collapse collapse show" data-bs-parent="#strategyAccordion">
+                                <div class="accordion-body">
+                                    <p class="text-muted">Uses 6 different market indicators. When multiple signals fire, the system picks the one with highest priority.</p>
+                                    <ul class="list-unstyled">
+                                        <li class="mb-3">
+                                            <strong>📉 RSI Oversold (Priority: 80)</strong>
+                                            <div class="text-muted small">Triggers when: Stock is heavily sold and RSI drops below 25</div>
+                                            <div class="text-success small">Plain English: "The stock has been beaten down too much and is likely to bounce back"</div>
+                                        </li>
+                                        <li class="mb-3">
+                                            <strong>📈 RSI Bullish Cross (Priority: 63)</strong>
+                                            <div class="text-muted small">Triggers when: RSI crosses above 50 from below</div>
+                                            <div class="text-success small">Plain English: "The stock is gaining momentum and starting an upward trend"</div>
+                                        </li>
+                                        <li class="mb-3">
+                                            <strong>📊 Bollinger Band Break (Priority: 80)</strong>
+                                            <div class="text-muted small">Triggers when: Price touches the lower Bollinger Band</div>
+                                            <div class="text-success small">Plain English: "The stock has moved unusually far from its average and should snap back"</div>
+                                        </li>
+                                        <li class="mb-3">
+                                            <strong>💹 Price Above VWAP (Priority: 57.6)</strong>
+                                            <div class="text-muted small">Triggers when: Current price is above the volume-weighted average</div>
+                                            <div class="text-success small">Plain English: "Big traders are buying at these levels, showing institutional support"</div>
+                                        </li>
+                                        <li class="mb-3">
+                                            <strong>🔻 ROC Below Threshold (Priority: 78.9)</strong>
+                                            <div class="text-muted small">Triggers when: Rate of change drops below -1%</div>
+                                            <div class="text-success small">Plain English: "The stock has dropped quickly and is due for a reversal"</div>
+                                        </li>
+                                        <li class="mb-3">
+                                            <strong>🎯 MACD Positive (Priority: 63)</strong>
+                                            <div class="text-muted small">Triggers when: MACD line crosses above signal line</div>
+                                            <div class="text-success small">Plain English: "Short-term momentum is overtaking long-term trend - bullish signal"</div>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Two RSI Strategy -->
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#twoRSI">
+                                    <strong>Two RSI Strategy</strong>
+                                </button>
+                            </h2>
+                            <div id="twoRSI" class="accordion-collapse collapse" data-bs-parent="#strategyAccordion">
+                                <div class="accordion-body">
+                                    <p class="text-muted">Simplified strategy using only the two RSI signals. Lower risk, fewer trades.</p>
+                                    <ul class="list-unstyled">
+                                        <li class="mb-3">
+                                            <strong>📉 RSI Oversold (Priority: 80)</strong>
+                                            <div class="text-muted small">Triggers when: RSI < 25</div>
+                                            <div class="text-success small">Plain English: "Buy when everyone else is fearful"</div>
+                                        </li>
+                                        <li class="mb-3">
+                                            <strong>📈 RSI Bullish Cross (Priority: 63)</strong>
+                                            <div class="text-muted small">Triggers when: RSI crosses above 50</div>
+                                            <div class="text-success small">Plain English: "Buy when momentum shifts positive"</div>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Test6 Strategy -->
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#test6">
+                                    <strong>Test6 - 8 Signals Strategy</strong>
+                                </button>
+                            </h2>
+                            <div id="test6" class="accordion-collapse collapse" data-bs-parent="#strategyAccordion">
+                                <div class="accordion-body">
+                                    <p class="text-muted">All 6 base signals PLUS 2 additional advanced indicators.</p>
+                                    <p class="small">Includes all signals from "All 6 Signals" plus:</p>
+                                    <ul class="list-unstyled">
+                                        <li class="mb-3">
+                                            <strong>📐 Keltner Channel Break (Priority: 74.2)</strong>
+                                            <div class="text-muted small">Triggers when: Price breaks below lower Keltner Channel</div>
+                                            <div class="text-success small">Plain English: "Price has moved beyond normal volatility range - expect a snapback"</div>
+                                        </li>
+                                        <li class="mb-3">
+                                            <strong>📊 MACD Histogram Negative (Priority: 70.7)</strong>
+                                            <div class="text-muted small">Triggers when: MACD histogram goes negative by more than -0.05</div>
+                                            <div class="text-success small">Plain English: "Momentum is oversold and reversal is likely"</div>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Test7 Strategy -->
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#test7">
+                                    <strong>Test7 - 9 Signals Strategy</strong>
+                                </button>
+                            </h2>
+                            <div id="test7" class="accordion-collapse collapse" data-bs-parent="#strategyAccordion">
+                                <div class="accordion-body">
+                                    <p class="text-muted">All 8 signals from Test6 PLUS an optimized MACD variant.</p>
+                                    <p class="small">Includes all signals from Test6 plus:</p>
+                                    <ul class="list-unstyled">
+                                        <li class="mb-3">
+                                            <strong>📈 MACD Histogram v2 (Priority: 75.9)</strong>
+                                            <div class="text-muted small">Triggers when: Optimized MACD histogram (5/18/4) goes below -0.10</div>
+                                            <div class="text-success small">Plain English: "Enhanced momentum reversal detector with tighter parameters"</div>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Enhanced Strategy -->
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#enhanced">
+                                    <strong>Enhanced - Current AI System</strong>
+                                </button>
+                            </h2>
+                            <div id="enhanced" class="accordion-collapse collapse" data-bs-parent="#strategyAccordion">
+                                <div class="accordion-body">
+                                    <p class="text-muted">The original AI system with dynamic confidence scoring.</p>
+                                    <ul class="list-unstyled">
+                                        <li class="mb-3">
+                                            <strong>🤖 AI Confidence System</strong>
+                                            <div class="text-muted small">Uses all available signals but requires minimum confidence threshold</div>
+                                            <div class="text-success small">Plain English: "Only trades when the AI is confident enough based on market conditions"</div>
+                                        </li>
+                                        <li class="mb-3">
+                                            <strong>📊 Dynamic Analysis</strong>
+                                            <div class="text-muted small">Analyzes multiple timeframes and market conditions</div>
+                                            <div class="text-success small">Plain English: "Adapts to changing market conditions rather than fixed rules"</div>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Crash Protection -->
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#crashProtection">
+                                    <strong>🛡️ What is Crash Protection?</strong>
+                                </button>
+                            </h2>
+                            <div id="crashProtection" class="accordion-collapse collapse" data-bs-parent="#strategyAccordion">
+                                <div class="accordion-body">
+                                    <p class="text-muted">Crash protection prevents trading during severe market downturns.</p>
+                                    <ul class="list-unstyled">
+                                        <li class="mb-3">
+                                            <strong>🚫 Trade Blocking</strong>
+                                            <div class="text-muted small">Blocks trades when: 3-day drawdown exceeds 10%</div>
+                                            <div class="text-success small">Plain English: "If the market dropped 10% in 3 days, stop trading until it recovers"</div>
+                                        </li>
+                                        <li class="mb-3">
+                                            <strong>📉 Bottom Detection</strong>
+                                            <div class="text-muted small">Resumes when: RSI < 20 and volume spikes 1.5x normal</div>
+                                            <div class="text-success small">Plain English: "Wait for signs of panic selling (the bottom) before trading again"</div>
+                                        </li>
+                                        <li class="mb-3">
+                                            <strong>📈 Recovery Threshold</strong>
+                                            <div class="text-muted small">Fully resumes when: Market recovers to within 3% of recent highs</div>
+                                            <div class="text-success small">Plain English: "Once the market is almost back to normal, trade normally again"</div>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="alert alert-info mt-3">
+                        <i class="fas fa-lightbulb"></i> <strong>How It Works:</strong> 
+                        The system checks all active signals every day at market close. When multiple signals trigger, 
+                        it selects the one with the highest priority number. Higher priority = historically better performance.
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Strategy Selection Modal -->
+    <div class="modal fade" id="strategySelectionModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fas fa-chart-line"></i> Select Trading Strategy</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="alert alert-info mb-3">
+                        <i class="fas fa-info-circle"></i> Select your preferred trading strategy. Each has different risk/reward profiles.
+                    </div>
+                    <div class="strategy-mode-selection">
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="radio" name="strategyMode" value="all_with_protection" id="allWithProtection" checked>
+                            <label class="form-check-label" for="allWithProtection">
+                                <strong>All 6 Signals WITH Protection</strong> ✅
+                                <br><span class="text-muted small">Uses RSI, Bollinger, VWAP, ROC, MACD with crash protection</span>
+                            </label>
+                        </div>
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="radio" name="strategyMode" value="all_no_protection" id="allNoProtection">
+                            <label class="form-check-label" for="allNoProtection">
+                                <strong>All 6 Signals NO Protection</strong>
+                                <br><span class="text-muted small">Same signals but trades through market crashes</span>
+                            </label>
+                        </div>
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="radio" name="strategyMode" value="two_rsi_protection" id="twoRsiProtection">
+                            <label class="form-check-label" for="twoRsiProtection">
+                                <strong>Two RSI WITH Protection</strong> 🛡️
+                                <br><span class="text-muted small">Simplified strategy, lowest risk</span>
+                            </label>
+                        </div>
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="radio" name="strategyMode" value="two_rsi_no_protection" id="twoRsiNoProtection">
+                            <label class="form-check-label" for="twoRsiNoProtection">
+                                <strong>Two RSI NO Protection</strong>
+                                <br><span class="text-muted small">RSI only, no crash protection</span>
+                            </label>
+                        </div>
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="radio" name="strategyMode" value="test6_no_protection" id="test6NoProtection">
+                            <label class="form-check-label" for="test6NoProtection">
+                                <strong>Test6 - 8 Signals NO Protection</strong> 🚀
+                                <br><span class="text-muted small">Adds Keltner Channel and MACD Histogram</span>
+                            </label>
+                        </div>
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="radio" name="strategyMode" value="test6_with_protection" id="test6WithProtection">
+                            <label class="form-check-label" for="test6WithProtection">
+                                <strong>Test6 - 8 Signals WITH Protection</strong> 🏆
+                                <br><span class="text-muted small">8 signals with crash protection</span>
+                            </label>
+                        </div>
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="radio" name="strategyMode" value="test7_no_protection" id="test7NoProtection">
+                            <label class="form-check-label" for="test7NoProtection">
+                                <strong>Test7 - 9 Signals NO Protection</strong>
+                                <br><span class="text-muted small">Test6 plus optimized MACD v2</span>
+                            </label>
+                        </div>
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="radio" name="strategyMode" value="test7_with_protection" id="test7WithProtection">
+                            <label class="form-check-label" for="test7WithProtection">
+                                <strong>Test7 - 9 Signals WITH Protection</strong>
+                                <br><span class="text-muted small">Most comprehensive with protection</span>
+                            </label>
+                        </div>
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="radio" name="strategyMode" value="enhanced" id="enhanced">
+                            <label class="form-check-label" for="enhanced">
+                                <strong>Enhanced AI System</strong>
+                                <br><span class="text-muted small">Dynamic confidence-based trading</span>
+                            </label>
+                        </div>
+                    </div>
+                    <button onclick="showStrategyDetails()" class="btn btn-info btn-sm mt-2">
+                        <i class="fas fa-info-circle"></i> View Strategy Details
+                    </button>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="saveStrategySettings(); bootstrap.Modal.getInstance(document.getElementById('strategySelectionModal')).hide(); updateActiveStrategyDisplay();">
+                        <i class="fas fa-save"></i> Save Strategy
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Stop Loss Configuration Modal -->
+    <div class="modal fade" id="stopLossModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fas fa-shield-alt"></i> Stop Loss Configuration</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-check mb-3">
+                        <input class="form-check-input" type="checkbox" id="overrideStrategySL">
+                        <label class="form-check-label" for="overrideStrategySL">
+                            Override Strategy Stop Loss
+                        </label>
+                    </div>
+                    <div class="form-check mb-3">
+                        <input class="form-check-input" type="radio" name="stopLossType" id="slNormal" value="normal" checked>
+                        <label class="form-check-label" for="slNormal">Normal Stop Loss (%)</label>
+                        <input type="number" class="form-control form-control-sm mt-1" id="slNormalValue" 
+                               placeholder="2.0" step="0.1" style="width: 100px;">
+                    </div>
+                    <div class="form-check mb-3">
+                        <input class="form-check-input" type="radio" name="stopLossType" id="slTrailing" value="trailing">
+                        <label class="form-check-label" for="slTrailing">Trailing Stop Loss</label>
+                        <div class="d-flex gap-2 mt-1">
+                            <input type="text" class="form-control form-control-sm" id="slThresholds" 
+                                   placeholder="Thresholds: 5,10,15" disabled style="width: 140px;">
+                            <input type="text" class="form-control form-control-sm" id="slAdjustments" 
+                                   placeholder="Adjust: 2,5,8" disabled style="width: 120px;">
+                        </div>
+                    </div>
+                    <div class="form-check mb-3">
+                        <input class="form-check-input" type="radio" name="stopLossType" id="slStaggered" value="staggered">
+                        <label class="form-check-label" for="slStaggered">Staggered Stop Loss</label>
+                        <div class="d-flex gap-2 mt-1">
+                            <input type="text" class="form-control form-control-sm" id="slWhenAt" 
+                                   placeholder="When: 2,4,5,7,10" disabled style="width: 140px;">
+                            <input type="text" class="form-control form-control-sm" id="slUse" 
+                                   placeholder="Use: 0,1,2,4,6" disabled style="width: 120px;">
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="btnSaveStopLoss" onclick="saveStopLossSettings(); bootstrap.Modal.getInstance(document.getElementById('stopLossModal')).hide();">
+                        <i class="fas fa-save"></i> Save Configuration
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+</body>
+</html>

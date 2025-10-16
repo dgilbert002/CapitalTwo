@@ -26,9 +26,11 @@ class HybridIntelligentSystem:
         self.OVERNIGHT_FUNDING_LONG = -0.00023  # -0.023% per day for longs
         
         # Strategy mode: 'enhanced' (current), 'all_signals' ($376k/$699k), 'two_rsi_only' (lower risk),
-        #               'test6_no_protection' ($509k), 'test6_with_protection' ($958k BEST!)
+        #               'test6_no_protection' ($509k), 'test6_with_protection' ($958k BEST!),
+        #               'test8' modes for SOXL profitability ranking
         self.strategy_mode = 'enhanced'  # Default to current system
         self.enable_crash_protection = True
+        self.last_strategy_metadata = None
         
         # Validate the proven strategy implementation on init
         try:
@@ -270,7 +272,7 @@ class HybridIntelligentSystem:
         """Enhanced multi-strategy OR logic analysis with proven strategy support"""
         
         # Use proven strategy if configured
-        if self.strategy_mode in ['all_signals', 'two_rsi_only', 'test6', 'test6_no_protection', 'test6_with_protection', 'test7', 'test7_no_protection', 'test7_with_protection']:
+        if self.strategy_mode in ['all_signals', 'two_rsi_only', 'test6', 'test6_no_protection', 'test6_with_protection', 'test7', 'test7_no_protection', 'test7_with_protection', 'test8', 'test8_no_protection', 'test8_with_protection']:
             # Ensure date column exists for crash protection
             if 'date' not in historical_data.columns:
                 historical_data['date'] = pd.to_datetime(historical_data['timestamp']).dt.date
@@ -289,8 +291,12 @@ class HybridIntelligentSystem:
                 current_date=check_date
             )
             
-            # Add direction for compatibility
+            # Add direction for compatibility and carry metadata where present
             analysis['direction'] = 'long'
+            if 'strategy_metadata' in analysis:
+                self.last_strategy_metadata = analysis['strategy_metadata']
+            else:
+                self.last_strategy_metadata = None
             return analysis
         
         # Otherwise use enhanced mode (current system)
@@ -326,7 +332,8 @@ class HybridIntelligentSystem:
             'fired_signals': fired_signals,  # For logging/debugging
             'strategy_used': best_signal,  # For trader.py compatibility
             'strategy_leverage': signal_config.get('leverage', 1),  # Include leverage from strategy
-            'strategy_stop_loss': signal_config.get('stop_loss_pct', None)  # Include stop loss from strategy
+            'strategy_stop_loss': signal_config.get('stop_loss_pct', None),  # Include stop loss from strategy
+            'strategy_metadata': self.last_strategy_metadata
         }
     
     def _analyze_market_conditions_original(self, day_data, historical_data, current_date):

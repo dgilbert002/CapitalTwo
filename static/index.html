@@ -224,17 +224,17 @@
                                     <label class="form-check-label" for="debugToggle">
                                         <i class="fas fa-bug"></i> Debug
                                     </label>
-                                </div>
+                            </div>
                                 <button class="btn btn-sm btn-success" id="btnStart"><i class="fas fa-play"></i> Start Bot</button>
                                 <button class="btn btn-sm btn-danger ms-2" id="btnStop" style="display:none;"><i class="fas fa-stop"></i> Stop Bot</button>
                                 <button class="btn btn-sm btn-warning ms-2" id="btnSimulate" title="Simulate Market Close"><i class="fas fa-vial"></i> Simulate</button>
                                 <button class="btn btn-sm btn-info ms-2" id="btnSpeedTest" title="Speed Test Multiple Days"><i class="fas fa-tachometer-alt"></i> Speed Test</button>
                                 <button class="btn btn-sm btn-info ms-2" id="btnBrainPreview" title="Run Brains Preview"><i class="fas fa-brain"></i> Brain Preview</button>
                             </div>
-                            </div>
-                            </div>
                         </div>
                     </div>
+                </div>
+            </div>
 
             <!-- Balance Row -->
             <div class="row mb-3">
@@ -242,22 +242,22 @@
                     <div class="metric-card">
                         <div class="row">
                             <div class="col-md-4">
-                                <div class="metric-label">Account Balance</div>
-                                <div class="metric-value" id="balance">$0.00</div>
-                            </div>
+                        <div class="metric-label">Account Balance</div>
+                        <div class="metric-value" id="balance">$0.00</div>
+                    </div>
                             <div class="col-md-4">
-                                <div class="metric-label">Available Funds</div>
-                                <div class="metric-value" id="available">$0.00</div>
-                            </div>
+                        <div class="metric-label">Available Funds</div>
+                        <div class="metric-value" id="available">$0.00</div>
+                    </div>
                             <div class="col-md-4">
-                                <div class="metric-label">Total P&L</div>
-                                <div class="metric-value" id="pnl">$0.00</div>
-                            </div>
-                        </div>
+                        <div class="metric-label">Total P&L</div>
+                        <div class="metric-value" id="pnl">$0.00</div>
+                    </div>
+                </div>
                     </div>
                 </div>
             </div>
-            
+
             <!-- Environment/Account and Market Info Row -->
             <div class="row mb-3">
                 <div class="col-lg-4">
@@ -269,8 +269,8 @@
                                     <option value="demo">Demo</option>
                                     <option value="live">Live</option>
                                 </select>
-                            </div>
-                            <div class="col-md-6">
+                </div>
+                <div class="col-md-6">
                                 <label class="metric-label mb-1"><i class="fas fa-user"></i> Account</label>
                                 <select id="accountSelect" class="form-select">
                                     <option value="">Loading...</option>
@@ -380,7 +380,7 @@
                                     <tr>
                                         <td colspan="8" class="text-center text-muted py-4">
                                             <i class="fas fa-chart-line fa-2x mb-2"></i><br>
-                                            No open positions
+                                            No open positions or orders
                                         </td>
                                     </tr>
                                 </tbody>
@@ -629,7 +629,7 @@
             console.log('Saving strategy:', strategyMode);
             
             // Parse the combined strategy mode to extract strategy and protection settings
-            let actualStrategy = 'enhanced';
+            let actualStrategy = strategyMode;
             let crashProtection = false;
             
             if (strategyMode === 'all_with_protection') {
@@ -656,18 +656,28 @@
             } else if (strategyMode === 'test7_with_protection') {
                 actualStrategy = 'test7_with_protection';
                 crashProtection = true;
-            } else {
-                actualStrategy = 'enhanced';
+            } else if (strategyMode === 'test8_no_protection') {
+                actualStrategy = 'test8_no_protection';
                 crashProtection = false;
+            } else if (strategyMode === 'test8_with_protection') {
+                actualStrategy = 'test8_with_protection';
+                crashProtection = true;
+            } else {
+                crashProtection = (strategyMode === 'enhanced') ? (document.getElementById('customCrashProtection')?.checked ?? false) : false;
             }
-            
+
+            const payload = {
+                strategy_mode: actualStrategy,
+                enable_crash_protection: crashProtection
+            };
+            if (strategyMode.startsWith('test8')) {
+                payload.epic = document.getElementById('marketEpic')?.textContent || 'SOXL';
+            }
+
             fetch('/api/strategy/settings', {
                 method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({
-                    strategy_mode: actualStrategy,
-                    enable_crash_protection: crashProtection
-                })
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
             })
             .then(response => response.json())
             .then(data => {
@@ -690,6 +700,10 @@
                         expectedResult = 'Test7 - 9 Signals (includes MACD v2) without protection';
                     } else if (strategyMode === 'test7_with_protection') {
                         expectedResult = 'Test7 - 9 Signals (includes MACD v2) WITH protection';
+                    } else if (strategyMode === 'test8_no_protection') {
+                        expectedResult = 'Test8 - SOXL Top 100 (profit ranked) without protection';
+                    } else if (strategyMode === 'test8_with_protection') {
+                        expectedResult = 'Test8 - SOXL Top 100 (profit ranked) WITH protection';
                     } else {
                         expectedResult = 'Enhanced AI system';
                     }
@@ -710,6 +724,8 @@
             connectionStatus: document.getElementById("connectionStatus"),
             statusIndicator: document.getElementById("statusIndicator"),
             status: document.getElementById("status"),
+            activeStrategyDisplay: document.getElementById("activeStrategyDisplay"),
+            activeStopLossDisplay: document.getElementById("activeStopLossDisplay"),
             epic: document.getElementById("epic"),
             epicName: document.getElementById("epicName"),
             bidAsk: document.getElementById("bidAsk"),
@@ -763,6 +779,9 @@
         // Track if we've already loaded the saved settings
         let strategySettingsLoaded = false;
         
+        // Ensure getElements helper exists for downstream calls
+        function getElements() { return elements; }
+        
         // Load saved strategy settings - will be called ONCE when WebSocket first sends data
         function loadSavedStrategySettings(strategyMode, crashProtection) {
             // Only load once on initial connection
@@ -797,6 +816,10 @@
                     radioValue = 'test7_with_protection';
                 } else if (strategyMode === 'test7' && crashProtection === false) {
                     radioValue = 'test7_no_protection';
+                } else if (strategyMode === 'test8_no_protection') {
+                    radioValue = 'test8_no_protection';
+                } else if (strategyMode === 'test8_with_protection') {
+                    radioValue = 'test8_with_protection';
                 } else if (strategyMode === 'enhanced') {
                     radioValue = 'enhanced';
                 }
@@ -829,7 +852,7 @@
                 console.log("Fetching account transactions on demand...");
             }
         }
-        
+
         function connectWebSocket() {
             const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
             const wsUrl = `${protocol}//${window.location.host}/ws`;
@@ -1510,7 +1533,7 @@
                                 <strong>Contracts:</strong> ${size.toFixed(2)}
                             </small>
                         </td>
-                        <td>$${level.toFixed(2)}</td>
+                        <td>${level.toFixed(2)}</td>
                         <td>${currentPrice ? '$' + currentPrice.toFixed(2) : '-'}</td>
                         <td>${slDisplay}</td>
                         <td class="${pnlClass}">${upl >= 0 ? '+' : ''}$${Math.abs(upl).toFixed(2)}</td>
@@ -2103,6 +2126,10 @@
                         strategyDisplay = 'Test7 - 9 Signals WITH Protection';
                     } else if (data.strategy_mode === 'test7_no_protection') {
                         strategyDisplay = 'Test7 - 9 Signals NO Protection';
+                    } else if (data.strategy_mode === 'test8_with_protection') {
+                        strategyDisplay = 'Test8 - SOXL Top 100 WITH Protection';
+                    } else if (data.strategy_mode === 'test8_no_protection') {
+                        strategyDisplay = 'Test8 - SOXL Top 100 NO Protection';
                     } else if (data.strategy_mode === 'all_signals') {
                         strategyDisplay = data.crash_protection ? 'All 6 Signals WITH Protection ($699k)' : 'All 6 Signals NO Protection ($376k)';
                     } else if (data.strategy_mode === 'two_rsi_only') {
@@ -2164,8 +2191,19 @@
                 if (data.strategy_config) {
                     const cfg = data.strategy_config;
                     rows.push(`<tr><td>Win Rate</td><td><strong>${cfg.win_rate || 0}%</strong></td></tr>`);
-                    rows.push(`<tr><td>Strategy Leverage</td><td><strong>${cfg.leverage || 1}x</strong></td></tr>`);
+                    rows.push(`<tr><td>Strategy Leverage</td><td><strong>${cfg.leverage || 1}x</strong> ${s.leverage_source === 'strategy' ? '(from strategy)' : '(from settings)'}</td></tr>`);
                     if (cfg.stop_loss_pct) rows.push(`<tr><td>Stop Loss</td><td>${cfg.stop_loss_pct}%</td></tr>`);
+                }
+                
+                if (data.strategy_metadata) {
+                    const meta = data.strategy_metadata;
+                    rows.push(`<tr><td colspan="2" class="text-center bg-dark text-white"><strong>Profitability (Test8)</strong></td></tr>`);
+                    if (meta.rank) rows.push(`<tr><td>Rank</td><td>#${meta.rank}</td></tr>`);
+                    if (meta.final_balance) rows.push(`<tr><td>Final Balance</td><td>$${Number(meta.final_balance).toLocaleString()}</td></tr>`);
+                    if (meta.win_rate) rows.push(`<tr><td>Win Rate</td><td>${meta.win_rate.toFixed ? meta.win_rate.toFixed(1) : meta.win_rate}%</td></tr>`);
+                    if (meta.total_trades) rows.push(`<tr><td>Total Trades</td><td>${meta.total_trades}</td></tr>`);
+                    if (meta.sharpe_ratio) rows.push(`<tr><td>Sharpe Ratio</td><td>${meta.sharpe_ratio}</td></tr>`);
+                    if (meta.max_drawdown_pct) rows.push(`<tr><td>Max Drawdown</td><td>${meta.max_drawdown_pct}%</td></tr>`);
                 }
                 
                 // Show sizing with leverage details
@@ -2180,10 +2218,23 @@
                 }
                 
                 if (mi.instrument && mi.instrument.name) rows.push(`<tr><td>Instrument</td><td>${mi.instrument.name}</td></tr>`);
+                const candleTime = lc.timestamp ? new Date(lc.timestamp) : null;
+                const dubaiFormatter = new Intl.DateTimeFormat('en-GB', {
+                    year: 'numeric',
+                    month: 'short',
+                    day: '2-digit',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    timeZone: 'Asia/Dubai',
+                    hour12: false
+                });
+                const dubaiTime = candleTime ? dubaiFormatter.format(candleTime) : '-';
+
                 body.innerHTML = `
                     <div class="mb-3">
                         <h6 class="text-muted">Latest 5m Candle</h6>
-                        <div><small><strong>Time:</strong> ${lc.timestamp ? new Date(lc.timestamp).toLocaleString() : '-'}</small></div>
+                        <div><small><strong>Time:</strong> ${candleTime ? candleTime.toLocaleString() : '-'}</small></div>
+                        <div><small><strong>Dubai Time:</strong> ${dubaiTime}</small></div>
                         <div><small><strong>O</strong>: ${lc.open?.toFixed ? lc.open.toFixed(4) : lc.open || '-'}  
                             <strong>H</strong>: ${lc.high?.toFixed ? lc.high.toFixed(4) : lc.high || '-'}  
                             <strong>L</strong>: ${lc.low?.toFixed ? lc.low.toFixed(4) : lc.low || '-'}  
@@ -2278,7 +2329,7 @@
                 stopLossDisplay.textContent = 'Connecting...';
             }
         });
-        
+
         // Initialize WebSocket connection
         connectWebSocket();
         
@@ -2332,18 +2383,55 @@
         
         // Update active strategy display
         function updateActiveStrategyDisplay() {
+            const elements = getElements();
             const strategyMode = document.querySelector('input[name="strategyMode"]:checked');
-            const display = document.getElementById('activeStrategyDisplay');
-            if (strategyMode && display) {
-                const label = strategyMode.parentElement.querySelector('strong');
-                if (label) {
-                    display.textContent = label.textContent;
-                } else {
-                    display.textContent = strategyMode.value;
-                }
-            } else if (display) {
-                display.textContent = 'Not Set';
+            if (!elements.activeStrategyDisplay) return;
+
+            if (!strategyMode) {
+                elements.activeStrategyDisplay.textContent = 'Not Set';
+                return;
             }
+
+            let displayText = '';
+            switch (strategyMode.value) {
+                case 'all_with_protection':
+                    displayText = 'All 6 Signals WITH Protection';
+                    break;
+                case 'all_no_protection':
+                    displayText = 'All 6 Signals NO Protection';
+                    break;
+                case 'two_rsi_protection':
+                    displayText = 'Two RSI WITH Protection';
+                    break;
+                case 'two_rsi_no_protection':
+                    displayText = 'Two RSI NO Protection';
+                    break;
+                case 'test6_no_protection':
+                    displayText = 'Test6 - 8 Signals NO Protection';
+                    break;
+                case 'test6_with_protection':
+                    displayText = 'Test6 - 8 Signals WITH Protection';
+                    break;
+                case 'test7_no_protection':
+                    displayText = 'Test7 - 9 Signals NO Protection';
+                    break;
+                case 'test7_with_protection':
+                    displayText = 'Test7 - 9 Signals WITH Protection';
+                    break;
+                case 'test8_no_protection':
+                    displayText = 'Test8 - SOXL Top 100 NO Protection';
+                    break;
+                case 'test8_with_protection':
+                    displayText = 'Test8 - SOXL Top 100 WITH Protection';
+                    break;
+                case 'enhanced':
+                    displayText = 'Enhanced AI System';
+                    break;
+                default:
+                    displayText = 'Custom Strategy';
+            }
+
+            elements.activeStrategyDisplay.textContent = displayText;
         }
         
         // Update active stop loss display
@@ -2505,6 +2593,37 @@
                             </div>
                         </div>
                         
+                        <!-- Test8 Strategy -->
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#test8">
+                                    <strong>Test8 - SOXL Top 100 Strategy</strong>
+                                </button>
+                            </h2>
+                            <div id="test8" class="accordion-collapse collapse" data-bs-parent="#strategyAccordion">
+                                <div class="accordion-body">
+                                    <p class="text-muted">A profitability-weighted strategy that mirrors the elite SOXL batch results.</p>
+                                    <ul class="list-unstyled">
+                                        <li class="mb-3">
+                                            <strong>🧠 Profitability Ranking</strong>
+                                            <div class="text-muted small">Uses the top SOXL indicator configurations (RSI, Keltner, MACD) ranked by final balance from historical analysis.</div>
+                                            <div class="text-success small">Plain English: "Always pick the historical money-maker when multiple signals fire."</div>
+                                        </li>
+                                        <li class="mb-3">
+                                            <strong>🔄 Epic Switching</strong>
+                                            <div class="text-muted small">Automatically points the bot at the SOXL Alpha Vantage table so live trading matches the backtest data.</div>
+                                            <div class="text-success small">Plain English: "Runs the proven SOXL playbook without manual reconfiguration."</div>
+                                        </li>
+                                        <li class="mb-3">
+                                            <strong>🛡️ Crash Protection (optional)</strong>
+                                            <div class="text-muted small">Same smart protection logic as other modes; turn it on/off via modal.</div>
+                                            <div class="text-success small">Plain English: "Choose whether to trade through crashes or sit out when risk spikes."</div>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        
                         <!-- Enhanced Strategy -->
                         <div class="accordion-item">
                             <h2 class="accordion-header">
@@ -2646,6 +2765,20 @@
                             </label>
                         </div>
                         <div class="form-check mb-3">
+                            <input class="form-check-input" type="radio" name="strategyMode" value="test8_no_protection" id="test8NoProtection">
+                            <label class="form-check-label" for="test8NoProtection">
+                                <strong>Test8 - SOXL Top 100 NO Protection</strong>
+                                <br><span class="text-muted small">Selects highest-profit SOXL setup (no crash filter)</span>
+                            </label>
+                        </div>
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="radio" name="strategyMode" value="test8_with_protection" id="test8WithProtection">
+                            <label class="form-check-label" for="test8WithProtection">
+                                <strong>Test8 - SOXL Top 100 WITH Protection</strong>
+                                <br><span class="text-muted small">Same profitability ranking with crash protection enabled</span>
+                            </label>
+                        </div>
+                        <div class="form-check mb-3">
                             <input class="form-check-input" type="radio" name="strategyMode" value="enhanced" id="enhanced">
                             <label class="form-check-label" for="enhanced">
                                 <strong>Enhanced AI System</strong>
@@ -2703,9 +2836,9 @@
                         <label class="form-check-label" for="slStaggered">Staggered Stop Loss</label>
                         <div class="d-flex gap-2 mt-1">
                             <input type="text" class="form-control form-control-sm" id="slWhenAt" 
-                                   placeholder="When: 2,4,5,7,10" disabled style="width: 140px;">
+                                   placeholder="When: 2,4,5,7,10,12,15" disabled style="width: 140px;">
                             <input type="text" class="form-control form-control-sm" id="slUse" 
-                                   placeholder="Use: 0,1,2,4,6" disabled style="width: 120px;">
+                                   placeholder="Use: 0,1,2,4,6,8,10" disabled style="width: 120px;">
                         </div>
                     </div>
                 </div>

@@ -18,6 +18,8 @@ import pandas as pd
 import numpy as np
 from datetime import datetime, time as dt_time, timedelta
 from typing import Dict, List, Tuple, Optional
+from pathlib import Path
+import json
 
 # ==============================================================================
 # CRITICAL CONFIGURATION - DO NOT CHANGE THESE VALUES!
@@ -97,6 +99,44 @@ SIGNAL_CONFIGS = {
     }
 }
 
+# ==============================================================================
+# TEST8 SOXL PROFITABILITY RANKED CONFIGURATIONS (TOP DEDUPED)
+# ==============================================================================
+
+def _load_test8_configs(limit: int = 100) -> List[Dict]:
+    results_path = Path(__file__).resolve().parents[1] / 'Results' / 'global_top300__SOXL.tsv'
+    if not results_path.exists():
+        return []
+
+    df = pd.read_csv(results_path, sep='\t').head(limit)
+    dedup: Dict[str, Dict] = {}
+
+    for _, row in df.iterrows():
+        params = json.loads(row['params_json'])
+        key = json.dumps({'condition': row['condition'], 'params': params}, sort_keys=True)
+        record = {
+            'condition': row['condition'],
+            'params': params,
+            'final_balance': float(row.get('final_balance', 0.0)),
+            'win_rate': float(row.get('win_rate', 0.0)),
+            'total_trades': float(row.get('total_trades', 0.0)),
+            'sharpe_ratio': float(row.get('sharpe_ratio', 0.0)),
+            'max_drawdown_pct': float(row.get('max_drawdown_pct', 0.0))
+        }
+        existing = dedup.get(key)
+        if existing is None or record['final_balance'] > existing['final_balance']:
+            dedup[key] = record
+
+    configs = sorted(dedup.values(), key=lambda r: r['final_balance'], reverse=True)
+    for idx, cfg in enumerate(configs, start=1):
+        cfg['rank'] = idx
+        cfg['identifier'] = f"{cfg['condition']}_rank{idx}"
+    return configs
+
+
+TEST8_SOXL_TOP_CONFIGS = _load_test8_configs()
+
+# ==============================================================================
 # Critical timing configuration
 # NOTE: These times are in MARKET LOCAL TIME (Eastern Time for US markets)
 # For UAE users: Market closes at midnight UAE (20:00 UTC = 16:00 ET)
@@ -285,14 +325,92 @@ def check_all_signals(df: pd.DataFrame, strategy_mode: str = 'all_signals') -> D
         signals_to_check = ['rsi_oversold', 'rsi_bullish_cross_50', 'bb_lower_break',
                             'price_above_vwap', 'roc_below_threshold', 'macd_positive',
                             'keltner_lower_break', 'macd_histogram_negative', 'macd_histogram_negative_v2']
+    elif strategy_mode in ['test8', 'test8_no_protection', 'test8_with_protection']:
+        # Test8 handled separately below
+        signals_to_check = []
     else:
         return {}  # No signals for other modes
     
     fired_signals = {}
     
+    if strategy_mode in ['test8', 'test8_no_protection', 'test8_with_protection']:
+        # For Test8 evaluate profitability-ranked configurations
+        fired_map: Dict[str, bool] = {}
+        hit_configs = []
+        for rank, cfg in enumerate(TEST8_SOXL_TOP_CONFIGS, start=1):
+            sig = cfg['condition']
+            params = cfg['params']
+            fired = False
+            if sig == 'rsi_oversold':
+                fired = check_rsi_oversold(
+                    df, idx,
+                    params.get('period', SIGNAL_CONFIGS['rsi_oversold']['period']),
+                    params.get('threshold', SIGNAL_CONFIGS['rsi_oversold']['threshold'])
+                )
+            elif sig == 'keltner_lower_break':
+                fired = check_keltner_lower_break(
+                    df, idx,
+                    params.get('period', SIGNAL_CONFIGS['keltner_lower_break']['period']),
+                    params.get('multiplier', SIGNAL_CONFIGS['keltner_lower_break']['multiplier'])
+                )
+            elif sig == 'macd_histogram_negative':
+                fired = check_macd_histogram_negative(
+                    df, idx,
+                    params.get('fast_period', SIGNAL_CONFIGS['macd_histogram_negative']['fast_period']),
+                    params.get('slow_period', SIGNAL_CONFIGS['macd_histogram_negative']['slow_period']),
+                    params.get('signal_period', SIGNAL_CONFIGS['macd_histogram_negative']['signal_period']),
+                    params.get('threshold', SIGNAL_CONFIGS['macd_histogram_negative']['threshold'])
+                )
+            elif sig == 'macd_histogram_negative_v2':
+                fired = check_macd_histogram_negative(
+                    df, idx,
+                    params.get('fast_period', SIGNAL_CONFIGS['macd_histogram_negative_v2']['fast_period']),
+                    params.get('slow_period', SIGNAL_CONFIGS['macd_histogram_negative_v2']['slow_period']),
+                    params.get('signal_period', SIGNAL_CONFIGS['macd_histogram_negative_v2']['signal_period']),
+                    params.get('threshold', SIGNAL_CONFIGS['macd_histogram_negative_v2']['threshold'])
+                )
+            else:
+                # fallback to existing signal handlers if present
+                if sig in SIGNAL_CONFIGS:
+                    config = SIGNAL_CONFIGS[sig]
+                    fired = False
+                    if sig == 'rsi_bullish_cross_50':
+                        fired = check_rsi_bullish_cross_50(df, idx, params.get('period', config['period']))
+                    elif sig == 'bb_lower_break':
+                        fired = check_bb_lower_break(df, idx, params.get('period', config['period']), params.get('std_dev', config['std_dev']))
+                    elif sig == 'price_above_vwap':
+                        fired = check_price_above_vwap(df, idx, params.get('threshold', config['threshold']))
+                    elif sig == 'roc_below_threshold':
+                        fired = check_roc_below_threshold(df, idx, params.get('period', config['period']))
+                    elif sig == 'macd_positive':
+                        fired = check_macd_positive(df, idx,
+                                                    params.get('fast_period', config['fast_period']),
+                                                    params.get('slow_period', config['slow_period']),
+                                                    params.get('signal_period', config['signal_period']),
+                                                    params.get('threshold', config['threshold']))
+                else:
+                    fired = False
+            if fired:
+                hit_cfg = {
+                    'rank': rank,
+                    'condition': sig,
+                    'params': dict(params),
+                    'final_balance': cfg.get('final_balance'),
+                    'win_rate': cfg.get('win_rate'),
+                    'total_trades': cfg.get('total_trades'),
+                    'sharpe_ratio': cfg.get('sharpe_ratio'),
+                    'max_drawdown_pct': cfg.get('max_drawdown_pct')
+                }
+                hit_configs.append(hit_cfg)
+
+            fired_map[cfg['condition']] = fired or fired_map.get(cfg['condition'], False)
+
+        fired_map['__test8_configs__'] = hit_configs
+        return fired_map
+
     for signal in signals_to_check:
         config = SIGNAL_CONFIGS[signal]
-        
+
         if signal == 'rsi_oversold':
             fired = check_rsi_oversold(df, idx, config['period'], config['threshold'])
         elif signal == 'rsi_bullish_cross_50':
@@ -302,7 +420,6 @@ def check_all_signals(df: pd.DataFrame, strategy_mode: str = 'all_signals') -> D
         elif signal == 'price_above_vwap':
             fired = check_price_above_vwap(df, idx, config['threshold'])
         elif signal == 'roc_below_threshold':
-            # CRITICAL FIX: Don't pass threshold, use default -1.0% from check_roc_below_threshold
             fired = check_roc_below_threshold(df, idx, config['period'])
         elif signal == 'macd_positive':
             fired = check_macd_positive(df, idx, config['fast_period'], config['slow_period'],
@@ -317,33 +434,53 @@ def check_all_signals(df: pd.DataFrame, strategy_mode: str = 'all_signals') -> D
                                                  config['signal_period'], config['threshold'])
         else:
             fired = False
-        
+
         fired_signals[signal] = fired
-    
+
     return fired_signals
 
-def select_best_signal(fired_signals: Dict[str, bool]) -> Tuple[Optional[str], Optional[Dict]]:
+def select_best_signal(fired_signals: Dict[str, bool], strategy_mode: str = 'all_signals') -> Tuple[Optional[str], Optional[Dict]]:
     """
     CRITICAL LOGIC: Select signal with highest win_rate (priority) when multiple fire
     This is how the $699k system works!
     
     Returns: (signal_name, signal_config) or (None, None)
     """
+    # Test8: select by highest final balance among fired configs
+    if strategy_mode in ['test8', 'test8_no_protection', 'test8_with_protection']:
+        hit_configs = fired_signals.get('__test8_configs__', []) if isinstance(fired_signals, dict) else []
+        if not hit_configs:
+            return None, None
+        best = max(hit_configs, key=lambda cfg: cfg.get('final_balance', 0))
+        return best['condition'], {
+            'leverage': best['params'].get('leverage'),
+            'stop_loss_pct': best['params'].get('stop_loss_pct'),
+            'win_rate': best.get('win_rate'),
+            'final_balance': best.get('final_balance'),
+            'params': best['params'],
+            'rank': best.get('rank'),
+            'total_trades': best.get('total_trades'),
+            'sharpe_ratio': best.get('sharpe_ratio'),
+            'max_drawdown_pct': best.get('max_drawdown_pct')
+        }
+
     best_signal = None
     best_config = None
     best_priority = -1
-    
+
     for signal, is_firing in fired_signals.items():
+        if signal == '__test8_configs__':
+            continue
         if is_firing and signal in SIGNAL_CONFIGS:
             config = SIGNAL_CONFIGS[signal]
             priority = config['win_rate']  # This is PRIORITY, not performance!
-            
+
             # Select highest priority signal
             if priority > best_priority:
                 best_priority = priority
                 best_signal = signal
                 best_config = config
-    
+
     return best_signal, best_config
 
 # ==============================================================================
@@ -459,20 +596,34 @@ def get_strategy_analysis(df: pd.DataFrame, strategy_mode: str = 'all_signals',
     fired_signals = check_all_signals(df, strategy_mode)
     
     # Select best signal by priority
-    best_signal, signal_config = select_best_signal(fired_signals)
+    best_signal, signal_config = select_best_signal(fired_signals, strategy_mode)
     
-    if best_signal is not None:
-        return {
+    if best_signal is not None and signal_config is not None:
+        result = {
             'trade_signal': 'buy',
             'confidence': 100.0,  # If a signal fired, we trade it! No threshold!
             'signal_name': best_signal,  # Add signal_name for compatibility
             'selected_strategy': best_signal,
-            'strategy_leverage': signal_config['leverage'],
-            'strategy_stop_loss': signal_config['stop_loss_pct'],
+            'strategy_leverage': signal_config.get('leverage'),
+            'strategy_stop_loss': signal_config.get('stop_loss_pct'),
             'fired_signals': fired_signals,
             'strategy_config': signal_config,
             'crash_protection_triggered': False
         }
+
+        # For Test8 include additional metadata for reporting
+        if strategy_mode in ['test8', 'test8_no_protection', 'test8_with_protection']:
+            result['strategy_metadata'] = {
+                'final_balance': signal_config.get('final_balance'),
+                'win_rate': signal_config.get('win_rate'),
+                'total_trades': signal_config.get('total_trades'),
+                'sharpe_ratio': signal_config.get('sharpe_ratio'),
+                'max_drawdown_pct': signal_config.get('max_drawdown_pct'),
+                'rank': signal_config.get('rank'),
+                'params': signal_config.get('params')
+            }
+
+        return result
     
     return {
         'trade_signal': 'hold',
