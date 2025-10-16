@@ -1150,7 +1150,29 @@ class TradingBot:
                 elif time_since is not None and time_since < market_update_interval:
                     return
 
-            self.market_info = await self.api.get_market_info(self.epic)
+            override_enabled = self.settings.getboolean('MARKET_HOURS', 'use_override', False)
+            override_epic = self.settings.get('MARKET_HOURS', 'override_epic', '')
+            override_hours = None
+
+            if override_enabled and override_epic:
+                try:
+                    override_market = await self.api.get_market_info(override_epic)
+                    instrument = (override_market or {}).get('instrument', {})
+                    override_hours = instrument.get('openingHours')
+                    if override_hours:
+                        logger.info("Using override market hours from %s", override_epic)
+                except Exception as e:
+                    logger.warning(f"Failed to load override market hours for {override_epic}: {e}")
+                    override_hours = None
+
+            market_info = await self.api.get_market_info(self.epic)
+            if market_info and override_hours:
+                market_info = dict(market_info)
+                instrument = dict(market_info.get('instrument', {}))
+                instrument['openingHours'] = override_hours
+                market_info['instrument'] = instrument
+
+            self.market_info = market_info
             self._last_market_update = now
         except Exception as e:
             logger.error(f"Error updating data: {e}")

@@ -71,6 +71,10 @@ near_close_data_update_sec = 5
 normal_loop_sec = 1
 alpha_vantage_cache_sec = 300
 
+[MARKET_HOURS]
+use_override = True
+override_epic = TECL
+
 [API_CONFIG]
 environment = live
 
