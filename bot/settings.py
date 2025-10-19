@@ -66,7 +66,19 @@ class TradingBotSettings:
     def getboolean(self, section: str, key: str, fallback: bool = False) -> bool:
         """Get boolean setting value"""
         self.load_settings()
-        return self.config.getboolean(section, key, fallback=fallback)
+        try:
+            if self.config.has_option(section, key):
+                raw = self.config.get(section, key)
+                if isinstance(raw, bool):
+                    return raw
+                if raw == '' or raw is None:
+                    return fallback
+            return self.config._convert_to_boolean(raw)
+        except (ValueError, TypeError, AttributeError):
+            return fallback
+        except Exception:
+            return self.config.getboolean(section, key, fallback=fallback)
+        return fallback
 
     def set_value(self, section: str, key: str, value) -> None:
         """Set a setting value and persist to file."""

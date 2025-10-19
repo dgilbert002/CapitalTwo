@@ -179,6 +179,9 @@ async def websocket_endpoint(websocket: WebSocket):
                     if leverage_value is None:
                         leverage_value = app_state.settings.getfloat("BOT_CONFIG", "leverage", 1.0)
 
+                    override_flag = app_state.settings.getboolean("MARKET_HOURS", "use_override", False)
+                    override_epic = app_state.settings.get("MARKET_HOURS", "override_epic", "")
+
                     data = {
                         "bot_name": app_state.settings.get("BOT_CONFIG", "bot_name", "AI Trading Bot"),
                         "epic": epic_value,
@@ -208,6 +211,10 @@ async def websocket_endpoint(websocket: WebSocket):
                         if app_state.settings.has_section("STRATEGY")
                         else True,
                         "data_source": app_state.data_source,
+                        "market_hours_override": {
+                            "enabled": override_flag,
+                            "epic": override_epic,
+                        },
                     }
                 else:
                     data = {"countdown_only": True, "market_event": market_event}
@@ -436,8 +443,36 @@ async def continuous_data_update():
                             reason = "T-15s: Entry position timing"
 
                 if should_update_market:
+                    override_enabled = app_state.settings.getboolean("MARKET_HOURS", "use_override", False)
+                    override_epic = app_state.settings.get("MARKET_HOURS", "override_epic", "")
+                    override_hours = None
+
+                    if override_enabled and override_epic:
+                        try:
+                            override_market_data = await app_state.api.get_market_info(override_epic)
+                            instrument = (override_market_data or {}).get("instrument", {})
+                            override_hours = instrument.get("openingHours")
+                            if override_hours:
+                                logger.info(
+                                    "Using override market hours from %s for countdowns",
+                                    override_epic,
+                                )
+                        except Exception as exc:
+                            logger.warning(
+                                "Failed to fetch override market hours for %s: %s",
+                                override_epic,
+                                exc,
+                            )
+                            override_hours = None
+
                     market_data = await app_state.api.get_market_info(epic)
                     if market_data:
+                        if override_hours:
+                            market_data = dict(market_data)
+                            instrument = dict(market_data.get("instrument", {}))
+                            instrument["openingHours"] = override_hours
+                            market_data["instrument"] = instrument
+
                         app_state.market_info = market_data
                         app_state.last_market_check = current_time
                         logger.info("Market data updated for %s - Reason: %s", epic, reason)
@@ -878,10 +913,16 @@ async def get_config():
     selected = app_state.settings.get("ENV_ACCOUNTS", env, "") or app_state.settings.get(
         "CREDENTIALS", "account_id", ""
     )
+    override_flag = app_state.settings.getboolean("MARKET_HOURS", "use_override", False)
+    override_epic = app_state.settings.get("MARKET_HOURS", "override_epic", "")
     return {
         "environment": env,
         "selected_account_id": selected,
         "is_connected": app_state.is_connected,
+        "market_hours_override": {
+            "enabled": override_flag,
+            "epic": override_epic,
+        },
     }
 
 
@@ -918,6 +959,14 @@ async def save_strategy_settings(payload: dict = Body(...)):
         app_state.settings.set_value(
             "STRATEGY", "enable_crash_protection", str(enable_crash_protection)
         )
+
+        if "market_hours_override" in payload:
+            override_payload = payload.get("market_hours_override", {}) or {}
+            override_enabled = bool(override_payload.get("enabled", False))
+            override_epic = override_payload.get("epic", "")
+            app_state.settings.set_value("MARKET_HOURS", "use_override", str(override_enabled))
+            if override_epic:
+                app_state.settings.set_value("MARKET_HOURS", "override_epic", override_epic)
 
         if strategy_mode in ("test8_no_protection", "test8_with_protection"):
             epic_override = payload.get("epic") or app_state.settings.get(

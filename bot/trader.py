@@ -1150,7 +1150,29 @@ class TradingBot:
                 elif time_since is not None and time_since < market_update_interval:
                     return
 
-            self.market_info = await self.api.get_market_info(self.epic)
+            override_enabled = self.settings.getboolean('MARKET_HOURS', 'use_override', False)
+            override_epic = self.settings.get('MARKET_HOURS', 'override_epic', '')
+            override_hours = None
+
+            if override_enabled and override_epic:
+                try:
+                    override_market = await self.api.get_market_info(override_epic)
+                    instrument = (override_market or {}).get('instrument', {})
+                    override_hours = instrument.get('openingHours')
+                    if override_hours:
+                        logger.info("Using override market hours from %s", override_epic)
+                except Exception as e:
+                    logger.warning(f"Failed to load override market hours for {override_epic}: {e}")
+                    override_hours = None
+
+            market_info = await self.api.get_market_info(self.epic)
+            if market_info and override_hours:
+                market_info = dict(market_info)
+                instrument = dict(market_info.get('instrument', {}))
+                instrument['openingHours'] = override_hours
+                market_info['instrument'] = instrument
+
+            self.market_info = market_info
             self._last_market_update = now
         except Exception as e:
             logger.error(f"Error updating data: {e}")
@@ -1330,6 +1352,16 @@ class TradingBot:
             records = []
             et_tz = pytz.timezone('US/Eastern')
             
+            use_mid = self.settings.getboolean('DATA', 'gap_fill_use_mid', True)
+
+            def mid(pblock: dict, field: str) -> float:
+                block = pblock.get(field) or {}
+                bid = block.get('bid')
+                ask = block.get('ask')
+                if bid is not None and ask is not None:
+                    return (float(bid) + float(ask)) / 2.0
+                return float(bid) if bid is not None else float(ask)
+
             for price in prices:
                 # Parse Capital.com timestamp (use UTC version)
                 ts_utc = pd.to_datetime(price['snapshotTimeUTC'])
@@ -1343,12 +1375,23 @@ class TradingBot:
                 if ts_et <= last_av_dt:
                     continue
                 
+                if use_mid:
+                    o = mid(price, 'openPrice')
+                    h = mid(price, 'highPrice')
+                    l = mid(price, 'lowPrice')
+                    c = mid(price, 'closePrice')
+                else:
+                    o = float(price['openPrice']['bid'])
+                    h = float(price['highPrice']['bid'])
+                    l = float(price['lowPrice']['bid'])
+                    c = float(price['closePrice']['bid'])
+
                 records.append({
                     'timestamp': ts_et,  # Keep as datetime for DataFrame
-                    'open': float(price['openPrice']['bid']),
-                    'high': float(price['highPrice']['bid']),
-                    'low': float(price['lowPrice']['bid']),
-                    'close': float(price['closePrice']['bid']),
+                    'open': o,
+                    'high': h,
+                    'low': l,
+                    'close': c,
                     'volume': float(price.get('lastTradedVolume', 0))
                 })
             

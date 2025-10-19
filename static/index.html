@@ -317,6 +317,13 @@
                                 <p class="mb-1 small"><strong>Status:</strong> <span id="marketStatus">-</span></p>
                                 <p class="mb-1 small"><strong>Next:</strong> <span id="nextEvent" style="font-size: 0.85em;">-</span></p>
                                 <p class="mb-1 small"><strong>Countdown:</strong> <span id="countdown" class="countdown">-</span></p>
+                                <p class="mb-0 small text-muted"><strong>Using Hours:</strong> <span id="hoursSource">-</span></p>
+                                <div class="form-check form-switch mt-1">
+                                    <input class="form-check-input" type="checkbox" id="marketHoursOverrideToggle">
+                                    <label class="form-check-label small" for="marketHoursOverrideToggle">
+                                        Use <span id="overrideEpicLabel">-</span> hours
+                                    </label>
+                                </div>
                             </div>
                             <div class="col-md-3">
                                 <p class="mb-1 small"><strong>Leverage:</strong> <span id="leverageDisplay">-</span>x</p>
@@ -646,29 +653,27 @@
                 crashProtection = false;
             } else if (strategyMode === 'test6_no_protection') {
                 actualStrategy = 'test6_no_protection';
-                crashProtection = false;
             } else if (strategyMode === 'test6_with_protection') {
                 actualStrategy = 'test6_with_protection';
-                crashProtection = true;
             } else if (strategyMode === 'test7_no_protection') {
                 actualStrategy = 'test7_no_protection';
-                crashProtection = false;
             } else if (strategyMode === 'test7_with_protection') {
                 actualStrategy = 'test7_with_protection';
-                crashProtection = true;
             } else if (strategyMode === 'test8_no_protection') {
                 actualStrategy = 'test8_no_protection';
-                crashProtection = false;
             } else if (strategyMode === 'test8_with_protection') {
                 actualStrategy = 'test8_with_protection';
-                crashProtection = true;
-            } else {
-                crashProtection = (strategyMode === 'enhanced') ? (document.getElementById('customCrashProtection')?.checked ?? false) : false;
+            } else if (strategyMode === 'enhanced') {
+                actualStrategy = 'enhanced';
             }
-
+            
             const payload = {
                 strategy_mode: actualStrategy,
-                enable_crash_protection: crashProtection
+                enable_crash_protection: crashProtection,
+                market_hours_override: {
+                    enabled: elements.marketHoursOverrideToggle?.checked || false,
+                    epic: elements.overrideEpicLabel?.textContent || ''
+                }
             };
             if (strategyMode.startsWith('test8')) {
                 payload.epic = document.getElementById('marketEpic')?.textContent || 'SOXL';
@@ -747,6 +752,9 @@
             countdown: document.getElementById("countdown"),
             marketTime: document.getElementById("marketTime"),
             uaeTime: document.getElementById("uaeTime"),
+            hoursSource: document.getElementById("hoursSource"),
+            overrideEpicLabel: document.getElementById("overrideEpicLabel"),
+            marketHoursOverrideToggle: document.getElementById("marketHoursOverrideToggle"),
             // lastUpdate: document.getElementById("lastUpdate"), // Removed - element doesn't exist
             positionsTable: document.getElementById("positionsTable"),
             envSelect: document.getElementById("envSelect"),
@@ -778,6 +786,7 @@
 
         // Track if we've already loaded the saved settings
         let strategySettingsLoaded = false;
+        let marketHoursSettingsLoaded = false;
         
         // Ensure getElements helper exists for downstream calls
         function getElements() { return elements; }
@@ -836,6 +845,57 @@
             } catch (error) {
                 console.error('Error loading saved strategy settings:', error);
             }
+        }
+
+        function loadMarketHoursSettings(data) {
+            if (marketHoursSettingsLoaded) {
+                return;
+            }
+
+            try {
+                const override = data.market_hours_override || {};
+                const enabled = !!override.enabled;
+                const epicLabel = override.epic || '-';
+
+                if (elements.marketHoursOverrideToggle) {
+                    elements.marketHoursOverrideToggle.checked = enabled;
+                }
+                if (elements.overrideEpicLabel) {
+                    elements.overrideEpicLabel.textContent = epicLabel || '-';
+                }
+
+                marketHoursSettingsLoaded = true;
+            } catch (error) {
+                console.error('Error loading market hours settings:', error);
+            }
+        }
+
+        function applyMarketHoursToggle(enabled) {
+            if (!window.latestWsData) return;
+            const payload = {
+                strategy_mode: window.latestWsData.strategy_mode,
+                enable_crash_protection: window.latestWsData.enable_crash_protection,
+                market_hours_override: {
+                    enabled,
+                    epic: (window.latestWsData.market_hours_override || {}).epic || elements.overrideEpicLabel?.textContent || ''
+                }
+            };
+            fetch('/api/strategy/settings', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            }).then(res => res.json()).then(json => {
+                if (!json.success) {
+                    showNotification('Failed to update market hours override', 'error');
+                    elements.marketHoursOverrideToggle.checked = !enabled;
+                } else {
+                    showNotification(`Market hours override ${enabled ? 'enabled' : 'disabled'}`, 'success');
+                }
+            }).catch(err => {
+                console.error('Error updating market hours override', err);
+                showNotification('Error updating market hours override', 'error');
+                elements.marketHoursOverrideToggle.checked = !enabled;
+            });
         }
 
         // On-demand data fetching functions
@@ -903,6 +963,9 @@
                     if (data.strategy_mode !== undefined && data.enable_crash_protection !== undefined) {
                         loadSavedStrategySettings(data.strategy_mode, data.enable_crash_protection);
                     }
+                    if (data.market_hours_override !== undefined) {
+                        loadMarketHoursSettings(data);
+                    }
                     // Live-sync Speed Test from action log
                     if (speedTestLive) {
                         syncSpeedTestFromActionLog(data.action_log || []);
@@ -915,6 +978,7 @@
             ws.onclose = function() {
                 // Reset the flag so settings load again on reconnect
                 strategySettingsLoaded = false;
+                marketHoursSettingsLoaded = false;
                 
                 // Only show connection status if bot is not running
                 if (elements.status.textContent !== "Bot Running - Monitoring Market") {
@@ -1024,50 +1088,19 @@
                 // Update market status - use actual market_status from API if available
                 const marketStatus = data.market_event.market_status || (data.market_event.is_open ? "OPEN" : "CLOSED");
                 elements.marketStatus.textContent = marketStatus;
-                
-                // Style the status based on open/closed
-                if (data.market_event.is_open) {
-                    elements.marketStatus.style.color = '#4caf50';
-                } else {
-                    elements.marketStatus.style.color = '#f44336';
-                }
-                
-                // Update next event with time
+                elements.marketStatus.style.color = data.market_event.is_open ? '#4caf50' : '#f44336';
                 if (data.market_event.next_event === "close") {
                     elements.nextEvent.textContent = "Market Close";
-                    if (data.market_event.next_event_time_local) {
-                        const closeTime = new Date(data.market_event.next_event_time_local);
-                        elements.nextEvent.textContent += ` at ${closeTime.toLocaleTimeString()}`;
-                    }
                 } else if (data.market_event.next_event === "open") {
                     elements.nextEvent.textContent = "Market Open";
-                    if (data.market_event.next_event_time_local) {
-                        const openTime = new Date(data.market_event.next_event_time_local);
-                        const tomorrow = openTime.toDateString() !== new Date().toDateString();
-                        elements.nextEvent.textContent += ` at ${openTime.toLocaleTimeString()}`;
-                        if (tomorrow) {
-                            elements.nextEvent.textContent += ` (${openTime.toLocaleDateString()})`;
-                        }
-                    }
                 } else {
-                    elements.nextEvent.textContent = data.market_event.error || "Unknown";
+                    elements.nextEvent.textContent = data.market_event.next_event || 'Unknown';
                 }
-                
-                // Update countdown
-                const timeUntil = data.market_event.time_until_seconds || 0;
-                const hours = Math.floor(timeUntil / 3600);
-                const minutes = Math.floor((timeUntil % 3600) / 60);
-                const seconds = Math.floor(timeUntil % 60);
-                elements.countdown.textContent = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-
-                // Update times - show local time and UAE time
-                if (data.market_event.current_local_time) {
-                    const localTime = new Date(data.market_event.current_local_time);
-                    elements.marketTime.textContent = localTime.toLocaleTimeString();
-                }
-                if (data.market_event.current_uae_time) {
-                    const uaeTime = new Date(data.market_event.current_uae_time);
-                    elements.uaeTime.textContent = uaeTime.toLocaleTimeString() + " (Dubai)";
+                updateCountdown(data.market_event);
+                if (elements.hoursSource) {
+                    const overrideData = data.market_hours_override || {};
+                    const label = overrideData.enabled ? (overrideData.epic || 'Override') : (data.epic || 'Primary');
+                    elements.hoursSource.textContent = label;
                 }
             }
             
@@ -2459,6 +2492,12 @@
             if (categoryHidden && categoryDisplay && categoryHidden.textContent !== '-') {
                 categoryDisplay.textContent = categoryHidden.textContent;
             }
+        }
+
+        if (elements.marketHoursOverrideToggle) {
+            elements.marketHoursOverrideToggle.addEventListener('change', (e) => {
+                applyMarketHoursToggle(e.target.checked);
+            });
         }
     </script>
     

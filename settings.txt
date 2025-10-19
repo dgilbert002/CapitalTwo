@@ -43,6 +43,7 @@ table_name = SOXL_av_5min
 [DATA]
 start_date = 2024-01-01
 end_date = 2025-10-20
+gap_fill_use_mid = true
 
 [TESTING]
 start_date = 2024-01-01
@@ -70,6 +71,10 @@ near_close_data_threshold_sec = 300
 near_close_data_update_sec = 5
 normal_loop_sec = 1
 alpha_vantage_cache_sec = 300
+
+[MARKET_HOURS]
+use_override = True
+override_epic = TECL
 
 [API_CONFIG]
 environment = live
