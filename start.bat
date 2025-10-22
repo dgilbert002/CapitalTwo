@@ -1,6 +1,7 @@
 @echo off
 chcp 65001 >nul
 setlocal ENABLEDELAYEDEXPANSION
+set PYTHONUTF8=1
 
 REM Change to the directory of this script
 pushd "%~dp0"
