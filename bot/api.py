@@ -17,6 +17,9 @@ class CapitalComAPI:
         self.client: Optional[object] = None
         self.loop: Optional[asyncio.AbstractEventLoop] = None
         self.environment: str = (environment or self.settings.get("API_CONFIG", "environment", "demo")).lower() or "demo"
+        # Metrics
+        self._metrics: Dict[str, int] = {}
+        self._last_error: Optional[str] = None
 
         # The latest capitalcom SDK exports CapitalClient instead of Client
         demo_cls = getattr(capital_client_demo, "Client", None) or getattr(capital_client_demo, "CapitalClient", None)
@@ -56,14 +59,29 @@ class CapitalComAPI:
     async def authenticate(self) -> bool:
         """Authenticate with Capital.com API"""
         try:
+            self._bump("authenticate")
             email = self.settings.get("CREDENTIALS", "email")
             password = self.settings.get("CREDENTIALS", "password")
             api_key = self.settings.get("CREDENTIALS", "api_key")
 
             logging.getLogger(__name__).info(f"CapitalComAPI.authenticate(environment={self.environment})")
-            self.client = await self._run_sync(self.ClientClass, email, password, api_key)
             
-            if self.client and self.client.cst:
+            # Try authentication with rate limit handling
+            for attempt in range(3):
+                try:
+                    self.client = await self._run_sync(self.ClientClass, email, password, api_key)
+                    break
+                except Exception as e:
+                    if "429" in str(e) or "too-many-requests" in str(e).lower():
+                        wait_time = 30 * (attempt + 1)  # 30s, 60s, 90s
+                        logger.warning(f"Rate limited (429) - waiting {wait_time} seconds before retry (attempt {attempt+1}/3)")
+                        await asyncio.sleep(wait_time)
+                        if attempt == 2:  # Last attempt
+                            raise
+                    else:
+                        raise
+            
+            if self.client and hasattr(self.client, 'cst') and self.client.cst:
                 logger.info("Successfully authenticated with Capital.com")
                 return True
             else:
@@ -71,12 +89,14 @@ class CapitalComAPI:
                 return False
 
         except Exception as e:
+            self._last_error = f"authenticate: {e}"
             logger.error(f"Authentication error: {e}")
             return False
 
     async def get_accounts(self) -> List[Dict]:
         """Get account information"""
         try:
+            self._bump("get_accounts")
             if not self.client:
                 logger.warning("Client not initialized, attempting to authenticate")
                 if not await self.authenticate():
@@ -87,22 +107,26 @@ class CapitalComAPI:
             logger.debug(f"Accounts fetched: {len(accounts)}")
             return accounts
         except Exception as e:
+            self._last_error = f"get_accounts: {e}"
             logger.error(f"Error getting accounts: {e}")
             return []
 
     async def switch_account(self, account_id: str) -> bool:
         """Switch to specific account"""
         try:
+            self._bump("switch_account")
             await self._run_sync(self.client.switch_account, account_id)
             logger.info(f"Switched to account: {account_id}")
             return True
         except Exception as e:
+            self._last_error = f"switch_account: {e}"
             logger.error(f"Error switching account: {e}")
             return False
 
     async def get_positions(self) -> List[Dict]:
         """Get open positions"""
         try:
+            self._bump("get_positions")
             if not self.client:
                 logger.warning("Client not initialized, attempting to authenticate")
                 if not await self.authenticate():
@@ -111,12 +135,14 @@ class CapitalComAPI:
             positions_data = await self._run_sync(self.client.all_positions)
             return positions_data.get("positions", [])
         except Exception as e:
+            self._last_error = f"get_positions: {e}"
             logger.error(f"Error getting positions: {e}")
             return []
 
     async def get_market_info(self, epic: str) -> Optional[Dict]:
         """Get market information for an epic"""
         try:
+            self._bump("get_market_info")
             if not self.client:
                 logger.warning("Client not initialized, attempting to authenticate")
                 if not await self.authenticate():
@@ -154,23 +180,27 @@ class CapitalComAPI:
                 
             return market_data
         except Exception as e:
+            self._last_error = f"get_market_info: {e}"
             logger.error(f"Error getting market info for {epic}: {e}")
             return None
             
     async def get_historical_prices(self, epic: str, resolution, num_candles: int) -> Optional[Dict]:
         """Get historical price data."""
         try:
+            self._bump("get_historical_prices")
             if not self.client:
                 logger.error(f"Client not initialized for historical prices")
                 return None
             return await self._run_sync(self.client.historical_price, epic, resolution, num_candles)
         except Exception as e:
+            self._last_error = f"get_historical_prices: {e}"
             logger.error(f"Error getting historical prices for {epic}: {e}")
             return None
 
     async def create_position(self, epic: str, direction: str, size: float, stop_level: Optional[float] = None) -> Optional[Dict]:
         """Create a new position"""
         try:
+            self._bump("create_position")
             # Import DirectionType from the appropriate module
             if self.environment == "demo":
                 from capitalcom.client_demo import DirectionType
@@ -195,32 +225,38 @@ class CapitalComAPI:
             logger.info(f"Position creation response: {position}")
             return position
         except Exception as e:
+            self._last_error = f"create_position: {e}"
             logger.error(f"Error creating position: {e}")
             return None
 
     async def close_position(self, deal_id: str) -> bool:
         """Close a position"""
         try:
+            self._bump("close_position")
             await self._run_sync(self.client.close_position, deal_id)
             logger.info(f"Position closed: {deal_id}")
             return True
         except Exception as e:
+            self._last_error = f"close_position: {e}"
             logger.error(f"Error closing position: {e}")
             return False
 
     async def keepalive(self) -> bool:
         """Ping the API to keep the session alive."""
         try:
+            self._bump("keepalive")
             await self._run_sync(self.client.check_server_time)
             logger.debug("Keepalive OK")
             return True
         except Exception as e:
+            self._last_error = f"keepalive: {e}"
             logger.warning(f"Keepalive failed: {e}")
             return False
     
     async def get_trade_history(self, days: int = 7) -> List[Dict]:
         """Get complete trade history with entry and exit details"""
         try:
+            self._bump("get_trade_history")
             if not self.client:
                 logger.warning("Client not initialized, attempting to authenticate")
                 if not await self.authenticate():
@@ -362,12 +398,14 @@ class CapitalComAPI:
             return trades
                         
         except Exception as e:
+            self._last_error = f"get_trade_history: {e}"
             logger.error(f"Error fetching trade history: {e}")
             return []
     
     async def get_account_activity(self, from_date: str = None, to_date: str = None, deal_id: str = None, epic: str = None) -> List[Dict]:
         """Get ALL account transactions/activities"""
         try:
+            self._bump("get_account_activity")
             # Use direct HTTP request to get ALL transactions (not just trades)
             from datetime import datetime, timedelta
             import aiohttp
@@ -420,6 +458,7 @@ class CapitalComAPI:
                         return []
                         
         except Exception as e:
+            self._last_error = f"get_account_activity: {e}"
             logger.error(f"Error fetching account activity: {e}")
             return []
 
@@ -427,12 +466,14 @@ class CapitalComAPI:
     async def get_account_preferences(self) -> Optional[Dict]:
         """Fetch account preferences including leverages per asset class."""
         try:
+            self._bump("get_account_preferences")
             if not hasattr(self.client, 'account_preferences'):
                 logger.error("Client does not support account_preferences")
                 return None
             prefs = await self._run_sync(self.client.account_preferences)
             return prefs
         except Exception as e:
+            self._last_error = f"get_account_preferences: {e}"
             logger.error(f"Error getting account preferences: {e}")
             return None
 
@@ -442,6 +483,7 @@ class CapitalComAPI:
         instrument_category should be one of: SHARES, CURRENCIES, INDICES, CRYPTOCURRENCIES, COMMODITIES
         """
         try:
+            self._bump("update_account_leverage")
             # Get current preferences to preserve other categories
             current = await self.get_account_preferences() or {}
             leverages = (current.get('leverages') or {}).copy()
@@ -466,6 +508,21 @@ class CapitalComAPI:
             logger.info(f"Update account leverage result: {result}")
             return {"ok": (result or {}).get('status') == 'SUCCESS', **(result or {})}
         except Exception as e:
+            self._last_error = f"update_account_leverage: {e}"
             logger.error(f"Error updating account leverage: {e}")
             return {"ok": False, "error": str(e)}
+
+    # ===== Metrics helpers =====
+    def _bump(self, name: str) -> None:
+        try:
+            self._metrics[name] = int(self._metrics.get(name, 0)) + 1
+        except Exception:
+            pass
+
+    def get_metrics(self) -> Dict:
+        return {"counts": dict(self._metrics), "last_error": self._last_error, "environment": self.environment}
+
+    def reset_metrics(self) -> None:
+        self._metrics = {}
+        self._last_error = None
 

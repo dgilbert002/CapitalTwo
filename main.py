@@ -114,6 +114,11 @@ class AppState:
         self.market_info_interval = 30
         self.data_source = ""
         self.action_log = []
+        # Runtime state machine and API metrics
+        self.state: str = "CLOSED"  # CLOSED | WARMUP | OPEN | NEAR_CLOSE
+        self.last_state_change: datetime | None = None
+        self.api_metrics: dict = {}
+        self._warmup_initialized: bool = False
 
 
 app_state = AppState()
@@ -181,7 +186,16 @@ async def websocket_endpoint(websocket: WebSocket):
 
                     override_flag = app_state.settings.getboolean("MARKET_HOURS", "use_override", False)
                     override_epic = app_state.settings.get("MARKET_HOURS", "override_epic", "")
-
+                    # Pull API metrics from API object if available
+                    metrics = {}
+                    try:
+                        if app_state.api and hasattr(app_state.api, "get_metrics"):
+                            metrics = app_state.api.get_metrics() or {}
+                        else:
+                            metrics = getattr(app_state, "api_metrics", {}) or {}
+                    except Exception:
+                        metrics = {}
+            
                     data = {
                         "bot_name": app_state.settings.get("BOT_CONFIG", "bot_name", "AI Trading Bot"),
                         "epic": epic_value,
@@ -190,6 +204,8 @@ async def websocket_endpoint(websocket: WebSocket):
                         "account": app_state.current_account,
                         "market_event": market_event,
                         "market_info": app_state.market_info,
+                        "state": app_state.state,
+                        "api_metrics": metrics,
                         "strategy_metadata": getattr(bot_instance.ai_system, "last_strategy_metadata", None)
                         if bot_instance and getattr(bot_instance, "ai_system", None)
                         else None,
@@ -239,7 +255,7 @@ async def websocket_endpoint(websocket: WebSocket):
                     if hasattr(obj, "isoformat"):
                         return obj.isoformat()
                     return str(obj)
-
+            
                 await websocket.send_text(json.dumps(data, default=serialize_datetime))
                 countdown_timer = (countdown_timer + 1) % full_update_interval
                 await asyncio.sleep(1)
@@ -323,7 +339,8 @@ async def keepalive_task():
     while True:
         try:
             await asyncio.sleep(keepalive_interval)
-            if app_state.api and app_state.is_connected:
+            # Only keepalive when we are in WARMUP or OPEN states
+            if app_state.api and app_state.is_connected and app_state.state in ("WARMUP", "OPEN", "NEAR_CLOSE"):
                 try:
                     success = await app_state.api.keepalive()
                     if success:
@@ -370,46 +387,140 @@ async def continuous_data_update():
     market_closed_interval = app_state.settings.getint(
         "TIMERS", "positions_update_market_closed_sec", fallback=10
     )
+    pre_open_warmup_sec = app_state.settings.getint("TIMERS", "pre_open_warmup_sec", fallback=120)
 
     while True:
         try:
+            # Compute market_event from cached info (no network required)
+            from bot.market_time import MarketTimeManager
+            market_timer = MarketTimeManager(app_state.settings)
+            cached_info = app_state.market_info
+            
+            # Robustness: If no cached info, use standard hours until WARMUP
+            if not cached_info:
+                logger.warning("No cached market info - using standard US market hours until WARMUP")
+                # Fallback: assume standard US market hours (9:30 AM - 4:00 PM ET, Mon-Fri)
+                cached_info = {
+                    "instrument": {
+                        "openingHours": {
+                            "mon": ["14:30 - 21:00"],
+                            "tue": ["14:30 - 21:00"],
+                            "wed": ["14:30 - 21:00"],
+                            "thu": ["14:30 - 21:00"],
+                            "fri": ["14:30 - 21:00"],
+                            "sat": [],
+                            "sun": [],
+                            "zone": "UTC"
+                        }
+                    }
+                }
+            
+            new_market_event = market_timer.get_next_market_event(cached_info) if cached_info else {}
+            if new_market_event:
+                app_state.market_event = new_market_event
+
+            # Determine target state
+            target_state = app_state.state
+            if new_market_event:
+                if new_market_event.get("is_open"):
+                    target_state = "OPEN"
+                else:
+                    t_open = new_market_event.get("time_until_open", new_market_event.get("time_until_seconds", 1e9))
+                    target_state = "WARMUP" if (t_open is not None and t_open <= pre_open_warmup_sec) else "CLOSED"
+
+            # NEAR_CLOSE is a sub-phase of OPEN for cadence; we tag when close is near
+            if target_state == "OPEN":
+                time_until = new_market_event.get("time_until_seconds", 1e9) if new_market_event else 1e9
+                next_event = new_market_event.get("next_event", "") if new_market_event else ""
+                if next_event == "close" and 0 < time_until <= 180:
+                    target_state = "NEAR_CLOSE"
+
+            if target_state != app_state.state:
+                logger.info("STATE -> %s", target_state)
+                app_state.state = target_state
+                app_state.last_state_change = datetime.utcnow()
+                if target_state != "WARMUP":
+                    app_state._warmup_initialized = False
+
+            # CLOSED: zero network usage; just sleep on closed interval
+            if app_state.state == "CLOSED":
+                update_interval = market_closed_interval
+                await asyncio.sleep(update_interval)
+                continue
+
+            # WARMUP: perform one-time re-auth and single market/accounts fetch
+            if app_state.state == "WARMUP":
+                if app_state.api and not app_state._warmup_initialized:
+                    try:
+                        logger.info("WARMUP: re-auth and refresh market/account cache")
+                        if await app_state.api.authenticate():
+                            app_state.is_connected = True
+                        else:
+                            raise Exception("Authentication failed")
+                        # Refresh account (preserve saved or current)
+                        accounts = await app_state.api.get_accounts()
+                        if accounts:
+                            saved_id = app_state.settings.get("ENV_ACCOUNTS", app_state.api.environment, "") or app_state.settings.get(
+                                "CREDENTIALS", "account_id", ""
+                            )
+                            target = next((acc for acc in accounts if acc.get("accountId") == saved_id), None) or accounts[0]
+                            await app_state.api.switch_account(target.get("accountId"))
+                            app_state.current_account = target
+                        # Refresh market info once (respect override hours)
+                        epic = app_state.settings.get("BOT_CONFIG", "epic", "TECL")
+                        override_enabled = app_state.settings.getboolean("MARKET_HOURS", "use_override", False)
+                        override_epic = app_state.settings.get("MARKET_HOURS", "override_epic", "")
+                        override_hours = None
+                        if override_enabled and override_epic:
+                            try:
+                                odata = await app_state.api.get_market_info(override_epic)
+                                instrument = (odata or {}).get("instrument", {})
+                                override_hours = instrument.get("openingHours")
+                            except Exception:
+                                override_hours = None
+                        mdata = await app_state.api.get_market_info(epic)
+                        if mdata and override_hours:
+                            mdata = dict(mdata)
+                            instrument = dict(mdata.get("instrument", {}))
+                            instrument["openingHours"] = override_hours
+                            mdata["instrument"] = instrument
+                        if mdata:
+                            app_state.market_info = mdata
+                            app_state.last_market_check = datetime.utcnow()
+                            logger.info("WARMUP: market info cached for %s", epic)
+                        app_state._warmup_initialized = True
+                    except Exception as exc:
+                        logger.warning("WARMUP failed: %s", exc)
+                # Light sleep during warmup
+                await asyncio.sleep(1)
+                continue
+
+            # OPEN / NEAR_CLOSE: normal cadence with throttles
             if app_state.api and app_state.is_connected:
                 update_count += 1
                 logger.info("Running data update #%s", update_count)
 
+                # Accounts refresh on cadence when open only
                 if app_state.current_account:
-                    market_event = app_state.market_event or {}
-                    is_market_open = market_event.get("is_open", False)
-                    account_interval = (
-                        app_state.settings.getint("TIMERS", "accounts_update_market_open_sec", 5)
-                        if is_market_open
-                        else app_state.settings.getint("TIMERS", "accounts_update_market_closed_sec", 10)
-                    )
+                    account_interval = app_state.settings.getint("TIMERS", "accounts_update_market_open_sec", 15)
                     if not hasattr(app_state, "_last_account_update") or (
                         datetime.utcnow() - app_state._last_account_update
                     ).total_seconds() > account_interval:
                         accounts = await app_state.api.get_accounts()
                         current_id = app_state.current_account.get("accountId")
-                        updated = next(
-                            (acc for acc in accounts if acc.get("accountId") == current_id),
-                            None,
-                        )
+                        updated = next((acc for acc in accounts if acc.get("accountId") == current_id), None)
                         if updated:
                             app_state.current_account = updated
                             app_state._last_account_update = datetime.utcnow()
                         else:
                             logger.warning("Could not find account %s in accounts list", current_id)
 
+                # Positions on open cadence
                 app_state.positions = await app_state.api.get_positions()
-                logger.debug(
-                    "Found %s open positions",
-                    len(app_state.positions) if app_state.positions else 0,
-                )
+                logger.debug("Found %s open positions", len(app_state.positions) if app_state.positions else 0)
 
                 epic = app_state.settings.get("BOT_CONFIG", "epic", "TECL")
-                market_info_interval = app_state.settings.getint(
-                    "TIMERS", "market_info_update_sec", fallback=30
-                )
+                market_info_interval = app_state.settings.getint("TIMERS", "market_info_update_sec", fallback=30)
                 current_time = datetime.utcnow()
                 should_update_market = False
                 reason = ""
@@ -417,19 +528,13 @@ async def continuous_data_update():
                 if app_state.last_market_check is None:
                     should_update_market = True
                     reason = "Initial market check"
-                elif (
-                    current_time - app_state.last_market_check
-                ).total_seconds() >= market_info_interval:
+                elif (current_time - app_state.last_market_check).total_seconds() >= market_info_interval:
                     should_update_market = True
                     reason = f"Regular update (every {market_info_interval}s)"
 
                 market_event = app_state.market_event or {}
                 if market_event:
                     time_until = market_event.get("time_until_seconds", float("inf"))
-                    if 0 < time_until < 300:
-                        should_update_market = True
-                        reason = "Near market state change"
-
                     next_event = market_event.get("next_event", "")
                     if next_event == "close" and market_event.get("is_open"):
                         if 115 <= time_until <= 125:
@@ -446,23 +551,15 @@ async def continuous_data_update():
                     override_enabled = app_state.settings.getboolean("MARKET_HOURS", "use_override", False)
                     override_epic = app_state.settings.get("MARKET_HOURS", "override_epic", "")
                     override_hours = None
-
                     if override_enabled and override_epic:
                         try:
                             override_market_data = await app_state.api.get_market_info(override_epic)
                             instrument = (override_market_data or {}).get("instrument", {})
                             override_hours = instrument.get("openingHours")
                             if override_hours:
-                                logger.info(
-                                    "Using override market hours from %s for countdowns",
-                                    override_epic,
-                                )
+                                logger.info("Using override market hours from %s for countdowns", override_epic)
                         except Exception as exc:
-                            logger.warning(
-                                "Failed to fetch override market hours for %s: %s",
-                                override_epic,
-                                exc,
-                            )
+                            logger.warning("Failed to fetch override market hours for %s: %s", override_epic, exc)
                             override_hours = None
 
                     market_data = await app_state.api.get_market_info(epic)
@@ -472,54 +569,38 @@ async def continuous_data_update():
                             instrument = dict(market_data.get("instrument", {}))
                             instrument["openingHours"] = override_hours
                             market_data["instrument"] = instrument
-
                         app_state.market_info = market_data
                         app_state.last_market_check = current_time
                         logger.info("Market data updated for %s - Reason: %s", epic, reason)
 
-                    from bot.market_time import MarketTimeManager
-
                     market_timer = MarketTimeManager(app_state.settings)
                     new_market_event = market_timer.get_next_market_event(market_data)
                     if new_market_event:
-                        current_state = new_market_event.get("is_open")
-                        if (
-                            app_state.last_market_state is not None
-                            and current_state != app_state.last_market_state
-                        ):
-                            if current_state:
+                        current_state_open = new_market_event.get("is_open")
+                        if (app_state.last_market_state is not None and current_state_open != app_state.last_market_state):
+                            if current_state_open:
                                 logger.warning("MARKET OPENED - Switching to higher frequency updates")
                                 if app_state.api:
                                     try:
                                         await app_state.api.keepalive()
                                         logger.warning("MARKET OPENED - Verified authentication")
                                     except Exception:
-                                        logger.warning(
-                                            "Keepalive failed at market open, will retry on next cycle"
-                                        )
+                                        logger.warning("Keepalive failed at market open, will retry on next cycle")
                             else:
                                 logger.warning("MARKET CLOSED - Switching to lower frequency updates")
 
-                        app_state.last_market_state = current_state
+                        app_state.last_market_state = current_state_open
                         app_state.market_event = new_market_event
-                        status = "OPEN" if current_state else "CLOSED"
+                        status = "OPEN" if current_state_open else "CLOSED"
                         next_event = new_market_event.get("next_event", "unknown")
                         time_until = new_market_event.get("time_until_seconds", 0)
                         hours_until = time_until / 3600
-                        logger.info(
-                            "Market is %s, next %s in %.1f hours", status, next_event, hours_until
-                        )
+                        logger.info("Market is %s, next %s in %.1f hours", status, next_event, hours_until)
             else:
-                logger.warning(
-                    "Not updating - connected: %s, api: %s",
-                    app_state.is_connected,
-                    app_state.api is not None,
-                )
+                logger.warning("Not updating - connected: %s, api: %s", app_state.is_connected, app_state.api is not None)
 
             update_interval = (
-                market_open_interval
-                if app_state.market_event and app_state.market_event.get("is_open")
-                else market_closed_interval
+                market_open_interval if app_state.state in ("OPEN", "NEAR_CLOSE") else market_closed_interval
             )
             await asyncio.sleep(update_interval)
         except Exception as exc:
@@ -534,23 +615,16 @@ async def startup_event():
 
     env = app_state.settings.get("API_CONFIG", "environment", "demo").lower()
     app_state.api = CapitalComAPI(app_state.settings, environment=env)
-
-    if await app_state.api.authenticate():
-        app_state.is_connected = True
-        accounts = await app_state.api.get_accounts()
-        if accounts:
-            saved_id = app_state.settings.get("ENV_ACCOUNTS", env, "") or app_state.settings.get(
-                "CREDENTIALS", "account_id", ""
-            )
-            target = next((acc for acc in accounts if acc.get("accountId") == saved_id), None) or accounts[0]
-            if await app_state.api.switch_account(target.get("accountId")):
-                app_state.current_account = target
-                logger.info("Connected to %s account: %s", env, target.get("accountName"))
-
-        app_state.update_task = asyncio.create_task(continuous_data_update())
-        app_state.keepalive_task = asyncio.create_task(keepalive_task())
-    else:
-        logger.error("Failed to connect to Capital.com API")
+    
+    # Initialize state to CLOSED (will be updated by continuous_data_update)
+    app_state.state = "CLOSED"
+    app_state.is_connected = False  # Don't connect immediately
+    
+    # Start the update task which will handle auth at the right time
+    app_state.update_task = asyncio.create_task(continuous_data_update())
+    app_state.keepalive_task = asyncio.create_task(keepalive_task())
+    
+    logger.info("App started in CLOSED state - will authenticate during WARMUP")
 
 
 @app.on_event("shutdown")
@@ -919,11 +993,38 @@ async def get_config():
         "environment": env,
         "selected_account_id": selected,
         "is_connected": app_state.is_connected,
+        "state": app_state.state,
         "market_hours_override": {
             "enabled": override_flag,
             "epic": override_epic,
         },
     }
+
+
+@app.get("/api/metrics")
+async def get_api_metrics():
+    try:
+        metrics = {}
+        if app_state.api and hasattr(app_state.api, "get_metrics"):
+            metrics = app_state.api.get_metrics() or {}
+        else:
+            metrics = getattr(app_state, "api_metrics", {}) or {}
+        return {"ok": True, "metrics": metrics, "state": app_state.state}
+    except Exception as exc:
+        logger.error(f"Error getting metrics: {exc}")
+        return {"ok": False, "error": str(exc)}
+
+
+@app.post("/api/metrics/reset")
+async def reset_api_metrics():
+    try:
+        if app_state.api and hasattr(app_state.api, "reset_metrics"):
+            app_state.api.reset_metrics()
+        app_state.api_metrics = {}
+        return {"ok": True}
+    except Exception as exc:
+        logger.error(f"Error resetting metrics: {exc}")
+        return {"ok": False, "error": str(exc)}
 
 
 @app.post("/api/log/level")

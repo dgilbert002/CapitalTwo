@@ -24,8 +24,8 @@ sl_use = 0,1,2,4,6,8,10
 override_strategy_sl = False
 
 [ENV_ACCOUNTS]
-demo = 293869307439690014
-live = 293339553283003588
+demo = 290950804147613982
+live = 211640169982416068
 
 [STRATEGY]
 strategy_mode = test8_no_protection
