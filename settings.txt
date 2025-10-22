@@ -77,5 +77,5 @@ use_override = True
 override_epic = TECL
 
 [API_CONFIG]
-environment = live
+environment = demo
 

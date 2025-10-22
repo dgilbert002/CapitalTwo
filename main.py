@@ -1207,19 +1207,48 @@ async def set_environment(payload: dict = Body(...)):
     app_state.settings.set_value("API_CONFIG", "environment", env)
     from bot.api import CapitalComAPI
 
+    # Create new API instance for the environment
     app_state.api = CapitalComAPI(app_state.settings, environment=env)
     logger.info("Environment changed to %s; re-authenticating", env)
 
     if await app_state.api.authenticate():
         app_state.is_connected = True
         accounts = await app_state.api.get_accounts()
+        
+        # Try to restore saved account for this environment
         saved_id = app_state.settings.get("ENV_ACCOUNTS", env, "")
-        target = next((acc for acc in accounts if acc.get("accountId") == saved_id), None)
-        target = target or (accounts[0] if accounts else None)
+        target = None
+        
+        if saved_id:
+            target = next((acc for acc in accounts if acc.get("accountId") == saved_id), None)
+            if target:
+                logger.info("Restored saved account for %s: %s", env, target.get("accountName"))
+            else:
+                logger.warning("Saved account %s not found in %s environment", saved_id, env)
+        
+        # Fall back to first account if saved not found
+        if not target and accounts:
+            target = accounts[0]
+            logger.info("Using first available account for %s: %s", env, target.get("accountName"))
+        
         if target:
             await app_state.api.switch_account(target.get("accountId"))
             app_state.current_account = target
-        return {"ok": True, "environment": env}
+            # Save the account ID for this environment
+            app_state.settings.set_value("ENV_ACCOUNTS", env, target.get("accountId"))
+            app_state.settings.save()
+            
+        # Return the updated account list along with environment info
+        return {
+            "ok": True, 
+            "environment": env,
+            "current_account": target,
+            "accounts": [
+                {"accountId": acc.get("accountId"), "accountName": acc.get("accountName")}
+                for acc in accounts
+            ]
+        }
+    
     app_state.is_connected = False
     return {"ok": False, "error": "auth_failed"}
 
@@ -1228,12 +1257,20 @@ async def set_environment(payload: dict = Body(...)):
 async def list_accounts():
     if not app_state.api:
         return {"accounts": []}
+    
+    # Make sure we're authenticated first
+    if not app_state.is_connected:
+        if not await app_state.api.authenticate():
+            return {"accounts": [], "error": "Not authenticated"}
+        app_state.is_connected = True
+    
     accounts = await app_state.api.get_accounts()
     return {
         "accounts": [
             {"accountId": acc.get("accountId"), "accountName": acc.get("accountName")}
             for acc in accounts
-        ]
+        ],
+        "current_account_id": app_state.current_account.get("accountId") if app_state.current_account else None
     }
 
 
@@ -1253,13 +1290,21 @@ async def select_account(payload: dict = Body(...)):
     
     ok = await app_state.api.switch_account(account_id)
     if ok:
-        app_state.settings.set_env_account(app_state.api.environment, account_id)
+        # Save the selected account for this environment
+        env = app_state.api.environment
+        app_state.settings.set_env_account(env, account_id)
+        logger.info("Saved account %s for %s environment to settings.txt", account_id, env)
+        
+        # Update current account
         accounts = await app_state.api.get_accounts()
         app_state.current_account = next(
             (acc for acc in accounts if acc.get("accountId") == account_id),
-            {"accountId": account_id},
+            {"accountId": account_id, "accountName": "Unknown"},
         )
-    return {"ok": ok}
+        
+        return {"ok": True, "account": app_state.current_account}
+    
+    return {"ok": False, "error": "Failed to switch account"}
 
 
 if __name__ == "__main__":

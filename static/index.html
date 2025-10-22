@@ -1490,7 +1490,23 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ environment: env })
                 });
-                if (res.ok) { await fetchAccounts(); }
+                if (res.ok) {
+                    const data = await res.json();
+                    // Update account list with the returned accounts
+                    if (data.accounts && data.accounts.length > 0) {
+                        elements.accountSelect.innerHTML = data.accounts
+                            .map(acc => `<option value="${acc.accountId}">${acc.accountName}</option>`)
+                            .join('');
+                        
+                        // Select the current account if provided
+                        if (data.current_account) {
+                            elements.accountSelect.value = data.current_account.accountId;
+                        }
+                    } else {
+                        // If no accounts returned, fetch them separately
+                        await fetchAccounts();
+                    }
+                }
             } catch (e) { console.error(e); }
         });
 
