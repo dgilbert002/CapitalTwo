@@ -441,6 +441,16 @@ async def continuous_data_update():
                 app_state.last_state_change = datetime.utcnow()
                 if target_state != "WARMUP":
                     app_state._warmup_initialized = False
+            
+            # Special case: if we just started and market is OPEN, authenticate immediately
+            if hasattr(app_state, '_startup_auth_needed') and app_state._startup_auth_needed:
+                if target_state in ("OPEN", "NEAR_CLOSE"):
+                    logger.info("Market is open on startup - authenticating immediately")
+                    app_state._warmup_initialized = False  # Trigger auth
+                    app_state._startup_auth_needed = False
+                elif target_state == "WARMUP":
+                    app_state._startup_auth_needed = False  # Will auth in WARMUP
+                # If CLOSED, keep the flag for when market opens
 
             # CLOSED: zero network usage; just sleep on closed interval
             if app_state.state == "CLOSED":
@@ -496,6 +506,51 @@ async def continuous_data_update():
                 continue
 
             # OPEN / NEAR_CLOSE: normal cadence with throttles
+            # First check if we need to authenticate (e.g., started while market was open)
+            if app_state.api and not app_state.is_connected and not app_state._warmup_initialized:
+                try:
+                    logger.info("Authenticating in OPEN state (startup or reconnect)")
+                    if await app_state.api.authenticate():
+                        app_state.is_connected = True
+                    else:
+                        raise Exception("Authentication failed")
+                    # Refresh account (preserve saved or current)
+                    accounts = await app_state.api.get_accounts()
+                    if accounts:
+                        saved_id = app_state.settings.get("ENV_ACCOUNTS", app_state.api.environment, "") or app_state.settings.get(
+                            "CREDENTIALS", "account_id", ""
+                        )
+                        target = next((acc for acc in accounts if acc.get("accountId") == saved_id), None) or accounts[0]
+                        await app_state.api.switch_account(target.get("accountId"))
+                        app_state.current_account = target
+                    # Fetch market info once
+                    epic = app_state.settings.get("BOT_CONFIG", "epic", "TECL")
+                    override_enabled = app_state.settings.getboolean("MARKET_HOURS", "use_override", False)
+                    override_epic = app_state.settings.get("MARKET_HOURS", "override_epic", "")
+                    override_hours = None
+                    if override_enabled and override_epic:
+                        try:
+                            odata = await app_state.api.get_market_info(override_epic)
+                            instrument = (odata or {}).get("instrument", {})
+                            override_hours = instrument.get("openingHours")
+                        except Exception:
+                            override_hours = None
+                    mdata = await app_state.api.get_market_info(epic)
+                    if mdata and override_hours:
+                        mdata = dict(mdata)
+                        instrument = dict(mdata.get("instrument", {}))
+                        instrument["openingHours"] = override_hours
+                        mdata["instrument"] = instrument
+                    if mdata:
+                        app_state.market_info = mdata
+                        app_state.last_market_check = datetime.utcnow()
+                        logger.info("Authenticated and market info cached for %s", epic)
+                    app_state._warmup_initialized = True
+                except Exception as exc:
+                    logger.warning("Authentication failed in OPEN state: %s", exc)
+                    await asyncio.sleep(30)  # Wait before retry
+                    continue
+            
             if app_state.api and app_state.is_connected:
                 update_count += 1
                 logger.info("Running data update #%s", update_count)
@@ -619,12 +674,13 @@ async def startup_event():
     # Initialize state to CLOSED (will be updated by continuous_data_update)
     app_state.state = "CLOSED"
     app_state.is_connected = False  # Don't connect immediately
+    app_state._startup_auth_needed = True  # Flag to trigger auth on first loop
     
     # Start the update task which will handle auth at the right time
     app_state.update_task = asyncio.create_task(continuous_data_update())
     app_state.keepalive_task = asyncio.create_task(keepalive_task())
     
-    logger.info("App started in CLOSED state - will authenticate during WARMUP")
+    logger.info("App started - will authenticate based on market state")
 
 
 @app.on_event("shutdown")
@@ -1188,6 +1244,13 @@ async def select_account(payload: dict = Body(...)):
         return {"ok": False, "error": "missing_account_id"}
 
     logger.info("Selecting account %s", account_id)
+    
+    # Make sure we're authenticated first
+    if app_state.api and not app_state.is_connected:
+        if not await app_state.api.authenticate():
+            return {"ok": False, "error": "Failed to authenticate"}
+        app_state.is_connected = True
+    
     ok = await app_state.api.switch_account(account_id)
     if ok:
         app_state.settings.set_env_account(app_state.api.environment, account_id)
