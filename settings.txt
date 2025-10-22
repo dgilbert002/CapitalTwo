@@ -24,8 +24,8 @@ sl_use = 0,1,2,4,6,8,10
 override_strategy_sl = False
 
 [ENV_ACCOUNTS]
-demo = 290950804147613982
-live = 211640169982416068
+demo = 293869307439690014
+live = 290795266196460740
 
 [STRATEGY]
 strategy_mode = test8_no_protection
@@ -77,5 +77,5 @@ use_override = True
 override_epic = TECL
 
 [API_CONFIG]
-environment = demo
+environment = live
 
