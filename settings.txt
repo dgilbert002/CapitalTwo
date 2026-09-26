@@ -24,7 +24,7 @@ sl_use = 0,1,2,4,6,8,10
 override_strategy_sl = False
 
 [ENV_ACCOUNTS]
-demo = 293869307439690014
+demo = 302988407772360990
 live = 290795266196460740
 
 [STRATEGY]
