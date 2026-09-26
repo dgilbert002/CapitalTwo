@@ -121,3 +121,4 @@ dmypy.json
 
 # Unzipped Alpha Vantage database (ships as database_av.zip)
 database_av.db
+database_av.db-journal
