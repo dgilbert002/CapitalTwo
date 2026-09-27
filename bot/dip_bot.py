@@ -17,6 +17,10 @@ settings.txt [DIP_BOT] (all optional):
   leverage = 3            (hard-capped at 5 = Capital.com 20% margin)
   invest_pct = 0.95       (fraction of equity used, leaves margin buffer)
   emergency_stop_pct = 15
+  trend_sma_days = 200    (below the N-day average use trend_below_mult x leverage; 0 = off)
+  trend_below_mult = 0.5  (0 = no trades below the average)
+  brake_dd_pct = 20       (account drawdown that pauses trading; 0 = off)
+  brake_pause_days = 20
   paper = true            (true: no orders, paper trades logged to CSV)
 """
 import configparser
@@ -59,6 +63,10 @@ def load_config():
         'invest_pct': min(float(d.get('invest_pct', 0.95)), 0.99),
         'stop_pct': float(d.get('emergency_stop_pct', 15)),
         'paper': str(d.get('paper', 'true')).lower() in ('1', 'true', 'yes'),
+        'trend_days': int(d.get('trend_sma_days', DS.TREND_SMA_DAYS)),
+        'trend_mult': float(d.get('trend_below_mult', DS.TREND_BELOW_MULT)),
+        'brake_dd': float(d.get('brake_dd_pct', DS.BRAKE_DD_PCT)),
+        'brake_pause': int(d.get('brake_pause_days', DS.BRAKE_PAUSE_DAYS)),
     }
     return cfg
 
@@ -85,6 +93,7 @@ class DipBot:
         self.cal = mcal.get_calendar('NYSE')
         self.st = load_state()
         self.history = None
+        self.daily = None
 
     def day(self, d):
         return self.st['days'].setdefault(str(d), {})
@@ -119,6 +128,11 @@ class DipBot:
         self.history = self.api.candles_1m(self.cfg['epic'], now_utc - pd.Timedelta(days=7), now_utc)
         log.info('Prefetched %d 1-min candles (to %s ET)', len(self.history),
                  self.history['t'].iloc[-1] if len(self.history) else '-')
+        if self.cfg['trend_days']:
+            h1 = self.api.candles(self.cfg['epic'], now_utc - pd.Timedelta(days=int(self.cfg['trend_days'] * 1.6) + 10),
+                                  now_utc, 'HOUR', pd.Timedelta(days=40))
+            self.daily = DS.daily_closes_from_hourly(h1)
+            log.info('Prefetched %d daily closes for the %d-day trend filter', len(self.daily), self.cfg['trend_days'])
 
     def close_positions(self, d):
         rec = self.day(d)
@@ -128,12 +142,14 @@ class DipBot:
                 bid = float(self.api.market(self.cfg['epic'])['snapshot']['bid'])
                 self._paper_close(pp, bid, 'T-30s')
             rec['closed'] = True
+            self._brake_after_close()
             return
         for attempt in range(5):
             ps = self.api.positions(self.cfg['epic'])
             if not ps:
                 rec['closed'] = True
                 log.info('No %s positions open', self.cfg['epic'])
+                self._brake_after_close()
                 return
             for p in ps:
                 did = p['position']['dealId']
@@ -147,10 +163,22 @@ class DipBot:
         if not rec['closed']:
             log.critical('Positions still open after 5 close attempts - will NOT open a new trade today')
 
+    def _brake_after_close(self):
+        prot = self.st.setdefault('protection', {})
+        before = prot.get('brake_days_left', 0)
+        DS.brake_update(prot, self.equity(), self.cfg['brake_dd'], self.cfg['brake_pause'])
+        if prot.get('brake_days_left', 0) > before:
+            log.warning('BRAKE: account fell more than %.0f%% from its peak - no new trades for %d trading days',
+                        self.cfg['brake_dd'], self.cfg['brake_pause'])
+
     def decide_and_open(self, d, now_utc):
         rec = self.day(d)
         rec['decided'] = True
         save_state(self.st)
+        if DS.brake_blocks(self.st.setdefault('protection', {})):
+            rec['decision'] = f"SKIP: brake active ({self.st['protection']['brake_days_left']} more days)"
+            log.warning(rec['decision'])
+            return
         recent = self.api.candles_1m(self.cfg['epic'], now_utc - pd.Timedelta(minutes=30), now_utc)
         m1 = pd.concat([self.history if self.history is not None else pd.DataFrame(), recent])
         m1 = m1.drop_duplicates('t', keep='last').sort_values('t')
@@ -164,6 +192,20 @@ class DipBot:
             return
         dec = DS.decide(m5)
         rec['decision'] = ('BUY ' if dec.buy else 'NO TRADE ') + dec.reason
+        lev = self.cfg['leverage']
+        if dec.buy and self.cfg['trend_days']:
+            if self.daily is None or len(self.daily) < self.cfg['trend_days'] - 1:
+                rec['decision'] = f'SKIP: trend filter has no data ({0 if self.daily is None else len(self.daily)} days)'
+                dec.buy = False
+            elif DS.below_trend(self.daily[self.daily.index < pd.Timestamp(d)], float(m5['close'].iloc[-1]),
+                                self.cfg['trend_days']):
+                lev_mult = self.cfg['trend_mult']
+                if lev_mult <= 0:
+                    rec['decision'] = f"NO TRADE (trend filter: below {self.cfg['trend_days']}-day average) " + dec.reason
+                    dec.buy = False
+                else:
+                    lev *= lev_mult
+                    rec['decision'] += f" | below {self.cfg['trend_days']}-day average: leverage x{lev_mult}"
         log.info('Decision: %s', rec['decision'])
         if not dec.buy:
             return
@@ -179,7 +221,7 @@ class DipBot:
         ask, bid = float(snap['offer']), float(snap['bid'])
         eq = self.equity()
         step = float(rules['minSizeIncrement']['value'])
-        size = math.floor(eq * self.cfg['invest_pct'] * self.cfg['leverage'] / ask / step) * step
+        size = math.floor(eq * self.cfg['invest_pct'] * lev / ask / step) * step
         size = int(size) if step >= 1 else round(size, 6)
         if size < float(rules['minDealSize']['value']):
             rec['decision'] += f' | equity {eq:.2f} too small for min size'

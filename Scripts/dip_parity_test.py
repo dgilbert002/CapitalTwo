@@ -53,3 +53,20 @@ print(f'live decision == mega-sweep engine : {agree_ms}/{n}')
 print(f'BUY days: {sum(bool(bt[t]) for t in days)}')
 if mism:
     print('mismatches:', mism[:10])
+
+# ---- trend filter parity: live (hourly 15:00 closes for past days + today's 15:55 price)
+#      vs backtest (15:55 closes of every trading day)
+h1 = pd.read_sql_query('SELECT * FROM SOXL_cap_1h ORDER BY timestamp', sqlite3.connect(os.path.join(ROOT, 'database_av.db')))
+h1['t'] = pd.to_datetime(h1['timestamp'])
+daily_live = DS.daily_closes_from_hourly(h1)
+_d = full5[full5['t'].dt.time == pd.Timestamp('15:55').time()]
+dec5 = pd.Series(_d['close'].to_numpy(), index=_d['t'].dt.normalize().to_numpy())
+# backtest series needs history before 2024: use hourly closes before the 1-min data starts
+bt_daily = pd.concat([daily_live[daily_live.index < dec5.index[0]], dec5])
+bt_below = bt_daily < bt_daily.rolling(DS.TREND_SMA_DAYS).mean()
+agree = n = 0
+for t in dec5.index:
+    live_b = DS.below_trend(daily_live[daily_live.index < t], float(dec5[t]))
+    n += 1
+    agree += live_b == bool(bt_below[t])
+print(f'trend filter (200-day) live == backtest : {agree}/{n}')

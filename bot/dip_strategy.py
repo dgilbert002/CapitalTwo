@@ -75,3 +75,46 @@ def decide(m5: pd.DataFrame) -> Decision:
     reason = (f"ROC{ROC_BARS}={ind['roc_pct']:+.2f}% (need < -{ROC_DROP_PCT}%), "
               f"MACD hist={ind['macd_hist_frac']*100:+.3f}% (need < -{MACD_FRAC*100:.2f}%)")
     return Decision(buy, float(ind['roc_pct']), float(ind['macd_hist_frac']), m5['t'].iloc[-1], len(m5), reason)
+
+
+# ---------------------------------------------------------------- protections
+# Chosen with Scripts/protect_sweep.py (exact 2024-26 data + hourly 2021-26
+# crash test). The old app's crash protection made results worse and is not used.
+TREND_SMA_DAYS = 200     # while price < its 200-day average ...
+TREND_BELOW_MULT = 0.5   # ... use this fraction of normal leverage (0 = skip)
+BRAKE_DD_PCT = 20.0      # account drawdown from peak that trips the brake
+BRAKE_PAUSE_DAYS = 20    # trading days without new trades after the brake trips
+
+
+def daily_closes_from_hourly(h1: pd.DataFrame) -> pd.Series:
+    """Daily closing mid price = close of the 15:00 ET hourly candle."""
+    x = h1[pd.to_datetime(h1['t']).dt.hour == 15]
+    return pd.Series(((x['bid_close'] + x['ask_close']) / 2).to_numpy(),
+                     index=pd.to_datetime(x['t']).dt.normalize().to_numpy())
+
+
+def below_trend(past_daily_closes: pd.Series, today_price: float, days: int = TREND_SMA_DAYS) -> bool:
+    """True if today's price is below the average of the last `days` daily closes
+    (including today). Not enough history -> False (no filter), as backtested."""
+    if not days:
+        return False
+    s = pd.concat([past_daily_closes, pd.Series([today_price])]).tail(days)
+    return len(s) >= days and today_price < s.mean()
+
+
+def brake_update(state: dict, equity: float, dd_pct: float = BRAKE_DD_PCT, pause: int = BRAKE_PAUSE_DAYS) -> None:
+    """Call after each close. Trips the brake when equity falls dd_pct from peak."""
+    peak = max(state.get('equity_peak') or equity, equity)
+    state['equity_peak'] = peak
+    if dd_pct and equity / peak - 1 < -dd_pct / 100:
+        state['brake_days_left'] = pause
+        state['equity_peak'] = equity
+
+
+def brake_blocks(state: dict) -> bool:
+    """Call once per trading day at decision time."""
+    left = int(state.get('brake_days_left') or 0)
+    if left > 0:
+        state['brake_days_left'] = left - 1
+        return True
+    return False

@@ -79,12 +79,17 @@ class CapitalREST:
 
     def candles_1m(self, epic: str, start_utc: pd.Timestamp, end_utc: pd.Timestamp) -> pd.DataFrame:
         """1-minute bid/ask candles, US/Eastern naive bar-start timestamps."""
+        return self.candles(epic, start_utc, end_utc, 'MINUTE', pd.Timedelta(hours=16))
+
+    def candles(self, epic: str, start_utc: pd.Timestamp, end_utc: pd.Timestamp, resolution: str,
+                window: pd.Timedelta) -> pd.DataFrame:
+        """Bid/ask candles at `resolution`, fetched in `window` chunks (<1000 bars each)."""
         rows, cur = [], start_utc
         while cur < end_utc:
-            nxt = min(cur + pd.Timedelta(hours=16), end_utc)
+            nxt = min(cur + window, end_utc)
             try:
                 j = self._req('GET', f'/prices/{epic}', params={
-                    'resolution': 'MINUTE', 'max': 1000,
+                    'resolution': resolution, 'max': 1000,
                     'from': cur.strftime('%Y-%m-%dT%H:%M:%S'), 'to': nxt.strftime('%Y-%m-%dT%H:%M:%S')})
             except CapitalError as e:
                 if '404' not in str(e):   # 404 = no prices in window

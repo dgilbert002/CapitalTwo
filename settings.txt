@@ -82,7 +82,7 @@ environment = demo
 
 [DIP_BOT]
 epic = SOXL
-leverage = 3
+leverage = 4
 invest_pct = 0.95
 emergency_stop_pct = 15
 paper = true
