@@ -1,0 +1,254 @@
+{
+ "SOXL": {
+  "type": "SHARES",
+  "margin_pct": 20,
+  "name": "Direxion Daily Semiconductor Bull 3X Shares",
+  "min_size": 1,
+  "overnight": {
+   "longRate": -0.0222069,
+   "shortRate": -1.53e-05,
+   "swapChargeTimestamp": 1790542800000,
+   "swapChargeInterval": 1440
+  }
+ },
+ "TQQQ": {
+  "type": "SHARES",
+  "margin_pct": 20,
+  "name": "ProShares UltraPro QQQ",
+  "min_size": 0.1,
+  "overnight": {
+   "longRate": -0.0222069,
+   "shortRate": -1.53e-05,
+   "swapChargeTimestamp": 1790542800000,
+   "swapChargeInterval": 1440
+  }
+ },
+ "TECL": {
+  "type": "SHARES",
+  "margin_pct": 20,
+  "name": "Direxion Daily Technology Bull 3X Shares",
+  "min_size": 0.1,
+  "overnight": {
+   "longRate": -0.0222069,
+   "shortRate": -1.53e-05,
+   "swapChargeTimestamp": 1790542800000,
+   "swapChargeInterval": 1440
+  }
+ },
+ "TNA": {
+  "type": "SHARES",
+  "margin_pct": 20,
+  "name": "Direxion Daily Small Cap Bull 3X Shares",
+  "min_size": 1,
+  "overnight": {
+   "longRate": -0.0222069,
+   "shortRate": -1.53e-05,
+   "swapChargeTimestamp": 1790542800000,
+   "swapChargeInterval": 1440
+  }
+ },
+ "UPRO": {
+  "type": "SHARES",
+  "margin_pct": 20,
+  "name": "ProShares UltraPro S&P500",
+  "min_size": 0.1,
+  "overnight": {
+   "longRate": -0.0222069,
+   "shortRate": -1.53e-05,
+   "swapChargeTimestamp": 1790542800000,
+   "swapChargeInterval": 1440
+  }
+ },
+ "UDOW": {
+  "type": "SHARES",
+  "margin_pct": 20,
+  "name": "ProShares UltraPro Dow30",
+  "min_size": 0.1,
+  "overnight": {
+   "longRate": -0.0222069,
+   "shortRate": -1.53e-05,
+   "swapChargeTimestamp": 1790542800000,
+   "swapChargeInterval": 1440
+  }
+ },
+ "NVDA": {
+  "type": "SHARES",
+  "margin_pct": 20,
+  "name": "NVIDIA Corp",
+  "min_size": 0.1,
+  "overnight": {
+   "longRate": -0.0222069,
+   "shortRate": -1.53e-05,
+   "swapChargeTimestamp": 1790542800000,
+   "swapChargeInterval": 1440
+  }
+ },
+ "TSLA": {
+  "type": "SHARES",
+  "margin_pct": 20,
+  "name": "Tesla Inc",
+  "min_size": 0.1,
+  "overnight": {
+   "longRate": -0.0222069,
+   "shortRate": -1.53e-05,
+   "swapChargeTimestamp": 1790542800000,
+   "swapChargeInterval": 1440
+  }
+ },
+ "MSTR": {
+  "type": "SHARES",
+  "margin_pct": 20,
+  "name": "Strategy Inc",
+  "min_size": 0.1,
+  "overnight": {
+   "longRate": -0.0222069,
+   "shortRate": -1.53e-05,
+   "swapChargeTimestamp": 1790542800000,
+   "swapChargeInterval": 1440
+  }
+ },
+ "COIN": {
+  "type": "SHARES",
+  "margin_pct": 20,
+  "name": "Coinbase Global Inc",
+  "min_size": 0.1,
+  "overnight": {
+   "longRate": -0.0222069,
+   "shortRate": -1.53e-05,
+   "swapChargeTimestamp": 1790542800000,
+   "swapChargeInterval": 1440
+  }
+ },
+ "SMCI": {
+  "type": "SHARES",
+  "margin_pct": 20,
+  "name": "Super Micro Computer, Inc.",
+  "min_size": 0.1,
+  "overnight": {
+   "longRate": -0.0222069,
+   "shortRate": -1.53e-05,
+   "swapChargeTimestamp": 1790542800000,
+   "swapChargeInterval": 1440
+  }
+ },
+ "PLTR": {
+  "type": "SHARES",
+  "margin_pct": 20,
+  "name": "Palantir Technologies Inc",
+  "min_size": 0.1,
+  "overnight": {
+   "longRate": -0.0222069,
+   "shortRate": -1.53e-05,
+   "swapChargeTimestamp": 1790542800000,
+   "swapChargeInterval": 1440
+  }
+ },
+ "AMD": {
+  "type": "SHARES",
+  "margin_pct": 20,
+  "name": "Advanced Micro Devices Inc",
+  "min_size": 0.1,
+  "overnight": {
+   "longRate": -0.0222069,
+   "shortRate": -1.53e-05,
+   "swapChargeTimestamp": 1790542800000,
+   "swapChargeInterval": 1440
+  }
+ },
+ "META": {
+  "type": "SHARES",
+  "margin_pct": 20,
+  "name": "Meta Platforms Inc",
+  "min_size": 0.01,
+  "overnight": {
+   "longRate": -0.0222069,
+   "shortRate": -1.53e-05,
+   "swapChargeTimestamp": 1790542800000,
+   "swapChargeInterval": 1440
+  }
+ },
+ "US100": {
+  "type": "INDICES",
+  "margin_pct": 5,
+  "name": "US Tech 100",
+  "min_size": 0.001,
+  "overnight": {
+   "longRate": -0.0222069,
+   "shortRate": -1.53e-05,
+   "swapChargeTimestamp": 1790542800000,
+   "swapChargeInterval": 1440
+  }
+ },
+ "US500": {
+  "type": "INDICES",
+  "margin_pct": 5,
+  "name": "US 500",
+  "min_size": 0.01,
+  "overnight": {
+   "longRate": -0.0222069,
+   "shortRate": -1.53e-05,
+   "swapChargeTimestamp": 1790542800000,
+   "swapChargeInterval": 1440
+  }
+ },
+ "DE40": {
+  "type": "INDICES",
+  "margin_pct": 5,
+  "name": "Germany 40",
+  "min_size": 0.001,
+  "overnight": {
+   "longRate": -0.0180156,
+   "shortRate": -0.0042067,
+   "swapChargeTimestamp": 1790542800000,
+   "swapChargeInterval": 1440
+  }
+ },
+ "GOLD": {
+  "type": "COMMODITIES",
+  "margin_pct": 5,
+  "name": "Gold",
+  "min_size": 0.01,
+  "overnight": {
+   "longRate": -0.00411,
+   "shortRate": -0.00411,
+   "swapChargeTimestamp": 1790542800000,
+   "swapChargeInterval": 1440
+  }
+ },
+ "BTCUSD": {
+  "type": "CRYPTOCURRENCIES",
+  "margin_pct": 50,
+  "name": "Bitcoin/USD",
+  "min_size": 0.0001,
+  "overnight": {
+   "longRate": -0.0616438,
+   "shortRate": 0.0136986,
+   "swapChargeTimestamp": 1790542800000,
+   "swapChargeInterval": 1440
+  }
+ },
+ "ETHUSD": {
+  "type": "CRYPTOCURRENCIES",
+  "margin_pct": 50,
+  "name": "Ethereum/USD",
+  "min_size": 0.001,
+  "overnight": {
+   "longRate": -0.0616438,
+   "shortRate": 0.0136986,
+   "swapChargeTimestamp": 1790542800000,
+   "swapChargeInterval": 1440
+  }
+ },
+ "SOLUSD": {
+  "type": "CRYPTOCURRENCIES",
+  "margin_pct": 50,
+  "name": "Solana/USD",
+  "min_size": 0.1,
+  "overnight": {
+   "longRate": -0.0616438,
+   "shortRate": 0.0136986,
+   "swapChargeTimestamp": 1790542800000,
+   "swapChargeInterval": 1440
+  }
+ }
+}
