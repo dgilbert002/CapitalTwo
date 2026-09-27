@@ -1,0 +1,90 @@
+//@version=6
+// SOXL Dip - CapitalTwo (TradingView version of bot/dip_bot.py)
+//
+// Use on a 5-minute chart of CAPITALCOM:SOXL (Capital.com's own prices) with
+// EXTENDED HOURS enabled (chart settings > Symbol > Session: Extended), so the
+// 78-candle look-back covers the same candles the bot uses.
+//
+// Rule, checked on the 15:55 ET 5-minute candle (bot: 15 s before the close):
+//   BUY  if price fell more than 2% over the last 78 five-minute candles
+//        AND the MACD(19,39,9) histogram is below -0.1% of price
+//   SELL at the same time next trading day (or on the 15% emergency stop)
+// Protections (same as the bot):
+//   - below the 200-day average: half size
+//   - account 20% below its peak: no new trades for 20 trading days
+//
+// Differences from the bot to be aware of:
+//   - TradingView fills at the candle's close (16:00), the bot ~15 s earlier
+//     using the still-forming candle. Decisions match on ~98% of days.
+//   - Spread is modelled as a commission % (set it to your real spread).
+//   - Half-day sessions (13:00 close) are skipped here; the bot trades them.
+
+strategy("SOXL Dip - CapitalTwo", overlay = true, initial_capital = 1000,
+     default_qty_type = strategy.fixed, pyramiding = 0,
+     process_orders_on_close = true, margin_long = 20,
+     commission_type = strategy.commission.percent, commission_value = 0.11)
+
+// ---------------------------------------------------------------- inputs
+leverage   = input.float(3.0,  "Leverage (max 5 on Capital.com)", minval = 0.5, maxval = 5, step = 0.5)
+investPct  = input.float(95.0, "Equity used %", minval = 10, maxval = 99)
+rocBars    = input.int(78,     "Drop look-back (5-min candles)")
+dropPct    = input.float(2.0,  "Drop needed %")
+macdFast   = input.int(19,     "MACD fast")
+macdSlow   = input.int(39,     "MACD slow")
+macdSig    = input.int(9,      "MACD signal")
+macdPct    = input.float(0.10, "MACD histogram below -% of price")
+stopPct    = input.float(15.0, "Emergency stop %")
+trendDays  = input.int(200,    "Trend filter: daily average length (0 = off)")
+belowMult  = input.float(0.5,  "Size multiplier below the average (0 = skip)")
+brakeDD    = input.float(20.0, "Brake: account drawdown % (0 = off)")
+brakeDays  = input.int(20,     "Brake: trading days paused")
+decHour    = input.int(15,     "Decision candle hour (ET)")
+decMinute  = input.int(55,     "Decision candle minute (ET)")
+
+// ---------------------------------------------------------------- signal
+roc = (close / close[rocBars] - 1) * 100
+[macdLine, signalLine, hist] = ta.macd(close, macdFast, macdSlow, macdSig)
+dipSignal = roc < -dropPct and hist / close < -macdPct / 100
+
+isDecision = timeframe.period == "5" and
+     hour(time, "America/New_York") == decHour and minute(time, "America/New_York") == decMinute
+
+// previous day's 200-day average (no repainting)
+dailyAvg = request.security(syminfo.tickerid, "D", ta.sma(close, math.max(trendDays, 1))[1],
+     lookahead = barmerge.lookahead_on)
+belowTrend = trendDays > 0 and not na(dailyAvg) and close < dailyAvg
+
+// ---------------------------------------------------------------- brake
+var float peakEquity = na
+var int   pauseLeft  = 0
+var int   lastClosed = 0
+if strategy.closedtrades > lastClosed
+    lastClosed := strategy.closedtrades
+    peakEquity := na(peakEquity) ? strategy.equity : math.max(peakEquity, strategy.equity)
+    if brakeDD > 0 and strategy.equity / peakEquity - 1 < -brakeDD / 100
+        pauseLeft  := brakeDays
+        peakEquity := strategy.equity
+
+// ---------------------------------------------------------------- orders
+if isDecision
+    paused = pauseLeft > 0
+    if paused
+        pauseLeft -= 1
+    buy = dipSignal and not paused
+    sizeMult = belowTrend ? belowMult : 1.0
+    if strategy.position_size > 0 and not buy
+        strategy.close("Long", comment = "next-day exit")
+    if buy and sizeMult > 0
+        qty = math.floor(strategy.equity * investPct / 100 * leverage * sizeMult / close)
+        if strategy.position_size == 0 and qty >= 1
+            strategy.entry("Long", strategy.long, qty = qty, comment = belowTrend ? "dip (half)" : "dip")
+        // if already long and it fires again, keep holding one more day (the bot
+        // closes and re-opens; same exposure, one spread saved)
+
+if strategy.position_size > 0
+    strategy.exit("Stop", "Long", stop = strategy.position_avg_price * (1 - stopPct / 100))
+
+// ---------------------------------------------------------------- visuals
+plotshape(isDecision and dipSignal, "Dip signal", shape.triangleup, location.belowbar,
+     belowTrend ? color.orange : color.lime, size = size.small)
+bgcolor(pauseLeft > 0 ? color.new(color.red, 90) : na, title = "Brake active")
