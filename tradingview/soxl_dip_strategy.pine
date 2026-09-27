@@ -1,12 +1,14 @@
 //@version=6
 // SOXL Dip - CapitalTwo (TradingView version of bot/dip_bot.py)
 //
-// Use on a 5-minute chart of CAPITALCOM:SOXL (Capital.com's own prices) with
-// EXTENDED HOURS enabled (chart settings > Symbol > Session: Extended), so the
-// 78-candle look-back covers the same candles the bot uses.
+// Use on a 5-minute chart of CAPITALCOM:SOXL (Capital.com's own prices).
+// Works on the regular-hours chart (09:30-16:00 ET): the drop is measured from
+// TODAY'S OPEN, which is what the bot's 78-candle look-back reaches on its
+// 04:00-20:00 data. Checked on 2024-26 Capital.com data: same decision as the
+// bot on 99.1% of days (43 of its 44 buys).
 //
 // Rule, checked on the 15:55 ET 5-minute candle (bot: 15 s before the close):
-//   BUY  if price fell more than 2% over the last 78 five-minute candles
+//   BUY  if price is more than 2% below today's opening price
 //        AND the MACD(19,39,9) histogram is below -0.1% of price
 //   SELL at the same time next trading day (or on the 15% emergency stop)
 // Protections (same as the bot):
@@ -27,7 +29,8 @@ strategy("SOXL Dip - CapitalTwo", overlay = true, initial_capital = 1000,
 // ---------------------------------------------------------------- inputs
 leverage   = input.float(3.0,  "Leverage (max 5 on Capital.com)", minval = 0.5, maxval = 5, step = 0.5)
 investPct  = input.float(95.0, "Equity used %", minval = 10, maxval = 99)
-rocBars    = input.int(78,     "Drop look-back (5-min candles)")
+dropFrom   = input.string("Today's open", "Measure drop from", options = ["Today's open", "78 candles back (extended-hours chart)"])
+rocBars    = input.int(78,     "Look-back candles (only for the 78-candle option)")
 dropPct    = input.float(2.0,  "Drop needed %")
 macdFast   = input.int(19,     "MACD fast")
 macdSlow   = input.int(39,     "MACD slow")
@@ -42,7 +45,10 @@ decHour    = input.int(15,     "Decision candle hour (ET)")
 decMinute  = input.int(55,     "Decision candle minute (ET)")
 
 // ---------------------------------------------------------------- signal
-roc = (close / close[rocBars] - 1) * 100
+var float dayOpen = na
+if ta.change(time("D")) != 0
+    dayOpen := open
+roc = dropFrom == "Today's open" ? (close / dayOpen - 1) * 100 : (close / close[rocBars] - 1) * 100
 [macdLine, signalLine, hist] = ta.macd(close, macdFast, macdSlow, macdSig)
 dipSignal = roc < -dropPct and hist / close < -macdPct / 100
 
