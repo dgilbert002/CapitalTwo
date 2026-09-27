@@ -84,6 +84,12 @@ if isDecision
 if strategy.position_size > 0
     strategy.exit("Stop", "Long", stop = strategy.position_avg_price * (1 - stopPct / 100))
 
+// ---------------------------------------------------------------- wrong-timeframe warning
+var table warn = table.new(position.top_right, 1, 1)
+if barstate.islast and timeframe.period != "5"
+    table.cell(warn, 0, 0, "SOXL Dip: switch the chart to the 5-minute timeframe\n(extended hours ON). It only trades on the 15:55 ET candle.",
+         bgcolor = color.new(color.red, 20), text_color = color.white)
+
 // ---------------------------------------------------------------- visuals
 plotshape(isDecision and dipSignal, "Dip signal", shape.triangleup, location.belowbar,
      belowTrend ? color.orange : color.lime, size = size.small)
