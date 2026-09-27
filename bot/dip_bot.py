@@ -4,7 +4,7 @@
     python -m bot.dip_bot            # uses settings.txt; paper mode by default
 
 Daily cycle (NYSE calendar, so holidays and 13:00 half-days are handled):
-  T-120s  prefetch ~7 days of 1-min candles per market (slow part, done early)
+  T-120s  prefetch ~12 days of 1-min candles per market (>=400 5-min candles even for regular-hours-only markets) (slow part, done early)
   T-30s   close THIS bot's positions in its markets; re-check until none remain
   T-15s   fetch the last minutes, build 5-min candles exactly like the
           backtester and decide for every market; the markets that fire share
@@ -130,7 +130,7 @@ class DipBot:
     # -- steps
     def prefetch(self, now_utc):
         for epic in self.cfg['epics']:
-            self.history[epic] = self.api.candles_1m(epic, now_utc - pd.Timedelta(days=7), now_utc)
+            self.history[epic] = self.api.candles_1m(epic, now_utc - pd.Timedelta(days=12), now_utc)
             log.info('%s: prefetched %d 1-min candles (to %s ET)', epic, len(self.history[epic]),
                      self.history[epic]['t'].iloc[-1] if len(self.history[epic]) else '-')
             if self.cfg['trend_days']:
