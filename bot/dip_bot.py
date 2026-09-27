@@ -4,17 +4,17 @@
     python -m bot.dip_bot            # uses settings.txt; paper mode by default
 
 Daily cycle (NYSE calendar, so holidays and 13:00 half-days are handled):
-  T-120s  prefetch ~7 days of 1-min candles (slow part, done early)
-  T-30s   close THIS bot's epic positions; re-check until none remain
+  T-120s  prefetch ~7 days of 1-min candles per market (slow part, done early)
+  T-30s   close THIS bot's positions in its markets; re-check until none remain
   T-15s   fetch the last minutes, build 5-min candles exactly like the
-          backtester, decide; if BUY and the close step succeeded, open a
-          long sized to `leverage` x equity with an emergency stop
+          backtester and decide for every market; the markets that fire share
+          one `leverage` budget (split equally), each with an emergency stop
 Every order/close is confirmed. State is saved per trading day in
 state/dip_bot_state.json so restarts neither double-trade nor forget.
 
 settings.txt [DIP_BOT] (all optional):
-  epic = SOXL
-  leverage = 3            (hard-capped at 5 = Capital.com 20% margin)
+  epics = SOXL,TQQQ       (markets traded in parallel; `epic = X` also accepted)
+  leverage = 3            (TOTAL budget shared by the markets that fire; capped at 5)
   invest_pct = 0.95       (fraction of equity used, leaves margin buffer)
   emergency_stop_pct = 15
   trend_sma_days = 200    (below the N-day average use trend_below_mult x leverage; 0 = off)
@@ -58,7 +58,7 @@ def load_config():
         'api_key': c.get('CREDENTIALS', 'api_key'), 'email': c.get('CREDENTIALS', 'email'),
         'password': c.get('CREDENTIALS', 'password'), 'environment': env,
         'account_id': c.get('ENV_ACCOUNTS', env, fallback=None),
-        'epic': d.get('epic', 'SOXL'),
+        'epics': [e.strip().upper() for e in d.get('epics', d.get('epic', 'SOXL')).split(',') if e.strip()],
         'leverage': min(float(d.get('leverage', 3)), MAX_LEVERAGE),
         'invest_pct': min(float(d.get('invest_pct', 0.95)), 0.99),
         'stop_pct': float(d.get('emergency_stop_pct', 15)),
@@ -75,7 +75,7 @@ def load_state():
     try:
         return json.loads(STATE.read_text())
     except (FileNotFoundError, json.JSONDecodeError):
-        return {'days': {}, 'paper_position': None, 'paper_equity': None}
+        return {'days': {}, 'paper_positions': {}, 'paper_equity': None}
 
 
 def save_state(st):
@@ -92,8 +92,12 @@ class DipBot:
         self.api = CapitalREST(cfg['api_key'], cfg['email'], cfg['password'], cfg['environment'])
         self.cal = mcal.get_calendar('NYSE')
         self.st = load_state()
-        self.history = None
-        self.daily = None
+        if self.st.get('paper_position'):                      # migrate single-market state
+            pp = self.st.pop('paper_position')
+            self.st.setdefault('paper_positions', {})[pp.get('epic', cfg['epics'][0])] = pp
+        self.st.setdefault('paper_positions', {})
+        self.history = {}
+        self.daily = {}
 
     def day(self, d):
         return self.st['days'].setdefault(str(d), {})
@@ -109,9 +113,9 @@ class DipBot:
         if self.cfg['account_id']:
             self.api.switch_account(self.cfg['account_id'])
         acc = self.api.account(self.cfg['account_id']) if self.cfg['account_id'] else self.api.accounts()[0]
-        log.info('Connected %s account %s (%s) balance %s %s | epic %s lev %.1fx stop %.0f%% | %s',
+        log.info('Connected %s account %s (%s) balance %s %s | markets %s shared budget %.1fx stop %.0f%% | %s',
                  self.cfg['environment'], acc['accountId'], acc.get('accountName'), acc['balance'].get('balance'),
-                 acc.get('currency'), self.cfg['epic'], self.cfg['leverage'], self.cfg['stop_pct'],
+                 acc.get('currency'), ','.join(self.cfg['epics']), self.cfg['leverage'], self.cfg['stop_pct'],
                  'PAPER MODE (no orders)' if self.cfg['paper'] else 'LIVE ORDERS')
 
     def equity(self):
@@ -125,43 +129,43 @@ class DipBot:
 
     # -- steps
     def prefetch(self, now_utc):
-        self.history = self.api.candles_1m(self.cfg['epic'], now_utc - pd.Timedelta(days=7), now_utc)
-        log.info('Prefetched %d 1-min candles (to %s ET)', len(self.history),
-                 self.history['t'].iloc[-1] if len(self.history) else '-')
-        if self.cfg['trend_days']:
-            h1 = self.api.candles(self.cfg['epic'], now_utc - pd.Timedelta(days=int(self.cfg['trend_days'] * 1.6) + 10),
-                                  now_utc, 'HOUR', pd.Timedelta(days=40))
-            self.daily = DS.daily_closes_from_hourly(h1)
-            log.info('Prefetched %d daily closes for the %d-day trend filter', len(self.daily), self.cfg['trend_days'])
+        for epic in self.cfg['epics']:
+            self.history[epic] = self.api.candles_1m(epic, now_utc - pd.Timedelta(days=7), now_utc)
+            log.info('%s: prefetched %d 1-min candles (to %s ET)', epic, len(self.history[epic]),
+                     self.history[epic]['t'].iloc[-1] if len(self.history[epic]) else '-')
+            if self.cfg['trend_days']:
+                h1 = self.api.candles(epic, now_utc - pd.Timedelta(days=int(self.cfg['trend_days'] * 1.6) + 10),
+                                      now_utc, 'HOUR', pd.Timedelta(days=40))
+                self.daily[epic] = DS.daily_closes_from_hourly(h1)
 
     def close_positions(self, d):
         rec = self.day(d)
         if self.cfg['paper']:
-            pp = self.st.get('paper_position')
-            if pp:
-                bid = float(self.api.market(self.cfg['epic'])['snapshot']['bid'])
-                self._paper_close(pp, bid, 'T-30s')
+            for epic, pp in list(self.st['paper_positions'].items()):
+                bid = float(self.api.market(epic)['snapshot']['bid'])
+                self._paper_close(epic, pp, bid, 'T-30s')
             rec['closed'] = True
             self._brake_after_close()
             return
+        mine = lambda: [p for e in self.cfg['epics'] for p in self.api.positions(e)]
         for attempt in range(5):
-            ps = self.api.positions(self.cfg['epic'])
+            ps = mine()
             if not ps:
                 rec['closed'] = True
-                log.info('No %s positions open', self.cfg['epic'])
+                log.info('No positions open in %s', ','.join(self.cfg['epics']))
                 self._brake_after_close()
                 return
             for p in ps:
                 did = p['position']['dealId']
                 try:
                     c = self.api.close(did)
-                    log.info('Closed %s size %s at %s', did, p['position']['size'], c.get('level'))
+                    log.info('Closed %s %s size %s at %s', p['market']['epic'], did, p['position']['size'], c.get('level'))
                 except CapitalError as e:
                     log.error('Close %s failed (attempt %d): %s', did, attempt + 1, e)
             time.sleep(0.5)
-        rec['closed'] = bool(not self.api.positions(self.cfg['epic']))
+        rec['closed'] = not mine()
         if not rec['closed']:
-            log.critical('Positions still open after 5 close attempts - will NOT open a new trade today')
+            log.critical('Positions still open after 5 close attempts - will NOT open new trades today')
 
     def _brake_after_close(self):
         prot = self.st.setdefault('protection', {})
@@ -171,6 +175,31 @@ class DipBot:
             log.warning('BRAKE: account fell more than %.0f%% from its peak - no new trades for %d trading days',
                         self.cfg['brake_dd'], self.cfg['brake_pause'])
 
+    def decide_one(self, epic, d, now_utc):
+        """Return (buy, leverage multiplier, reason) for one market."""
+        recent = self.api.candles_1m(epic, now_utc - pd.Timedelta(minutes=30), now_utc)
+        m1 = pd.concat([self.history.get(epic, pd.DataFrame()), recent])
+        m1 = m1.drop_duplicates('t', keep='last').sort_values('t')
+        close_et = self._close_et(d)
+        m1 = m1[m1['t'] < close_et - pd.Timedelta(minutes=1)]   # drop the still-forming last minute
+        m5 = DS.build_5min(m1)
+        expect = close_et - pd.Timedelta(minutes=5)
+        if m5.empty or m5['t'].iloc[-1] != expect:
+            return False, 0.0, f'SKIP stale data: last 5-min candle {m5["t"].iloc[-1] if len(m5) else None}, expected {expect}'
+        dec = DS.decide(m5)
+        reason = ('BUY ' if dec.buy else 'NO TRADE ') + dec.reason
+        mult = 1.0
+        if dec.buy and self.cfg['trend_days']:
+            daily = self.daily.get(epic)
+            if daily is None or len(daily) < self.cfg['trend_days'] - 1:
+                return False, 0.0, f'SKIP: trend filter has no data ({0 if daily is None else len(daily)} days)'
+            if DS.below_trend(daily[daily.index < pd.Timestamp(d)], float(m5['close'].iloc[-1]), self.cfg['trend_days']):
+                mult = self.cfg['trend_mult']
+                if mult <= 0:
+                    return False, 0.0, f"NO TRADE (below {self.cfg['trend_days']}-day average) " + dec.reason
+                reason += f" | below {self.cfg['trend_days']}-day average: size x{mult}"
+        return dec.buy, mult, reason
+
     def decide_and_open(self, d, now_utc):
         rec = self.day(d)
         rec['decided'] = True
@@ -179,84 +208,73 @@ class DipBot:
             rec['decision'] = f"SKIP: brake active ({self.st['protection']['brake_days_left']} more days)"
             log.warning(rec['decision'])
             return
-        recent = self.api.candles_1m(self.cfg['epic'], now_utc - pd.Timedelta(minutes=30), now_utc)
-        m1 = pd.concat([self.history if self.history is not None else pd.DataFrame(), recent])
-        m1 = m1.drop_duplicates('t', keep='last').sort_values('t')
-        close_et = self._close_et(d)
-        m1 = m1[m1['t'] < close_et - pd.Timedelta(minutes=1)]   # drop the still-forming last minute
-        m5 = DS.build_5min(m1)
-        expect = close_et - pd.Timedelta(minutes=5)
-        if m5.empty or m5['t'].iloc[-1] != expect:
-            rec['decision'] = f'SKIP: stale data, last 5-min candle {m5["t"].iloc[-1] if len(m5) else None}, expected {expect}'
-            log.error(rec['decision'])
-            return
-        dec = DS.decide(m5)
-        rec['decision'] = ('BUY ' if dec.buy else 'NO TRADE ') + dec.reason
-        lev = self.cfg['leverage']
-        if dec.buy and self.cfg['trend_days']:
-            if self.daily is None or len(self.daily) < self.cfg['trend_days'] - 1:
-                rec['decision'] = f'SKIP: trend filter has no data ({0 if self.daily is None else len(self.daily)} days)'
-                dec.buy = False
-            elif DS.below_trend(self.daily[self.daily.index < pd.Timestamp(d)], float(m5['close'].iloc[-1]),
-                                self.cfg['trend_days']):
-                lev_mult = self.cfg['trend_mult']
-                if lev_mult <= 0:
-                    rec['decision'] = f"NO TRADE (trend filter: below {self.cfg['trend_days']}-day average) " + dec.reason
-                    dec.buy = False
-                else:
-                    lev *= lev_mult
-                    rec['decision'] += f" | below {self.cfg['trend_days']}-day average: leverage x{lev_mult}"
-        log.info('Decision: %s', rec['decision'])
-        if not dec.buy:
+        fired, rec['decision'] = {}, {}
+        for epic in self.cfg['epics']:
+            try:
+                buy, mult, reason = self.decide_one(epic, d, now_utc)
+            except CapitalError as e:
+                buy, mult, reason = False, 0.0, f'SKIP API error: {e}'
+            rec['decision'][epic] = reason
+            log.info('%s decision: %s', epic, reason)
+            if buy:
+                fired[epic] = mult
+        if not fired:
             return
         if not rec.get('closed'):
             log.error('Close step did not complete - not opening')
             return
-        mk = self.api.market(self.cfg['epic'])
+        share = self.cfg['leverage'] / len(fired)          # shared budget, as backtested
+        eq = self.equity()
+        rec['opened'] = {}
+        for epic, mult in fired.items():
+            try:
+                rec['opened'][epic] = self._open(epic, d, eq, share * mult)
+            except CapitalError as e:
+                log.error('%s open failed: %s', epic, e)
+                rec['opened'][epic] = f'FAILED: {e}'
+
+    def _open(self, epic, d, eq, lev):
+        mk = self.api.market(epic)
         snap, rules = mk['snapshot'], mk['dealingRules']
         if snap.get('marketStatus') != 'TRADEABLE':
-            rec['decision'] += f' | market {snap.get("marketStatus")} - skipped'
-            log.error(rec['decision'])
-            return
+            log.error('%s market %s - skipped', epic, snap.get('marketStatus'))
+            return f'skipped: market {snap.get("marketStatus")}'
         ask, bid = float(snap['offer']), float(snap['bid'])
-        eq = self.equity()
         step = float(rules['minSizeIncrement']['value'])
         size = math.floor(eq * self.cfg['invest_pct'] * lev / ask / step) * step
         size = int(size) if step >= 1 else round(size, 6)
         if size < float(rules['minDealSize']['value']):
-            rec['decision'] += f' | equity {eq:.2f} too small for min size'
-            log.error(rec['decision'])
-            return
+            log.error('%s: equity %.2f too small for min size', epic, eq)
+            return 'skipped: below min size'
         stop = round(bid * (1 - self.cfg['stop_pct'] / 100), 2)
-        log.info('Opening BUY %s x%s at ~%.2f (%.2fx of equity %.2f), stop %.2f',
-                 self.cfg['epic'], size, ask, size * ask / eq, eq, stop)
+        log.info('Opening BUY %s x%s at ~%.2f (%.2fx of equity %.2f), stop %.2f', epic, size, ask, size * ask / eq, eq, stop)
         if self.cfg['paper']:
-            self.st['paper_position'] = {'date': str(d), 'size': size, 'entry': ask, 'stop': stop}
-            rec['opened'] = {'paper': True, 'size': size, 'entry': ask}
-            return
-        c = self.api.open_long(self.cfg['epic'], size, stop)
-        rec['opened'] = {'dealId': (c.get('affectedDeals') or [{}])[0].get('dealId'), 'level': c.get('level'),
-                         'stopLevel': c.get('stopLevel'), 'size': c.get('size')}
-        log.info('Order CONFIRMED %s', rec['opened'])
+            self.st['paper_positions'][epic] = {'epic': epic, 'date': str(d), 'size': size, 'entry': ask, 'stop': stop}
+            return {'paper': True, 'size': size, 'entry': ask}
+        c = self.api.open_long(epic, size, stop)
+        out = {'dealId': (c.get('affectedDeals') or [{}])[0].get('dealId'), 'level': c.get('level'),
+               'stopLevel': c.get('stopLevel'), 'size': c.get('size')}
+        log.info('%s order CONFIRMED %s', epic, out)
+        return out
 
-    def _paper_close(self, pp, bid, why):
+    def _paper_close(self, epic, pp, bid, why):
         eq0 = self.st['paper_equity']
-        stop_hit = self._paper_stop_hit(pp)
+        stop_hit = self._paper_stop_hit(epic, pp)
         exit_px = pp['stop'] if stop_hit else bid
         pnl = pp['size'] * (exit_px - pp['entry'])
         self.st['paper_equity'] = eq0 + pnl
-        row = pd.DataFrame([{**pp, 'exit': exit_px, 'exit_reason': 'stop' if stop_hit else why,
+        row = pd.DataFrame([{**pp, 'epic': epic, 'exit': exit_px, 'exit_reason': 'stop' if stop_hit else why,
                              'pnl': round(pnl, 2), 'equity': round(eq0 + pnl, 2),
                              'closed_at': pd.Timestamp.now(tz='America/New_York')}])
         PAPER_LOG.parent.mkdir(exist_ok=True)
         row.to_csv(PAPER_LOG, mode='a', header=not PAPER_LOG.exists(), index=False)
-        log.info('PAPER close: entry %.2f exit %.2f pnl %+.2f equity %.2f', pp['entry'], exit_px, pnl, eq0 + pnl)
-        self.st['paper_position'] = None
+        log.info('PAPER close %s: entry %.2f exit %.2f pnl %+.2f equity %.2f', epic, pp['entry'], exit_px, pnl, eq0 + pnl)
+        self.st['paper_positions'].pop(epic, None)
 
-    def _paper_stop_hit(self, pp):
+    def _paper_stop_hit(self, epic, pp):
         try:
             since = pd.Timestamp(pp['date']).tz_localize('America/New_York').tz_convert('UTC').tz_localize(None) + pd.Timedelta(hours=20)
-            m1 = self.api.candles_1m(self.cfg['epic'], since, pd.Timestamp.utcnow().tz_localize(None))
+            m1 = self.api.candles_1m(epic, since, pd.Timestamp.utcnow().tz_localize(None))
             return bool(len(m1) and (m1['bid_low'] <= pp['stop']).any())
         except CapitalError:
             return False
@@ -293,7 +311,7 @@ class DipBot:
                     log.error(rec['decision'])
                     save_state(self.st)
                 if left <= 0:
-                    self.history = None
+                    self.history, self.daily = {}, {}
                     time.sleep(10)
                     continue
                 time.sleep(0.25)
